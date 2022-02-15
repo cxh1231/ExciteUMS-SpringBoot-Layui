@@ -15,16 +15,18 @@ import org.springframework.web.bind.annotation.RestController;
         "com.zxdmy.excite",
         "com.zxdmy.excite.system.service",
         "com.zxdmy.excite.common.service",
+        "com.zxdmy.excite.geek.service",
 })
 @MapperScan(basePackages = {
         "com.zxdmy.excite.system.mapper",
         "com.zxdmy.excite.common.mapper",
+        "com.zxdmy.excite.geek.mapper",
 })
 public class ExciteAdminApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(ExciteAdminApplication.class, args);
-        System.out.println("系统启动成功，访问 http://localhost:8181 ");
+        System.out.println("系统启动成功，访问 http://localhost:8282 ");
     }
 
 }

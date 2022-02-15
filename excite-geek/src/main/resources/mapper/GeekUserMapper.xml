@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zxdmy.excite.geek.mapper.GeekUserMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.zxdmy.excite.geek.entity.GeekUser">
+        <id column="id" property="id" />
+        <result column="uuid" property="uuid" />
+        <result column="username" property="username" />
+        <result column="userimg" property="userimg" />
+        <result column="jifen" property="jifen" />
+        <result column="num" property="num" />
+        <result column="viptime" property="viptime" />
+        <result column="addtime" property="addtime" />
+        <result column="logintime" property="logintime" />
+        <result column="status" property="status" />
+        <result column="count" property="count" />
+        <result column="times" property="times" />
+        <result column="qiandao" property="qiandao" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, uuid, username, userimg, jifen, num, viptime, addtime, logintime, status, count, times, qiandao
+    </sql>
+
+</mapper>

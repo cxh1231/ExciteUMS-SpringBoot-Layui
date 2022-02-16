@@ -1,10 +1,325 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>用户管理</title>
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <link rel="stylesheet" href="/lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+    <style>
+        /* 表格的行高 */
+        .layui-table-cell {
+            height: 42px;
+            line-height: 42px;
+        }
+    </style>
 </head>
 <body>
+<div class="layuimini-container">
+    <div class="layuimini-main">
+        <!-- 上方搜索栏 -->
+        <fieldset class="table-search-fieldset">
+            <legend>操作 / 搜索</legend>
+            <div class="layui-form layui-form-pane">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <button type="button" class="layui-btn layui-btn-normal btn-user-action" data-type="add">
+                            <i class="fa fa-plus-square"></i> 添加
+                        </button>
+                    </div>
+                    <div class="layui-inline">
+                        <label class="layui-form-label" style="width: 100px">用户昵称</label>
+                        <div class="layui-input-inline" style="width: 150px">
+                            <input type="text" id="inputNickname" autocomplete="off" class="layui-input" placeholder="输入用户昵称"/>
+                        </div>
+                        <label class="layui-form-label" style="width: 100px">其他信息</label>
+                        <div class="layui-input-inline" style="width: 250px">
+                            <input type="text" id="inputOtherInfo" autocomplete="off" class="layui-input" placeholder="输入其他检索信息（如ID）"/>
+                        </div>
+                    </div>
+                    <!-- 搜索、清除按钮 -->
+                    <div class="layui-inline">
+                        <button type="button" class="layui-btn layui-btn-primary layui-border-green btn-user-action" data-type="search">
+                            <i class="fa fa-search"></i> 搜索
+                        </button>
+                        <button type="button" class="layui-btn layui-btn-primary btn-user-action" data-type="refresh">
+                            <i class="fa fa-refresh"></i> 清除
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <!-- 表格 -->
+        <table class="layui-hide" id="table-geek-resources" lay-filter="table-geek-resources"></table>
+    </div>
+</div>
+<!--表格每行末尾的操作按钮-->
+<script type="text/html" id="tool-table-user">
+    <a class="layui-btn layui-btn-xs" lay-event="resources-edit">编辑</a>
+    <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="resources-delete">删除</a>
+</script>
+<!--引入JS文件-->
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script src="/js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script>
+    layui.use(['table', 'miniTab'], function () {
+        let $ = layui.jquery,
+            form = layui.form,
+            layer = layui.layer,
+            miniTab = layui.miniTab,
+            table = layui.table;
 
+        let currPage = 1                    // 定义全局变量：记录当前页码
+        // 表格
+        let table_user = table.render({
+            elem: '#table-geek-resources',     // 绑定的表格ID
+            url: '/geek/resources/list',       // 表格数据请求URL
+            response: {statusCode: 200},    // 请求成功的返回码
+            height: 'full-158',             // 表格高度：高度最大化减去差值
+            cols: [
+                [
+                    {type: "checkbox", width: 50},
+                    {field: 'id', title: 'ID', width: 80, align: 'center', sort: true},
+                    {field: 'title', title: '标题', width: 250},
+                    {
+                        field: 'cover', title: '封面', width: 150, align: 'center', templet: function (d) {
+                            return '<div ><img onclick="show_img(this)" style="height:40px;" src="' + d.cover + '"></div>'
+                        }
+                    },
+                    {
+                        field: 'type', title: '解锁类型', align: 'center', width: 150, templet: function (d) {
+                            if (d.type === 4)
+                                return "积分兑换(" + d.price + "积分)"
+                            let type = ["", "广告解锁获取", "广告解锁全文", "VIP专享", "积分兑换", "免费获取"]
+                            return type[d.type]
+                        }
+                    },
+                    {
+                        field: 'id', title: '前端链接', align: 'center', event: 'copyFontEndUrl', templet: function (d) {
+                            return "pages/details/details?tid=" + d.id
+                        }
+                    },
+                    {
+                        field: 'status', title: '首页显示', align: 'center', width: 95, templet: function (d) {
+                            let checkStr = "";
+                            if (d.status === 1) {
+                                checkStr += " checked "
+                            }
+                            return '<input type="checkbox" lay-filter="check-user-status" value="' + d.id + '" lay-skin="switch" lay-text="显示|隐藏" ' + checkStr + '/>'
+                        }
+                    },
+                    {
+                        field: 'status', title: '全局显示', align: 'center', width: 95, templet: function (d) {
+                            let checkStr = "";
+                            if (d.status === 1) {
+                                checkStr += " checked "
+                            }
+                            return '<input type="checkbox" lay-filter="check-user-status" value="' + d.id + '" lay-skin="switch" lay-text="显示|隐藏" ' + checkStr + '/>'
+                        }
+                    },
+                    {
+                        field: 'createTime', title: '创建/修改', align: 'center', templet: function (d) {
+                            if (d.createTime === d.updateTime)
+                                return get_date(d.createTime * 1000)
+                            else
+                                return get_date(d.createTime * 1000) + " | 修改于" + get_date(d.updateTime * 1000)
+                        }
+                    },
+                    {fixed: 'right', title: '操作', align: 'center', toolbar: '#tool-table-user', width: 180}
+                ]
+            ],
+            page: true,
+            done: function (res, curr, count) {
+                // 此处修复bug：删除最后一页数据后，跳转至上一页
+                if (res.data.length === 0 && curr > 1) {
+                    table_user.reload({page: {curr: curr - 1}})
+                }
+                currPage = curr
+            }
+        });
+
+        // 表格的搜索加载与刷新，几个参数的定义，详见如下注释！
+        let active = {
+            // 重载：刷新本页数据，检索等数据不变 （直接使用表格的table_user.reload() 即可）
+            // 搜索：从第一页开始，检索数据不变
+            search: function () {
+                //执行重载
+                table.reload('table-geek-resources', {
+                    page: {curr: 1},            // 页码
+                    where: {                    // 检索数据
+                        username: $('#inputUserName').val(),
+                        account: $('#inputUserAccount').val()
+                    }
+                });
+            },
+            // 刷新：从第一页开始，检索数据清空
+            refresh: function () {
+                //执行刷新
+                table.reload('table-geek-resources', {
+                    page: {curr: 1},                    // 页码
+                    where: {username: "", account: ""}  // 检索数据清空
+                });
+                $('#inputUserName').val('')             // 检索栏输入的数据清空
+                $('#inputUserAccount').val('')
+            },
+            // 添加按钮
+            add: function () {
+                // 打开新的窗口
+                miniTab.openNewTabByIframe({
+                    href: "/geek/resources/add",
+                    title: "添加资源",
+                });
+            }
+        };
+        // 【搜索】【清除】按钮的响应事件
+        $('.btn-user-action').on('click', function () {
+            let type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+
+        // 【行操作】监听表格行事件
+        table.on('tool(table-geek-resources)', function (obj) {
+            let that = this;
+            let data = obj.data;
+            let layEvent = obj.event;
+            switch (layEvent) {
+                // 点击单元格【前端链接】按钮，复制链接
+                case "copyFontEndUrl":
+                    console.log("pages/details/details?tid=" + data.id)
+                    break
+                // 【赠送积分】按钮
+                case "resources-edit":
+                    let layer_sendPoints = layer.open({
+                        type: 1,
+                        btn: ["确定", "取消"],
+                        title: '给用户【' + obj.data.nickname + '】赠送积分',
+                        skin: 'layui-layer-prompt',
+                        content: "<div><form>" +
+                            "<input id='sendPoints' type='text' class='layui-layer-input' value='' placeholder='请输入赠送的积分' autocomplete='off'>" +
+                            "</form></div>",
+                        yes: function (index, l) {
+                            let sendPoints = $(l).find("#sendPoints").val()
+                            if (sendPoints.length !== 0) {
+                                // 发起 赠送 请求
+                                // 加载层
+                                let index_loading = layer.load(1, {
+                                    shade: [0.2, '#fff'] //0.1透明度的白色背景
+                                });
+                                $.post("/geek/user/sendPoints", {
+                                    userId: obj.data.id,
+                                    sendPoints: sendPoints
+                                }, function (d) {
+                                    // 关闭加载层
+                                    layer.close(index_loading)
+                                    if (d.code === 200) {
+                                        layer.close(layer_sendPoints)
+                                        table_user.reload()
+                                        layer.msg(d.msg, {time: 3000, icon: 1});
+                                    } else {
+                                        layer.msg(d.msg, {time: 3000, icon: 2});
+                                    }
+                                });
+                            }
+                        }
+                    });
+                    break;
+                case
+                "resources-delete":
+                    // 删除用户 - 第 1 次确认
+                    layer.confirm("<a style='color: red'>确认要删除用户 " + data.nickname + "(" + data.id + ") 吗？</a>", {
+                        icon: 3, title: '删除用户确认【1/2】'
+                    }, function (index) {
+                        layer.close(index);
+                        // 删除用户 - 第 2 次确认
+                        layer.confirm("<a style='color: red'>真的要删除用户 " + data.nickname + "(" + data.id + ") 吗？删除后不可恢复，请三思而后行！</a>", {
+                            icon: 3, title: '删除用户确认【2/2】'
+                        }, function (index) {
+                            // 加载层
+                            let index_loading = layer.load(1, {
+                                shade: [0.2, '#fff'] //0.1透明度的白色背景
+                            });
+                            // 发起 删除用户 请求
+                            $.post("/geek/user/delete", {userIds: data.id}, function (d) {
+                                // 关闭加载层
+                                layer.close(index_loading)
+                                // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
+                                if (d.code === 200) {
+                                    layer.msg(d.msg, {time: 3000, icon: 1});
+                                    table_user.reload()
+                                } else {
+                                    layer.msg(d.msg, {time: 3000, icon: 2});
+                                }
+                            });
+                        });
+                    });
+                    break;
+
+            }
+        })
+        ;
+
+        // 【行操作】修改用户状态（用户行的switch开关切换事件）
+        form.on('switch(check-user-status)', function (data) {
+            // 注意：isChecked是操作之后的值
+            let isChecked = data.elem.checked;
+            let actionText = isChecked ? "开启" : "禁用"
+            let newStatus = isChecked ? "1" : "0"
+            let userId = data.value;
+            layer.confirm('确认要 ' + actionText + ' ID为 ' + data.value + ' 的用户吗？', {
+                title: false,
+                btn: ['确定', '取消'],
+                closeBtn: 0,        // 不显示右上角的关闭（X）按钮
+                // 按钮【确定】的回调
+                btn1: function (index) {
+                    $.post("/geek/user/changeStatus/" + newStatus, {userIds: userId}, function (d) {
+                        if (d.code === 200) {
+                            layer.msg(d.msg, {time: 3000, icon: 1});
+                            data.elem.checked = isChecked;
+                            form.render();
+                        } else {
+                            layer.msg(d.msg, {time: 3000, icon: 2});
+                            data.elem.checked = !isChecked;
+                            form.render();
+                        }
+                    });
+                },
+                // 按钮【取消】的回调
+                btn2: function (index) {
+                    data.elem.checked = !isChecked;
+                    form.render();
+                    layer.close(index);
+                }
+            });
+        });
+
+
+    });
+
+    function show_img(t) {
+        layer.open({
+            type: 1,
+            title: false,
+            closeBtn: 0,
+            area: '640px',
+            skin: 'layui-layer-nobg', //没有背景色
+            shadeClose: true,
+            content: '<img style="display: inline-block; width: 100%; height: 100%;" src="' + t.src + '">'
+        });
+    }
+
+    function get_date(time) {
+        let time2 = new Date(time),
+            y = time2.getFullYear(),
+            m = time2.getMonth() + 1,
+            d = time2.getDate();
+        let date_str = y + "-" + (m < 10 ? "0" + m : m) + "-" + (d < 10 ? "0" + d : d) + " " + time2.toTimeString().substr(0, 8);
+        if (Date.now() > time) {
+            return date_str
+        } else {
+            return '<span style="color: green"><b>' + date_str + '</b></span>'
+        }
+    }
+</script>
 </body>
 </html>

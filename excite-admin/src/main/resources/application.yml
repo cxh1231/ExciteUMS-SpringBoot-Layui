@@ -1,15 +1,16 @@
 # 项目服务配置
 server:
-  port: 8181  # 端口号
+  port: 8282  # 端口号
   servlet:
     context-path: / #项目访问路径
 
 # 自定义的配置信息
 excite:
-  name: ExciteCMS # 项目名
+  name: ExciteCMS-Geek # 项目名
   allow-redis: true # 开启redis缓存
-  rsa-public-key: "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCxo7epYQqWu4Dgr52LZIn+Y9T3wf2t1NCnh+DpbY3CSBdTDbTyoJdMJm0cat3E7sWcCGqZb2U8Kdtg12ycybhiyuNIc9tXqjYZqBk4ocjuk2QshNFBWU9hgLioKCsbGnCvUY4bB/SuuKUGmNl+CRT7kcehU6u+i3ML88V2LQQKuQIDAQAB"
-  rsa-private-key: "MIICdAIBADANBgkqhkiG9w0BAQEFAASCAl4wggJaAgEAAoGBALGjt6lhCpa7gOCvnYtkif5j1PfB/a3U0KeH4OltjcJIF1MNtPKgl0wmbRxq3cTuxZwIaplvZTwp22DXbJzJuGLK40hz21eqNhmoGTihyO6TZCyE0UFZT2GAuKgoKxsacK9RjhsH9K64pQaY2X4JFPuRx6FTq76LcwvzxXYtBAq5AgMBAAECfxC5ld7K1gp+wJctnedLlKegE/Wf8prsCCputNKFHE/UecjEqfJ+yPAKEv9SlFuIKOdiuZWTbl+xqgJt9UTzCD8t3E7WTi6yejmhIw1WcmFnDvh7G/AFdfYSxKJ29ak+CEc93SlfaURtxYco71qbjkrUnJi9ALIei4k8i+cEe9ECQQDXq/fm+MiMFTwZEjAimEbu2SZ6E70hbva520WOCkyDDnAvYZ76jtR35rDcIrXEPGGIBKf527iYEpiRriji4CBlAkEA0tstVP+j0UdIb8K1DZ7jj9pKVsBH/5HxLGtE5qk5GnqVwyI3C39/Y1kGY2hkt+7HHQ/uCa29AraymOTntahZxQJBAIsmXTAc2+fl23yhi4UGkt2QJY8mJSTpHy8TFnFqm6sDKcaoSZaHiPZDVWDy1CvkeVj1CBvhc9xKQz3bDG41BTECQGLSPCW5BhLgQK+4Zlhy3h4eZXbQ+S1rPcfeolUkfFHPn/7rOzcVUyPBpn/SflnB++m//ITmu03ZSEzmAz6dHy0CQHRgMPKVPzi70ToLwsWcnhZT6fUv/rkyYIRn4K40l13HNM/6Jj0zEaSMw/Ib4wJx/9l3QgiazeUO0usylxfprug="
+  rsa-public-key: "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDjRPay/Wi6PHzZGEgil67tUa1VHR26u1kSu1UQ3X86AdUw/w9EDtdX8zJrhNiPEj7KIlm7ZLUAumFPJVjeC3nzHwUmDWlQ/ay/AoBHXWXM0m2+Xtvg4/fdeCP/RmlUUnKaLRNY6+S2GXb1xGHpu7q+08e4iE+4Gs0J3j1H6y8i8wIDAQAB"
+  rsa-private-key: "MIICdAIBADANBgkqhkiG9w0BAQEFAASCAl4wggJaAgEAAoGBAONE9rL9aLo8fNkYSCKXru1RrVUdHbq7WRK7VRDdfzoB1TD/D0QO11fzMmuE2I8SPsoiWbtktQC6YU8lWN4LefMfBSYNaVD9rL8CgEddZczSbb5e2+Dj9914I/9GaVRScpotE1jr5LYZdvXEYem7ur7Tx7iIT7gazQnePUfrLyLzAgMBAAECgYABbjMxUDgDCBNvGGCH2zWOJ9fz87F2tewrGoPADezZlB5f5xMVBhTj6FN2askkKWS8x/eRnuImxYWMRntnNmJHmu6KSmKtvqymL5ffly8AjmerQzl0ozdaZD/3j8djkgl3/+eE2gQhyJDpYKWCSLq8fnTrule8qu2vWTzKD0Ag2QJBAPJuUuC6oTHyKRySZpKBI3CpKJtX2jgccV+8MGQSJhjhbI6DYILvVTzGaprRLbpYTNVzBTagfDrlRjjAkm1NKwsCQQDv/WWvB1o+S+Tf/yQXynKEEl35ru77TO0eFCSve0TsRv44xX5wanyqnBk+vIe6AI+pq8fyIgofm+Dc8iEkZhi5Aj80FX+4yF/ZWy159foTf6sdiTowJa+8Xl/9MXE0DrIgpk2sUI1rk/+8DuTYXhh08IORWCTGl7QY8ykjCDxtPycCQHf3qvIQ8dq8Y6BZ0bgW2qIM8G9VNF/pN4tWtHQIYg7e+kx05VzazpEW0UPcSNkBWM+PcLcorvjYGlM4srqYUvkCQE6xxIBoBb7VMaKgNe1yKdoQvFAzPA2ei0kUF/UZjACsUs8PbmUF55//xwqHvM3H5oMPMYSlPA50T3iva2NjU+s=
+"
 
 # Spring相关配置
 spring:
@@ -18,7 +19,7 @@ spring:
     name: druidDataSource
     type: com.alibaba.druid.pool.DruidDataSource
     # 链接地址，这里需要修改自己的数据库IP和数据库名
-    url: jdbc:mysql://127.0.0.1:3306/db_excite_cms?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC
+    url: jdbc:mysql://127.0.0.1:3306/db_excite_geek?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC
     username: chen
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -70,7 +71,7 @@ spring:
     # 自定义属性：开启自定义前缀
     allow-prefix: true
     # 自定义属性：key的前缀
-    prefix: "com.zxdmy.excite:"
+    prefix: "com.zxdmy.geek:"
     lettuce:
       pool:
         # 连接池最大连接数（使用负值表示没有限制） 默认 8
@@ -102,7 +103,7 @@ mybatis-plus:
   # 配置Mapper映射文件
   mapper-locations: classpath*:/mapper/**/**Mapper.xml
   # 实体扫描，多个package用逗号或者分号分隔
-  typeAliasesPackage: com.zxdmy.excite.system.entity;com.zxdmy.excite.common.entity
+  typeAliasesPackage: com.zxdmy.excite.system.entity;com.zxdmy.excite.common.entity;com.zxdmy.excite.geek.entity
   configuration:
     # 自动驼峰命名
     map-underscore-to-camel-case: true
@@ -146,7 +147,7 @@ springdoc:
 # Sa-Token配置（权限配置使用）
 sa-token:
   # token名称 (同时也是cookie名称)
-  token-name: "com.zxdmy.excite"
+  token-name: "com.zxdmy.geek"
   # token有效期，单位s 默认30天（2592000）, -1代表永不过期
   timeout: 259200
   # token临时有效期 (指定时间内无操作就视为token过期) 单位: 秒，-1表示永不过期

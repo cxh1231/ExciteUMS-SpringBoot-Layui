@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/css/public.css" media="all">
     <link rel="stylesheet" href="/lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
     <style>
+        /* 表格的行高 */
         .layui-table-cell {
             height: 40px;
             line-height: 40px;
@@ -22,13 +23,13 @@
             <div class="layui-form layui-form-pane">
                 <div class="layui-form-item">
                     <div class="layui-inline">
-                        <label class="layui-form-label" style="width: 100px">用户名称</label>
+                        <label class="layui-form-label" style="width: 100px">用户昵称</label>
                         <div class="layui-input-inline" style="width: 150px">
-                            <input type="text" id="inputUserName" autocomplete="off" class="layui-input" placeholder="输入名称"/>
+                            <input type="text" id="inputNickname" autocomplete="off" class="layui-input" placeholder="输入用户昵称"/>
                         </div>
-                        <label class="layui-form-label" style="width: 100px">电话/邮箱</label>
-                        <div class="layui-input-inline" style="width: 200px">
-                            <input type="text" id="inputUserAccount" autocomplete="off" class="layui-input" placeholder="输入电话/邮箱"/>
+                        <label class="layui-form-label" style="width: 100px">其他信息</label>
+                        <div class="layui-input-inline" style="width: 250px">
+                            <input type="text" id="inputOtherInfo" autocomplete="off" class="layui-input" placeholder="输入其他检索信息（如ID）"/>
                         </div>
                     </div>
                     <!-- 搜索、清除按钮 -->
@@ -44,7 +45,7 @@
             </div>
         </fieldset>
         <!-- 表格 -->
-        <table class="layui-hide" id="table-system-user" lay-filter="table-system-user"></table>
+        <table class="layui-hide" id="table-geek-user" lay-filter="table-geek-user"></table>
     </div>
 </div>
 <!--表格头部工具类（左上）-->
@@ -52,22 +53,20 @@
     <div class="layui-btn-container">
         <!-- 【刷新】-->
         <button class="layui-btn layui-btn-sm layuimini-btn-primary" lay-event="btn-user-reload"><i class="fa fa-refresh"></i></button>
-        <!-- 【添加】-->
-        <button class="layui-btn layui-btn-sm layui-btn-normal" lay-event="btn-user-add"><i class="fa fa-plus"></i> 添加</button>
         <!-- 【修改状态】下拉菜单：禁用与否 -->
         <div class="layui-btn-group">
             <button class="layui-btn layui-btn-sm layui-btn-warm" lay-event="btn-user-changeStatus">修改状态 <i class="fa fa-caret-down"></i></button>
         </div>
-        <!-- 【删除】 -->
+        <!-- 【批量删除】 -->
         <div class="layui-btn-group">
-            <button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="btn-user-delete"><i class="fa fa-trash-o"></i> 删除</button>
+            <button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="btn-user-delete"><i class="fa fa-trash-o"></i> 批量删除</button>
         </div>
     </div>
 </script>
 <!--表格每行末尾的操作按钮-->
 <script type="text/html" id="tool-table-user">
-    <a class="layui-btn layui-btn-xs" lay-event="user-edit">更新</a>
-    <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="user-more">更多 <i class="layui-icon layui-icon-down"></i></a>
+    <a class="layui-btn layui-btn-xs" lay-event="user-add-points">充值积分</a>
+    <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="user-delete">删除</a>
 </script>
 <!--引入JS文件-->
 <script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
@@ -85,7 +84,7 @@
         let currPage = 1                    // 定义全局变量：记录当前页码
         // 表格
         let table_user = table.render({
-            elem: '#table-system-user',     // 绑定的表格ID
+            elem: '#table-geek-user',     // 绑定的表格ID
             url: '/geek/user/list',       // 表格数据请求URL
             response: {statusCode: 200},    // 请求成功的返回码
             height: 'full-158',             // 表格高度：高度最大化减去差值
@@ -96,13 +95,13 @@
                 [
                     {type: "checkbox", width: 50},
                     {field: 'id', title: 'ID', width: 80, align: 'center', sort: true},
-                    {field: 'username', title: '用户名称', width: 150, align: 'center'},
+                    {field: 'nickname', title: '用户昵称', width: 150, align: 'center'},
                     {
-                        field: 'userimg', title: '头像', width: 200, align: 'center', templet: function (d) {
-                            return '<div ><img onclick="show_img(this)" style="height:38px;width:38px;" src="' + d.userimg + '"></div>'
+                        field: 'avatar', title: '头像', width: 80, align: 'center', templet: function (d) {
+                            return '<div ><img onclick="show_img(this)" style="height:38px;width:38px;" src="' + d.avatar + '"></div>'
                         }
                     },
-                    {field: 'jifen', title: '积分', align: 'center'},
+                    {field: 'points', title: '积分', width: 100, align: 'center'},
                     {
                         field: 'status', title: '状态', align: 'center', width: 95, templet: function (d) {
                             let checkStr = "";
@@ -114,9 +113,22 @@
                             return '<input type="checkbox" lay-filter="check-user-status" value="' + d.id + '" lay-skin="switch" lay-text="正常|禁用" ' + checkStr + '/>'
                         }
                     },
-                    {field: 'remark', title: '备注', align: 'center'},
-                    {field: 'updateTime', title: '更新时间', align: 'center'},
-                    {fixed: 'right', title: '操作', align: 'center', toolbar: '#tool-table-user', width: 150}
+                    {
+                        field: 'vipTime', title: '会员到期时间', align: 'center', templet: function (d) {
+                            return get_date(d.vipTime * 1000)
+                        }
+                    },
+                    {
+                        field: 'lastLoginTime', title: '最后登录时间', align: 'center', templet: function (d) {
+                            return get_date(d.lastLoginTime * 1000)
+                        }
+                    },
+                    {
+                        field: 'createTime', title: '注册时间', align: 'center', templet: function (d) {
+                            return get_date(d.createTime * 1000)
+                        }
+                    },
+                    {fixed: 'right', title: '操作', align: 'center', toolbar: '#tool-table-user', width: 180}
                 ]
             ],
             page: true,
@@ -132,20 +144,10 @@
         // 表格的搜索加载与刷新，几个参数的定义，详见如下注释！
         let active = {
             // 重载：刷新本页数据，检索等数据不变 （直接使用表格的table_user.reload() 即可）
-            // reload: function () {
-            //     //执行重载
-            //     table.reload('table-system-user', {
-            //         page: {curr: currPage},     // 页码
-            //         where: {                    // 检索数据
-            //             username: $('#inputUserName').val(),
-            //             account: $('#inputUserAccount').val()
-            //         }
-            //     });
-            // },
             // 搜索：从第一页开始，检索数据不变
             search: function () {
                 //执行重载
-                table.reload('table-system-user', {
+                table.reload('table-geek-user', {
                     page: {curr: 1},            // 页码
                     where: {                    // 检索数据
                         username: $('#inputUserName').val(),
@@ -156,7 +158,7 @@
             // 刷新：从第一页开始，检索数据清空
             refresh: function () {
                 //执行刷新
-                table.reload('table-system-user', {
+                table.reload('table-geek-user', {
                     page: {curr: 1},                    // 页码
                     where: {username: "", account: ""}  // 检索数据清空
                 });
@@ -171,27 +173,12 @@
         });
 
         // 【左上】操作按钮
-        table.on('toolbar(table-system-user)', function (obj) {
+        table.on('toolbar(table-geek-user)', function (obj) {
             let that = this;
             switch (obj.event) {
                 // 【刷新】按钮
                 case "btn-user-reload":
                     table_user.reload()
-                    break;
-                // 【添加】按钮
-                case "btn-user-add":
-                    layer.open({
-                        title: '添加新用户',             // 添加用户 窗口的标题
-                        type: 2,                        // 窗口类型：0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
-                        shade: 0.2,                     // 遮罩透明度
-                        maxmin: true,                   // 是否允许最大最小化
-                        shadeClose: false,              // 是否点击遮罩关闭
-                        area: ['600px', '500px'],       // 弹窗大小
-                        content: '/system/user/goAdd',  // 窗口显示的内容
-                        end: function () {
-                            table_user.reload();        // 添加结束后，窗口关闭，刷新表格
-                        }
-                    });
                     break;
                 // 【修改状态】按钮（批量修改状态）
                 case "btn-user-changeStatus":
@@ -206,7 +193,7 @@
                         click: function (obj) {
                             let newStatus = obj.id;     // 选中菜单的ID即为新的status
                             let userIds = "";           // 读取所有选中的按钮
-                            let checkUserList = table.checkStatus('table-system-user').data
+                            let checkUserList = table.checkStatus('table-geek-user').data
                             for (let i = 0; i < checkUserList.length; i++)
                                 userIds += (checkUserList[i].id + ",")
                             // 去掉末尾的逗号
@@ -219,7 +206,7 @@
                                     icon: 3, title: '修改用户状态提示'
                                 }, function (index) {
                                     // 执行修改状态操作
-                                    $.post("/system/user/changeStatus/" + newStatus, {userIds: userIds}, function (d) {
+                                    $.post("/geek/user/changeStatus/" + newStatus, {userIds: userIds}, function (d) {
                                         if (d.code === 200) {       // 状态码 200 表示成功，其他表示失败
                                             layer.msg(d.msg, {time: 3000, icon: 1});
                                             table_user.reload()
@@ -237,7 +224,7 @@
                 // 【删除】按钮（批量删除）
                 case "btn-user-delete":
                     // 获取选中的数据（以下的操作，逻辑基本同 修改状态 部分）
-                    let checkUserList = table.checkStatus('table-system-user').data
+                    let checkUserList = table.checkStatus('table-geek-user').data
                     let userIds = "";
                     for (let i = 0; i < checkUserList.length; i++) {
                         userIds += (checkUserList[i].id + ",")
@@ -254,7 +241,7 @@
                                 icon: 3, title: '删除用户确认【2/2】'
                             }, function (index) {
                                 // 发起 删除用户 请求
-                                $.post("/system/user/delete", {userIds: userIds}, function (d) {
+                                $.post("/geek/user/delete", {userIds: userIds}, function (d) {
                                     // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
                                     if (d.code === 200) {
                                         layer.msg(d.msg, {time: 3000, icon: 1});
@@ -273,132 +260,82 @@
         });
 
         // 【行操作】监听表格行末按钮
-        table.on('tool(table-system-user)', function (obj) {
+        table.on('tool(table-geek-user)', function (obj) {
             let that = this;
             let data = obj.data;
             let layEvent = obj.event;
             switch (layEvent) {
-                // 【编辑】按钮
-                case "user-edit":
-                    layer.open({
-                        title: '更新用户信息',
-                        type: 2,
-                        shade: 0.2,
-                        maxmin: true,
-                        shadeClose: false,
-                        area: ['600px', '400px'],
-                        content: '/system/user/goEdit/' + data.id,
-                        end: function () {
-                            table_user.reload()
-                        }
-                    });
-                    break;
-                // 【更多】按钮
-                case "user-more":
-                    dropdown.render({       // 下拉菜单
-                        elem: that,
-                        show: true,
-                        data: [
-                            {title: '分配角色', id: 'set-role'},
-                            {title: '重置密码', id: 'reset-password'},
-                            {title: '<a style="color: red">删除</a>', id: 'delete'}],
-                        click: function (d, othis) {
-                            // 【分配角色】
-                            if (d.id === 'set-role') {
-                                layer.open({
-                                    title: '更新用户角色',
-                                    type: 2,
-                                    shade: 0.2,
-                                    maxmin: true,
-                                    shadeClose: false,
-                                    area: ['600px', '500px'],
-                                    content: '/system/user/goAuthRole/' + data.id
+                // 【赠送积分】按钮
+                case "user-add-points":
+                    let layer_sendPoints = layer.open({
+                        type: 1,
+                        btn: ["确定", "取消"],
+                        title: '给用户【' + obj.data.nickname + '】赠送积分',
+                        skin: 'layui-layer-prompt',
+                        content: "<div><form>" +
+                            "<input id='sendPoints' type='text' class='layui-layer-input' value='' placeholder='请输入赠送的积分' autocomplete='off'>" +
+                            "</form></div>",
+                        yes: function (index, l) {
+                            let sendPoints = $(l).find("#sendPoints").val()
+                            if (sendPoints.length !== 0) {
+                                // 发起 赠送 请求
+                                // 加载层
+                                let index_loading = layer.load(1, {
+                                    shade: [0.2, '#fff'] //0.1透明度的白色背景
                                 });
-                            }
-                            // 【重置密码】
-                            else if (d.id === 'reset-password') {
-                                let layer_resetPassword = layer.open({
-                                    type: 1,
-                                    btn: ["确定", "取消"],
-                                    title: '重置用户【' + obj.data.username + '】的密码',
-                                    skin: 'layui-layer-prompt',
-                                    content: "<div><form>" +
-                                        "<input id='newPassword1' type='password' class='layui-layer-input' value='' placeholder='请输入新密码' autocomplete='off'>" +
-                                        "<input id='newPassword2' type='password' class='layui-layer-input' value='' placeholder='请再次输入新密码' style='margin-top:10px;' autocomplete='off'>" +
-                                        "</form></div>",
-                                    yes: function (index, l) {
-                                        let newPassword1 = $(l).find("#newPassword1").val()
-                                        let newPassword2 = $(l).find("#newPassword2").val()
-                                        if (newPassword1 !== '' && newPassword2 !== '') {
-                                            if (newPassword1 === newPassword2) {
-                                                // 密码加密
-                                                let encrypt = new JSEncrypt()
-                                                encrypt.setPublicKey(PUBLIC_KEY)
-                                                newPassword1 = encrypt.encrypt(newPassword1)
-                                                newPassword2 = encrypt.encrypt(newPassword2)
-                                                // 发起 重置密码 请求
-                                                // 加载层
-                                                let index_loading = layer.load(1, {
-                                                    shade: [0.2, '#fff'] //0.1透明度的白色背景
-                                                });
-                                                $.post("/system/user/resetPassword", {
-                                                    userId: obj.data.id,
-                                                    newPassword: newPassword1,
-                                                    newPassword2: newPassword2
-                                                }, function (d) {
-                                                    // 关闭加载层
-                                                    layer.close(index_loading)
-                                                    if (d.code === 200) {
-                                                        layer.close(layer_resetPassword)
-                                                        layer.msg(d.msg, {time: 3000, icon: 1});
-                                                    } else {
-                                                        layer.msg(d.msg, {time: 3000, icon: 2});
-                                                    }
-                                                });
-                                            } else {
-                                                layer.msg('输入的新密码不一致，请重新输入！', {icon: 2});
-                                            }
-                                        } else {
-                                            layer.msg('新密码不能为空，请输入！', {icon: 2});
-                                        }
+                                $.post("/geek/user/sendPoints", {
+                                    userId: obj.data.id,
+                                    sendPoints: sendPoints
+                                }, function (d) {
+                                    // 关闭加载层
+                                    layer.close(index_loading)
+                                    if (d.code === 200) {
+                                        layer.close(layer_sendPoints)
+                                        table_user.reload()
+                                        layer.msg(d.msg, {time: 3000, icon: 1});
+                                    } else {
+                                        layer.msg(d.msg, {time: 3000, icon: 2});
                                     }
                                 });
                             }
-                            // 【删除用户】
-                            else if (d.id === 'delete') {
-                                // 删除用户 - 第 1 次确认
-                                layer.confirm("<a style='color: red'>确认要删除用户 " + data.username + "(" + data.id + ") 吗？</a>", {
-                                    icon: 3, title: '删除用户确认【1/2】'
-                                }, function (index) {
-                                    layer.close(index);
-                                    // 删除用户 - 第 2 次确认
-                                    layer.confirm("<a style='color: red'>真的要删除用户 " + data.username + "(" + data.id + ") 吗？删除后不可恢复，请三思而后行！</a>", {
-                                        icon: 3, title: '删除用户确认【2/2】'
-                                    }, function (index) {
-                                        // 加载层
-                                        let index_loading = layer.load(1, {
-                                            shade: [0.2, '#fff'] //0.1透明度的白色背景
-                                        });
-                                        // 发起 删除用户 请求
-                                        $.post("/system/user/delete", {userIds: data.id}, function (d) {
-                                            // 关闭加载层
-                                            layer.close(index_loading)
-                                            // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
-                                            if (d.code === 200) {
-                                                layer.msg(d.msg, {time: 3000, icon: 1});
-                                                table_user.reload()
-                                            } else {
-                                                layer.msg(d.msg, {time: 3000, icon: 2});
-                                            }
-                                        });
-                                    });
-                                });
-                            }
-                        },
+                        }
                     });
                     break;
+                case
+                "user-delete"
+                :
+                    // 删除用户 - 第 1 次确认
+                    layer.confirm("<a style='color: red'>确认要删除用户 " + data.nickname + "(" + data.id + ") 吗？</a>", {
+                        icon: 3, title: '删除用户确认【1/2】'
+                    }, function (index) {
+                        layer.close(index);
+                        // 删除用户 - 第 2 次确认
+                        layer.confirm("<a style='color: red'>真的要删除用户 " + data.nickname + "(" + data.id + ") 吗？删除后不可恢复，请三思而后行！</a>", {
+                            icon: 3, title: '删除用户确认【2/2】'
+                        }, function (index) {
+                            // 加载层
+                            let index_loading = layer.load(1, {
+                                shade: [0.2, '#fff'] //0.1透明度的白色背景
+                            });
+                            // 发起 删除用户 请求
+                            $.post("/geek/user/delete", {userIds: data.id}, function (d) {
+                                // 关闭加载层
+                                layer.close(index_loading)
+                                // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
+                                if (d.code === 200) {
+                                    layer.msg(d.msg, {time: 3000, icon: 1});
+                                    table_user.reload()
+                                } else {
+                                    layer.msg(d.msg, {time: 3000, icon: 2});
+                                }
+                            });
+                        });
+                    });
+                    break;
+
             }
-        });
+        })
+        ;
 
         // 【行操作】修改用户状态（用户行的switch开关切换事件）
         form.on('switch(check-user-status)', function (data) {
@@ -413,7 +350,7 @@
                 closeBtn: 0,        // 不显示右上角的关闭（X）按钮
                 // 按钮【确定】的回调
                 btn1: function (index) {
-                    $.post("/system/user/changeStatus/" + newStatus, {userIds: userId}, function (d) {
+                    $.post("/geek/user/changeStatus/" + newStatus, {userIds: userId}, function (d) {
                         if (d.code === 200) {
                             layer.msg(d.msg, {time: 3000, icon: 1});
                             data.elem.checked = isChecked;
@@ -447,6 +384,19 @@
             shadeClose: true,
             content: '<img style="display: inline-block; width: 100%; height: 100%;" src="' + t.src + '">'
         });
+    }
+
+    function get_date(time) {
+        let time2 = new Date(time),
+            y = time2.getFullYear(),
+            m = time2.getMonth() + 1,
+            d = time2.getDate();
+        let date_str = y + "-" + (m < 10 ? "0" + m : m) + "-" + (d < 10 ? "0" + d : d) + " " + time2.toTimeString().substr(0, 8);
+        if (Date.now() > time) {
+            return date_str
+        } else {
+            return '<span style="color: green"><b>' + date_str + '</b></span>'
+        }
     }
 </script>
 </body>

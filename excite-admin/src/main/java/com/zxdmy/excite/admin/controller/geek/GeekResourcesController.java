@@ -2,21 +2,17 @@ package com.zxdmy.excite.admin.controller.geek;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zxdmy.excite.common.base.BaseResult;
-import com.zxdmy.excite.geek.entity.GeekUser;
-import com.zxdmy.excite.geek.service.IGeekUserService;
+import com.zxdmy.excite.geek.entity.GeekResources;
+import com.zxdmy.excite.geek.service.IGeekResourcesService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.stereotype.Controller;
 import com.zxdmy.excite.common.base.BaseController;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.util.List;
 
 /**
  * <p>
@@ -28,10 +24,10 @@ import java.util.List;
  */
 @Controller
 @AllArgsConstructor
-@RequestMapping("/geek/user")
-public class GeekUserController extends BaseController {
+@RequestMapping("/geek/resources")
+public class GeekResourcesController extends BaseController {
 
-    private IGeekUserService userService;
+    private IGeekResourcesService resourcesService;
 
     /**
      * 访问页面：用户管理 - 列表页面
@@ -40,8 +36,15 @@ public class GeekUserController extends BaseController {
      */
     @RequestMapping("index")
     public String index() {
-        return "geek/user/index";
+        return "geek/resources/index";
     }
+
+    @RequestMapping("add")
+    public String add() {
+        return "geek/resources/add";
+    }
+
+
 
     /**
      * 接口功能：获取用户列表
@@ -54,26 +57,14 @@ public class GeekUserController extends BaseController {
      */
     @GetMapping(value = "/list")
     @ResponseBody
-    public BaseResult getUserList(Integer page, Integer limit, String username, String account) {
-        QueryWrapper<GeekUser> wrapper = new QueryWrapper<>();
+    public BaseResult getResourcesList(Integer page, Integer limit, String username, String account) {
+        QueryWrapper<GeekResources> wrapper = new QueryWrapper<>();
         wrapper.orderByDesc("id");
-        Page<GeekUser> userPage = userService.page(new Page<>(page, limit), wrapper);
+        Page<GeekResources> userPage = resourcesService.page(new Page<>(page, limit), wrapper);
         if (null != userPage) {
             return success("查询成功", userPage.getRecords(), (int) userPage.getTotal());
         } else {
             return error("查询失败，用户不存在");
         }
-    }
-
-    @PostMapping(value = "/sendPoints")
-    @ResponseBody
-    public BaseResult sendPoints(Integer userId, Integer sendPoints) {
-        UpdateWrapper<GeekUser> wrapper = new UpdateWrapper<>();
-        wrapper.setSql("points = points + " + sendPoints)
-                .eq("id", userId);
-        if (userService.update(wrapper)) {
-            return success("积分赠送成功！");
-        }
-        return error("积分赠送失败，请核实！");
     }
 }

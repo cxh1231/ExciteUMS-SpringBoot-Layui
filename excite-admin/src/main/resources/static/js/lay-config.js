@@ -20,7 +20,8 @@ layui.config({
     miniTheme: "layuimini/miniTheme", // layuimini 主题扩展
     miniTongji: "layuimini/miniTongji", // layuimini 统计扩展
     step: 'step-lay/step', // 分步表单扩展
-    dtree: 'dtree/dtree', // 分步表单扩展
+    dtree: 'dtree/dtree',
+    fileManager: 'fileManager/fileManager',
     treetable: 'treetable-lay/treetable', //table树形扩展
     treeTable: 'treetable-lay-3.x/treeTable', //table树形扩展
     tableSelect: 'tableSelect/tableSelect', // table选择扩展

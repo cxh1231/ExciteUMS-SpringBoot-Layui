@@ -8,6 +8,7 @@ import com.zxdmy.excite.geek.entity.GeekResources;
 import com.zxdmy.excite.geek.service.IGeekResourcesService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.stereotype.Controller;
@@ -39,9 +40,9 @@ public class GeekResourcesController extends BaseController {
         return "geek/resources/index";
     }
 
-    @RequestMapping("add")
+    @RequestMapping("add/html")
     public String add() {
-        return "geek/resources/add";
+        return "geek/resources/add/html";
     }
 
 
@@ -66,5 +67,11 @@ public class GeekResourcesController extends BaseController {
         } else {
             return error("查询失败，用户不存在");
         }
+    }
+
+    @PostMapping(value = "/up")
+    @ResponseBody
+    public BaseResult up(){
+        return success(200,"").put("url","https://www.chenxiuhao.cn/public/images/avatar.jpg");
     }
 }

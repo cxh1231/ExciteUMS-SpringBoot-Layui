@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>用户管理</title>
+    <link rel="stylesheet" href="/lib/layui-v2.6.8/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <link rel="stylesheet" href="/lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+</head>
+<body>
+<div class="layuimini-container">
+    <div class="layuimini-main">
+        <button type="button" class="layui-hide" name="file" id="uploadFile"></button>
+        <button class="layui-hide" id="copyFileUrl">Copy</button>
+        <div id="fileManager" lay-filter="geekFile"></div>
+
+    </div>
+</div>
+
+<!--引入JS文件-->
+<script src="/lib/layui-v2.6.8/layui.js" charset="utf-8"></script>
+<script src="/js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script src="https://cdn.zxdmy.com/libs/clipboard.js/2.0.8/clipboard.min.js"></script>
+<script>
+    layui.use(['table', 'miniTab', 'fileManager', 'upload'], function () {
+        let $ = layui.jquery,
+            form = layui.form,
+            layer = layui.layer,
+            miniTab = layui.miniTab,
+            fileManager = layui.fileManager, upload = layui.upload;
+
+        fileManager.render({
+            elem: '#fileManager',
+            method: 'get',
+            id: 'geekFileManager',
+            btn_upload: true,
+            btn_create: false,
+            icon_url: 'http://filemanage.localhost.com/filemanage/ico/',
+            url: '/geek/file/list',
+            thumb: {'nopic': '/filemanage/upload/null-100x100.jpg', 'width': 95, 'height': 95},
+            parseData: function (res) {
+                let _res = [];
+                _res.code = 0;
+                _res.data = res.data;
+                _res.count = res.count
+                return _res;
+            },
+            done: function (res, curr, count) {
+                // console.log(res, curr, count)
+            },
+            page: {limit: 24, layout: ['count', 'prev', 'page', 'next', 'limit', 'refresh', 'skip']},
+            where: {}
+        });
+
+        //监听图片选择事件
+        fileManager.on('pic(geekFile)', function (obj) {
+            let data = obj.data;
+            // 大图显示
+            layer.photos({
+                photos: {
+                    "title": "",    //相册标题
+                    "id": 123,      //相册id
+                    "start": 0,     //初始显示的图片序号，默认0
+                    "data": [       //相册包含的图片，数组格式
+                        {
+                            "alt": data.name,
+                            "pid": data.id, //图片id
+                            "src": data.path, //原图地址
+                            "thumb": data.path //缩略图地址
+                        }
+                    ]
+                },
+                anim: 5 //0-6的选择，指定弹出图片动画类型，默认随机（请注意，3.0之前的版本用shift参数）
+            });
+            // 复制链接
+            let clipboard = new ClipboardJS('#copyFileUrl', {
+                text: function () {
+                    return data.path;
+                },
+            });
+            //复制成功响应
+            clipboard.on('success', function (e) {
+                layer.msg('图片链接已复制！', {icon: 1, time: 1500, offset: 't'});
+            });
+            let e = document.createEvent("MouseEvents");
+            e.initEvent("click", true, true);
+            document.getElementById("copyFileUrl").dispatchEvent(e)
+
+        });
+
+        //监听图片上传事件
+        let upIns = upload.render({
+            elem: '#uploadFile', //绑定元素
+            url: '/geek/file/upload', //上传接口
+            field: 'file'
+        })
+        fileManager.on('uploadfile(geekFile)', function (obj) {
+            upIns.config.data = {'path': obj.path};
+            // 上传前
+            upIns.config.before = function (obj) {
+                layer.load()
+            }
+            // 上传成功
+            upIns.config.done = function (res) {
+                layer.closeAll('loading');
+                layer.msg('上传成功！', {icon: 1});
+                fileManager.reload('geekFileManager');
+            }
+            // 上传失败事件
+            upIns.config.error = function (res) {
+                layer.closeAll('loading');
+                layer.msg('上传失败！', {icon: 2});
+            }
+            let e = document.createEvent("MouseEvents");
+            e.initEvent("click", true, true);
+            document.getElementById("uploadFile").dispatchEvent(e)
+        });
+
+    });
+
+</script>
+</body>
+</html>

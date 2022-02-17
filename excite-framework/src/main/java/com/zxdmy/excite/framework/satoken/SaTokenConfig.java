@@ -47,7 +47,7 @@ public class SaTokenConfig implements WebMvcConfigurer {
 
             // 可以在此处直接[批量]指定哪些路由需要拦截/排除[登录]
             // SaRouter.match(Arrays.asList("/system/**", ""), Arrays.asList("/system/login", "/system/user/login"), StpUtil::checkLogin);
-            SaRouter.match(Arrays.asList("/system/**", "/geek/**")).notMatch(Arrays.asList("/system/login", "/system/user/login","/geek/api/**")).check(StpUtil::checkLogin);
+            SaRouter.match(Arrays.asList("/system/**", "/geek/**")).notMatch(Arrays.asList("/system/login", "/system/user/login","/geek/api/**","/geek/file/**")).check(StpUtil::checkLogin);
 
             // 可以在此处为[某个路由]指定需要的[权限]
             // SaRouter.match("/system/menu/get2", () -> StpUtil.checkPermission("system:menu:get2"));

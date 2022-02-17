@@ -1,6 +1,7 @@
 package com.zxdmy.excite.component.qiniu;
 
 import cn.hutool.core.util.DesensitizedUtil;
+import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,7 +46,7 @@ public class QiniuOssService {
      * @param qiniuOssBO 七牛云信息实体。如果指定key，则存储的配置信息的key即为所指定
      * @return 结果
      */
-    public boolean saveQiniuConfig(QiniuOssBO qiniuOssBO) throws JsonProcessingException {
+    public boolean saveQiniuConfig(QiniuOssBO qiniuOssBO) {
         // 如果必填信息为空，则返回错误
         if (null == qiniuOssBO.getSecretKey() || null == qiniuOssBO.getAccessKey() || null == qiniuOssBO.getBucket() || null == qiniuOssBO.getDomain()) {
             throw new ServiceException("AK、SK、空间名称或者域名为空，请核实！");
@@ -54,10 +55,14 @@ public class QiniuOssService {
         if (null == qiniuOssBO.getProtocol()) {
             qiniuOssBO.setProtocol("http");
         }
-        if (null == qiniuOssBO.getKey()) {
-            return configService.save(DEFAULT_SERVICE, DEFAULT_KEY, qiniuOssBO, false);
+        try {
+            if (null == qiniuOssBO.getKey()) {
+                return configService.save(DEFAULT_SERVICE, DEFAULT_KEY, qiniuOssBO, true);
+            }
+            return configService.save(DEFAULT_SERVICE, qiniuOssBO.getKey(), qiniuOssBO, true);
+        } catch (Exception e) {
+            throw new ServiceException(e.getMessage());
         }
-        return configService.save(DEFAULT_SERVICE, qiniuOssBO.getKey(), qiniuOssBO, false);
     }
 
     /**
@@ -176,10 +181,25 @@ public class QiniuOssService {
         QiniuOssBO qiniuOssBO = this.createUploadToken(confKey, file.getName(), 3600L);
         // 设置区域：如果不为空
         Region region;
-        if (null != qiniuOssBO.getRegion() && !"".equals(qiniuOssBO.getRegion())) {
-            region = new Region.Builder().region(qiniuOssBO.getRegion()).build();
-        } else {
-            region = new Region.Builder().autoRegion("https://uc.qbox.me");
+        // 华东[z0]、华北[z1]、华南[z2]、北美[na0]、东南亚（新加坡）[na1]，
+        switch (qiniuOssBO.getRegion()) {
+            case "z0":
+                region = Region.huadong();
+                break;
+            case "z1":
+                region = Region.huabei();
+                break;
+            case "z2":
+                region = Region.huanan();
+                break;
+            case "na0":
+                region = Region.beimei();
+                break;
+            case "na1":
+                region = Region.xinjiapo();
+                break;
+            default:
+                region = new Region.Builder().autoRegion("https://uc.qbox.me");
         }
         // 配置信息，
         Configuration configuration = new Configuration(region);

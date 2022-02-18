@@ -113,6 +113,35 @@ public class GeekFileController extends BaseController {
     }
 
     /**
+     * 上传文件（RUL上传）
+     *
+     * @param url 文件链接
+     * @return 结果
+     */
+    @PostMapping("upload/url")
+    @ResponseBody
+    public BaseResult uploadByURL(@RequestParam("url") String url) {
+        String fileType = StrUtil.subAfter(url, ".", true);
+        String newFileName = System.currentTimeMillis() + "_" + IdUtil.simpleUUID() + "." + fileType;
+        QiniuFileVO qiniuFileVO = qiniuOssService.uploadFileFromUrl(newFileName, url);
+        if (qiniuFileVO != null) {
+            GeekFile geekFile = new GeekFile()
+                    .setUserId(10000L)
+                    .setNewName(newFileName)
+                    .setName(newFileName)
+                    .setSize(qiniuFileVO.getSize())
+                    .setPath(qiniuFileVO.getProtocol() + "://" + qiniuFileVO.getDomain() + "/" + newFileName)
+                    .setType(fileType)
+                    .setMimeType(qiniuFileVO.getMimeType())
+                    .setCreateTime(LocalDateTime.now());
+            // 保存至数据库
+            geekFileService.save(geekFile);
+            return success(200, "上传成功！");
+        }
+        return error(400, "上传失败，请重试！");
+    }
+
+    /**
      * 获取文件列表
      *
      * @return 结果

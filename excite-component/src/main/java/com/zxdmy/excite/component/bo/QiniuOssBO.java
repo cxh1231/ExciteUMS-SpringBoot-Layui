@@ -50,10 +50,11 @@ public class QiniuOssBO implements Serializable {
     private String domain;
 
     /**
-     * 地域选择：https://developer.qiniu.com/kodo/1239/java#simple-uptoken
-     * 华东[z0]、华北[z1]、华南[z2]、北美[na0]、东南亚（新加坡）[na0]，
+     * 地域选择：https://developer.qiniu.com/kodo/1671/region-endpoint-fq
+     * 华东:z0; 华北:z1; 华南:z2; 北美:na0; 东南亚:as0; 华东-浙江2:cn-east-2
+     * 可以为空，填写其他字符，由系统自己选
      */
-    @NotBlank(message = "地域不能为空")
+//    @NotBlank(message = "地域不能为空")
     private String region;
 
     /**

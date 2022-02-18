@@ -10,7 +10,34 @@
 <body>
 <div class="layuimini-container">
     <div class="layuimini-main">
-        <button type="button" class="layui-hide" name="file" id="uploadFile"></button>
+        <!-- 上方搜索栏 -->
+        <fieldset class="table-search-fieldset" style="margin-bottom: 5px">
+            <legend>操作栏</legend>
+            <div class="layui-form">
+                <div class="layui-form-item" style="margin-bottom: 5px">
+                    <div class="layui-inline">
+                        <button type="button" class="layui-btn layui-btn-normal" id="file-upload-local">
+                            <i class="fa fa-upload"></i> 上传本地文件
+                        </button>
+                    </div>
+                    <div class="layui-inline">
+                        <button type="button" class="layui-btn layui-btn-normal" id="file-upload-cloud">
+                            <i class="fa fa-cloud-upload"></i> 通过URL上传
+                        </button>
+                    </div>
+                    <div class="layui-inline">
+                        <label class="layui-form-label">点击图片时</label>
+                        <div class="layui-input-block">
+                            <input type="radio" name="file-click-action" value="0" title="复制链接">
+                            <input type="radio" name="file-click-action" value="1" title="展示大图">
+                            <input type="radio" name="file-click-action" value="2" title="新标签页打开">
+                            <input type="radio" name="file-click-action" value="3" title="复制链接并展示大图" checked>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <!--        <button type="button" class="layui-hide" name="file" id="uploadFile"></button>-->
         <button class="layui-hide" id="copyFileUrl">Copy</button>
         <div id="fileManager" lay-filter="geekFile"></div>
 
@@ -33,7 +60,7 @@
             elem: '#fileManager',
             method: 'get',
             id: 'geekFileManager',
-            btn_upload: true,
+            btn_upload: false,
             btn_create: false,
             icon_url: 'http://filemanage.localhost.com/filemanage/ico/',
             url: '/geek/file/list',
@@ -48,73 +75,163 @@
             done: function (res, curr, count) {
                 // console.log(res, curr, count)
             },
-            page: {limit: 24, layout: ['count', 'prev', 'page', 'next', 'limit', 'refresh', 'skip']},
+            page: {limit: 20, layout: ['count', 'prev', 'page', 'next', 'limit', 'refresh', 'skip']},
             where: {}
         });
 
-        //监听图片选择事件
-        fileManager.on('pic(geekFile)', function (obj) {
-            let data = obj.data;
-            // 大图显示
-            layer.photos({
-                photos: {
-                    "title": "",    //相册标题
-                    "id": 123,      //相册id
-                    "start": 0,     //初始显示的图片序号，默认0
-                    "data": [       //相册包含的图片，数组格式
-                        {
-                            "alt": data.name,
-                            "pid": data.id, //图片id
-                            "src": data.path, //原图地址
-                            "thumb": data.path //缩略图地址
-                        }
-                    ]
-                },
-                anim: 5 //0-6的选择，指定弹出图片动画类型，默认随机（请注意，3.0之前的版本用shift参数）
-            });
-            // 复制链接
-            let clipboard = new ClipboardJS('#copyFileUrl', {
-                text: function () {
-                    return data.path;
-                },
-            });
-            //复制成功响应
-            clipboard.on('success', function (e) {
-                layer.msg('图片链接已复制！', {icon: 1, time: 1500, offset: 't'});
-            });
-            let e = document.createEvent("MouseEvents");
-            e.initEvent("click", true, true);
-            document.getElementById("copyFileUrl").dispatchEvent(e)
-
-        });
-
-        //监听图片上传事件
-        let upIns = upload.render({
-            elem: '#uploadFile', //绑定元素
+        // 【上传本地文件】
+        let uploadInst = upload.render({
+            elem: '#file-upload-local', //绑定元素
             url: '/geek/file/upload', //上传接口
-            field: 'file'
-        })
-        fileManager.on('uploadfile(geekFile)', function (obj) {
-            upIns.config.data = {'path': obj.path};
-            // 上传前
-            upIns.config.before = function (obj) {
+            before: function (obj) {
                 layer.load()
-            }
-            // 上传成功
-            upIns.config.done = function (res) {
+            },
+            done: function (res) {
+                //上传完毕回调
                 layer.closeAll('loading');
-                layer.msg('上传成功！', {icon: 1});
-                fileManager.reload('geekFileManager');
-            }
-            // 上传失败事件
-            upIns.config.error = function (res) {
+                if (res.code === 200) {
+                    layer.msg(res.msg, {icon: 1});
+                    fileManager.reload('geekFileManager');
+                } else {
+                    layer.msg(res.msg, {icon: 2});
+                }
+            },
+            error: function () {
                 layer.closeAll('loading');
-                layer.msg('上传失败！', {icon: 2});
             }
-            let e = document.createEvent("MouseEvents");
-            e.initEvent("click", true, true);
-            document.getElementById("uploadFile").dispatchEvent(e)
         });
+        // 【通过链接上传文件】
+        $('#file-upload-cloud').on('click', function () {
+            let layer_upload_cloud = layer.open({
+                type: 1,
+                btn: ["确定", "取消"],
+                title: '通过URL上传文件',
+                skin: 'layui-layer-prompt',
+                content: "<div><form>" +
+                    "<input id='fileUrl' class='layui-layer-input' value='' placeholder='请输入资源文件的URL' autocomplete='off'>" +
+                    "</form></div>",
+                yes: function (index, l) {
+                    let url = $(l).find("#fileUrl").val()
+                    if (url !== '') {
+                        // 加载层
+                        let index_loading = layer.load(1, {
+                            shade: [0.2, '#fff'] //0.1透明度的白色背景
+                        });
+                        $.post("/geek/file/upload/url", {
+                            url: url
+                        }, function (d) {
+                            // 关闭加载层
+                            layer.close(index_loading)
+                            if (d.code === 200) {
+                                layer.close(layer_upload_cloud)
+                                fileManager.reload('geekFileManager');
+                                layer.msg(d.msg, {time: 3000, icon: 1});
+                            } else {
+                                layer.msg(d.msg, {time: 3000, icon: 2});
+                            }
+                        });
+                    } else {
+                        layer.msg('上传的URL为空，请重新输入！', {icon: 2});
+                    }
+                }
+            });
+
+        });
+
+        // 监听图片选择事件
+        fileManager.on('pic(geekFile)', function (obj) {
+            // 获取选择的图片信息
+            let data = obj.data;
+            // 获取选中的操作信息
+            let actionFlag = $("input[name='file-click-action']:checked").val();
+            // 复制链接
+            if (actionFlag === '0') {
+                // 实例化
+                let clipboard = new ClipboardJS('#copyFileUrl', {
+                    text: function () {
+                        return data.path;
+                    },
+                });
+                // 成功结果回调
+                clipboard.on('success', function (e) { //复制成功响应
+                    layer.msg('图片链接已复制！', {icon: 1, time: 2000, offset: 't'});
+                });
+                // 模拟点击
+                let e = document.createEvent("MouseEvents");
+                e.initEvent("click", true, true);
+                document.getElementById("copyFileUrl").dispatchEvent(e)
+            }
+            // 大图显示
+            else if (actionFlag === '1') {
+                layer.photos({
+                    photos: {
+                        "title": "相册", "id": 1, "start": 0,
+                        "data": [{
+                            "alt": data.name, "pid": data.id, "src": data.path, "thumb": data.path
+                        }]
+                    },
+                    anim: 5 //0-6的选择，指定弹出图片动画类型，默认随机（请注意，3.0之前的版本用shift参数）
+                });
+            }
+            // 新标签页打开
+            else if (actionFlag === '2') {
+                window.open(data.path);
+            }
+            // 复制 + 大图
+            else {
+                // 大图
+                layer.photos({
+                    photos: {
+                        "title": "相册", "id": 1, "start": 0,
+                        "data": [{
+                            "alt": data.name, "pid": data.id, "src": data.path, "thumb": data.path
+                        }]
+                    },
+                    anim: 5 //0-6的选择，指定弹出图片动画类型，默认随机（请注意，3.0之前的版本用shift参数）
+                });
+                // 复制链接
+                let clipboard = new ClipboardJS('#copyFileUrl', {
+                    text: function () {
+                        return data.path;
+                    },
+                });
+                clipboard.on('success', function (e) { //复制成功响应
+                    layer.msg('图片链接已复制！', {icon: 1, time: 2000, offset: 't'});
+                });
+                let e = document.createEvent("MouseEvents");
+                e.initEvent("click", true, true);
+                document.getElementById("copyFileUrl").dispatchEvent(e)
+            }
+        });
+
+        // 废弃代码，不过可能有用...
+
+        // let upIns = upload.render({
+        //     elem: '#uploadFile', //绑定元素
+        //     url: '/geek/file/upload', //上传接口
+        //     field: 'file'
+        // })
+        // fileManager.on('uploadfile(geekFile)', function (obj) {
+        //     upIns.config.data = {'path': obj.path};
+        //     // 上传前
+        //     upIns.config.before = function (obj) {
+        //         layer.load()
+        //     }
+        //     // 上传成功
+        //     upIns.config.done = function (res) {
+        //         layer.closeAll('loading');
+        //         layer.msg('上传成功！', {icon: 1});
+        //         fileManager.reload('geekFileManager');
+        //     }
+        //     // 上传失败事件
+        //     upIns.config.error = function (res) {
+        //         layer.closeAll('loading');
+        //         layer.msg('上传失败！', {icon: 2});
+        //     }
+        //     let e = document.createEvent("MouseEvents");
+        //     e.initEvent("click", true, true);
+        //     document.getElementById("uploadFile").dispatchEvent(e)
+        // });
 
     });
 

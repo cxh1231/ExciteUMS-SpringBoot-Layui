@@ -20,6 +20,7 @@ import com.zxdmy.excite.common.base.BaseController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
@@ -76,7 +77,7 @@ public class GeekFileController extends BaseController {
         // 构造文件名
         String fileName = file.getOriginalFilename();
         String fileType = StrUtil.subAfter(fileName, ".", true);
-        String newFileName = System.currentTimeMillis() + "_" + IdUtil.simpleUUID() + "." + fileType;
+        String newFileName = new SimpleDateFormat("yyyyMMddHHmmssSSSS").format(new Date()) + "_" + IdUtil.fastSimpleUUID() + "." + fileType;
         System.out.println(newFileName);
         // 临时文件保存的路径和文件名，这个路径要存在！
         String tempPath = "D:/temp/" + newFileName;
@@ -139,6 +140,25 @@ public class GeekFileController extends BaseController {
             return success(200, "上传成功！");
         }
         return error(400, "上传失败，请重试！");
+    }
+
+    /**
+     * 删除图片
+     *
+     * @param id   图片的ID
+     * @param path 路径（key）
+     * @return
+     */
+    @PostMapping("delete")
+    @ResponseBody
+    public BaseResult delete(Integer id, String path) {
+        // 从数据库删除
+        if (geekFileService.removeById(id)) {
+            // 从云存储删除
+//            qiniuOssService
+            return success("删除成功！");
+        }
+        return error("删除成功￣□￣｜｜");
     }
 
     /**

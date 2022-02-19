@@ -32,6 +32,7 @@
                             <input type="radio" name="file-click-action" value="1" title="展示大图">
                             <input type="radio" name="file-click-action" value="2" title="新标签页打开">
                             <input type="radio" name="file-click-action" value="3" title="复制链接并展示大图" checked>
+                            <input type="radio" name="file-click-action" value="4" title="删除图片">
                         </div>
                     </div>
                 </div>
@@ -178,7 +179,7 @@
                 window.open(data.path);
             }
             // 复制 + 大图
-            else {
+            else if (actionFlag === '3') {
                 // 大图
                 layer.photos({
                     photos: {
@@ -201,6 +202,32 @@
                 let e = document.createEvent("MouseEvents");
                 e.initEvent("click", true, true);
                 document.getElementById("copyFileUrl").dispatchEvent(e)
+            }
+            // 删除图片
+            else if (actionFlag === '4') {
+                let layer_upload_cloud = layer.open({
+                    type: 1,
+                    btn: ["确定", "取消"],
+                    title: '<a style="color: red">确定要删除此图片吗？</a>',
+                    skin: 'layui-layer-prompt',
+                    shadeClose: true,
+                    content: "<div><form>" +
+                        "<a style='color: red' target='_blank' href='" + data.path + "'><img src='" + data.path + "' style='height: 200px'/></a>" +
+                        "</form></div>",
+                    yes: function (index, l) {
+                        $.post("/geek/file/delete", {
+                            id: data.id, path: data.path
+                        }, function (d) {
+                            if (d.code === 200) {
+                                layer.close(layer_upload_cloud)
+                                fileManager.reload('geekFileManager');
+                                layer.msg(d.msg, {time: 3000, icon: 1});
+                            } else {
+                                layer.msg(d.msg, {time: 3000, icon: 2});
+                            }
+                        });
+                    }
+                });
             }
         });
 

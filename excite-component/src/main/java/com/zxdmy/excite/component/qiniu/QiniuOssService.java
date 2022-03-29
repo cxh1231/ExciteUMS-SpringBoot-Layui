@@ -1,9 +1,9 @@
 package com.zxdmy.excite.component.qiniu;
 
 import cn.hutool.core.util.DesensitizedUtil;
-import com.baomidou.mybatisplus.extension.api.R;
+//import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.fasterxml.jackson.core.JsonProcessingException;
+//import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.qiniu.common.QiniuException;
 import com.qiniu.http.Response;

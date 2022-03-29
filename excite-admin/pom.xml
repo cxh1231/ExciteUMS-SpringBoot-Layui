@@ -33,7 +33,7 @@
 
         <dependency>
             <groupId>com.zxdmy.excite</groupId>
-            <artifactId>excite-geek</artifactId>
+            <artifactId>excite-offiaccount</artifactId>
             <version>2.0.0</version>
         </dependency>
 

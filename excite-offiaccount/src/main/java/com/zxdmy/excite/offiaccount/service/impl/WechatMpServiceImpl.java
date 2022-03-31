@@ -3,8 +3,8 @@ package com.zxdmy.excite.offiaccount.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zxdmy.excite.common.exception.ServiceException;
 import com.zxdmy.excite.common.service.IGlobalConfigService;
-import com.zxdmy.excite.offiaccount.bo.OffiAccount;
-import com.zxdmy.excite.offiaccount.service.IOffiAccountService;
+import com.zxdmy.excite.offiaccount.bo.WechatMpBo;
+import com.zxdmy.excite.offiaccount.service.IWechatMpService;
 import lombok.AllArgsConstructor;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.config.WxMpConfigStorage;
@@ -27,12 +27,12 @@ import java.util.Map;
  */
 @Service
 @AllArgsConstructor
-public class OffiAccountServiceImpl implements IOffiAccountService {
+public class WechatMpServiceImpl implements IWechatMpService {
 
     private static final String DEFAULT_SERVICE = "offiaccount";
 
-    // 默认使用公众号的 appid 作为 key
-    // private static final String DEFAULT_KEY = "wx1111111111";
+    // 后期项目，如果开启了多公众号管理，则可以取消该默认key。使用公众号appid作为key。
+    private static final String DEFAULT_KEY = "offiaccount";
 
     private IGlobalConfigService configService;
 
@@ -41,18 +41,18 @@ public class OffiAccountServiceImpl implements IOffiAccountService {
     /**
      * 保存公众号配置
      *
-     * @param account 公众号信息实体
+     * @param wechatMpBo 公众号信息实体
      * @return 保存结果
      */
     @Override
-    public boolean saveOffiAccount(OffiAccount account) {
+    public boolean saveWechatMpConfig(WechatMpBo wechatMpBo) {
         // 如果必填信息为空，则返回错误
-        if (null == account.getAppid() || null == account.getAppSecret() || null == account.getToken() || null == account.getAesKey()) {
+        if (null == wechatMpBo.getAppid() || null == wechatMpBo.getAppSecret() || null == wechatMpBo.getToken() || null == wechatMpBo.getAesKey()) {
             throw new ServiceException("appid、appSecret、token或AesKey为空，请核实！");
         }
         try {
-            if (configService.save(DEFAULT_SERVICE, account.getAppid(), account, false)) {
-                this.addAccountToRuntime(account);
+            if (configService.save(DEFAULT_SERVICE, DEFAULT_KEY, wechatMpBo, false)) {
+                this.addWechatMpConfigToRuntime(wechatMpBo);
                 return true;
             }
         } catch (Exception e) {
@@ -64,23 +64,30 @@ public class OffiAccountServiceImpl implements IOffiAccountService {
     /**
      * 通过appid获取公众号配置信息
      *
-     * @param appId 公众号的appid
+     * @param key 公众号的appid
      * @return 公众号配置信息
      */
     @Override
-    public OffiAccount getOffiAccount(String appId) {
-        OffiAccount account = new OffiAccount();
-        return (OffiAccount) configService.get(DEFAULT_SERVICE, appId, account);
+    public WechatMpBo getWechatMpConfig(String key) {
+        WechatMpBo wechatMpBo = new WechatMpBo();
+        return (WechatMpBo) configService.get(DEFAULT_SERVICE, key, wechatMpBo);
     }
 
     @Override
-    public List<OffiAccount> getOffiAccountList() {
-        OffiAccount account = new OffiAccount();
+    public WechatMpBo getWechatMpConfig() {
+        WechatMpBo wechatMpBo = new WechatMpBo();
+        return (WechatMpBo) configService.get(DEFAULT_SERVICE, DEFAULT_KEY, wechatMpBo);
+    }
+
+
+    @Override
+    public List<WechatMpBo> getWechatMpConfigList() {
+        WechatMpBo account = new WechatMpBo();
         // 加载公众号配置
         List<Object> objectList = configService.getList(DEFAULT_SERVICE, account);
         // 公众号配置不为空
         if (objectList != null && !objectList.isEmpty()) {
-            List<OffiAccount> accountList = new ArrayList<>();
+            List<WechatMpBo> accountList = new ArrayList<>();
             ObjectMapper objectMapper = new ObjectMapper();
             // 遍历
             for (Object o : objectList) {
@@ -95,32 +102,44 @@ public class OffiAccountServiceImpl implements IOffiAccountService {
     }
 
 
+//    /**
+//     * 项目启动后，即注入公众号的配置。（批量注入）
+//     */
+//    @PostConstruct
+//    public void loadWxMpConfigStorages() {
+//        WechatMpBo account = new WechatMpBo();
+//        // 加载公众号配置
+//        List<Object> accountList = configService.getList(DEFAULT_SERVICE, account);
+//        // 公众号配置不为空
+//        if (accountList != null && !accountList.isEmpty()) {
+//            ObjectMapper objectMapper = new ObjectMapper();
+//            // 遍历
+//            for (Object o : accountList) {
+//                // 转换类型并加载公众号配置至系统
+//                account = objectMapper.convertValue(o, account.getClass());
+//                this.addAccountToRuntime(account);
+//            }
+//        }
+//    }
+
     /**
-     * 项目启动后，即注入公众号的配置
+     * 项目启动后，即注入公众号的配置（单个注册）
      */
     @PostConstruct
     public void loadWxMpConfigStorages() {
-        OffiAccount account = new OffiAccount();
-        // 加载公众号配置
-        List<Object> accountList = configService.getList(DEFAULT_SERVICE, account);
+        WechatMpBo wechatMpBo = this.getWechatMpConfig();
         // 公众号配置不为空
-        if (accountList != null && !accountList.isEmpty()) {
-            ObjectMapper objectMapper = new ObjectMapper();
-            // 遍历
-            for (Object o : accountList) {
-                // 转换类型并加载公众号配置至系统
-                account = objectMapper.convertValue(o, account.getClass());
-                this.addAccountToRuntime(account);
-            }
+        if (wechatMpBo != null) {
+            this.addWechatMpConfigToRuntime(wechatMpBo);
         }
     }
 
     /**
-     * 添加账号到当前程序。首次添加需初始化configStorageMap
+     * 添加账号到当前程序。动态配置使用。首次添加需初始化configStorageMap
      *
      * @param account 公众号配置
      */
-    private synchronized void addAccountToRuntime(OffiAccount account) {
+    private synchronized void addWechatMpConfigToRuntime(WechatMpBo account) {
         // 配置类
         WxMpDefaultConfigImpl config = new WxMpDefaultConfigImpl();
         config.setAppId(account.getAppid());

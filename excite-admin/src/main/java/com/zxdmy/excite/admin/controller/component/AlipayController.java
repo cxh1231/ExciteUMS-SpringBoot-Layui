@@ -3,7 +3,7 @@ package com.zxdmy.excite.admin.controller.component;
 import cn.hutool.core.util.IdUtil;
 import com.zxdmy.excite.common.base.BaseController;
 import com.zxdmy.excite.common.base.BaseResult;
-import com.zxdmy.excite.component.alipay.AlipayService;
+import com.zxdmy.excite.payment.service.IAlipayService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping("/component/alipay")
 public class AlipayController extends BaseController {
 
-    AlipayService alipayService;
+    IAlipayService alipayService;
 
     @RequestMapping("index")
     public String index() {

@@ -3,10 +3,9 @@ package com.zxdmy.excite.admin.controller.component;
 import cn.hutool.core.util.IdUtil;
 import com.github.binarywang.wxpay.bean.result.WxPayOrderQueryV3Result;
 import com.github.binarywang.wxpay.bean.result.WxPayRefundV3Result;
-import com.github.binarywang.wxpay.bean.result.WxPayUnifiedOrderV3Result;
 import com.zxdmy.excite.common.base.BaseController;
 import com.zxdmy.excite.common.base.BaseResult;
-import com.zxdmy.excite.component.wechat.WeChatPayService;
+import com.zxdmy.excite.payment.service.IWechatPayService;
 import lombok.AllArgsConstructor;
 import org.aspectj.weaver.ast.Or;
 import org.springframework.stereotype.Controller;
@@ -29,7 +28,7 @@ import java.util.Timer;
 @RequestMapping("/component/wechatPay")
 public class WeChatPayController extends BaseController {
 
-    WeChatPayService weChatPayService;
+    IWechatPayService weChatPayService;
 
 
     @RequestMapping("index")

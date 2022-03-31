@@ -15,7 +15,7 @@ import java.io.Serializable;
  */
 @Data
 @Accessors(chain = true)
-public class OffiAccount implements Serializable{
+public class WechatMpBo implements Serializable{
 
     private static final long serialVersionUID = 1L;
 

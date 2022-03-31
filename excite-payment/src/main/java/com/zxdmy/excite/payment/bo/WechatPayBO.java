@@ -1,4 +1,4 @@
-package com.zxdmy.excite.component.bo;
+package com.zxdmy.excite.payment.bo;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -15,7 +15,7 @@ import java.io.Serializable;
  */
 @Data
 @Accessors(chain = true)
-public class WeChatPayBO implements Serializable {
+public class WechatPayBO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

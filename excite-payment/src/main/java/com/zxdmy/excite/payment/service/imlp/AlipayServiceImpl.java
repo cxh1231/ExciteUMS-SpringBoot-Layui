@@ -1,4 +1,4 @@
-package com.zxdmy.excite.component.alipay;
+package com.zxdmy.excite.payment.service.imlp;
 
 import cn.hutool.core.util.IdUtil;
 import com.alipay.easysdk.factory.Factory;
@@ -15,9 +15,13 @@ import com.alipay.easysdk.payment.wap.models.AlipayTradeWapPayResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.zxdmy.excite.common.exception.ServiceException;
 import com.zxdmy.excite.common.service.IGlobalConfigService;
-import com.zxdmy.excite.component.bo.AlipayBO;
+import com.zxdmy.excite.payment.bo.AlipayBO;
+import com.zxdmy.excite.payment.bo.WechatPayBO;
+import com.zxdmy.excite.payment.service.IAlipayService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
 
 /**
  * 支付宝支付服务实现类
@@ -28,7 +32,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @AllArgsConstructor
-public class AlipayService {
+public class AlipayServiceImpl implements IAlipayService {
 
     private IGlobalConfigService configService;
 
@@ -53,10 +57,14 @@ public class AlipayService {
                 throw new ServiceException("证书模式下，[应用公钥证书][支付宝公钥证书][支付宝根证书]不能为空，请检查！");
         // 保存信息至数据库
         try {
-            return configService.save(DEFAULT_SERVICE, alipayBO.getKey() != null ? alipayBO.getKey() : DEFAULT_KEY, alipayBO, true);
+            if (configService.save(DEFAULT_SERVICE, alipayBO.getKey() != null ? alipayBO.getKey() : DEFAULT_KEY, alipayBO, false)) {
+                this.addAlipayOptionsRuntime(alipayBO);
+                return true;
+            }
         } catch (JsonProcessingException e) {
             throw new ServiceException(e.getMessage());
         }
+        return false;
     }
 
     /**
@@ -98,8 +106,6 @@ public class AlipayService {
         if (null == subject || null == outTradeNo || null == totalAmount) {
             throw new ServiceException("商品名称、商户订单号、商品价格不能为空！");
         }
-        // 1. 设置参数
-        Factory.setOptions(this.getOptions(confKey));
         try {
             // 2. 调用API发起创建支付
             switch (payType.toLowerCase()) {
@@ -164,8 +170,6 @@ public class AlipayService {
         if (null == tradeNo && null == outTradeNo) {
             throw new ServiceException("tradeNo 和 outTradeNo 不能同时为空！");
         }
-        // 设置参数
-        Factory.setOptions(this.getOptions(confKey));
         try {
             // 执行查询
             AlipayTradeQueryResponse response = Factory.Payment.Common().optional("trade_no", tradeNo).query(outTradeNo);
@@ -207,8 +211,6 @@ public class AlipayService {
         if (null == tradeNo && null == outTradeNo) {
             throw new ServiceException("tradeNo 和 outTradeNo 不能同时为空！");
         }
-        // 设置参数
-        Factory.setOptions(this.getOptions(confKey));
         try {
             // 生成唯一的款请求号
             String outRequestNo = IdUtil.simpleUUID();
@@ -250,8 +252,6 @@ public class AlipayService {
      * @return 已退款：{ Y，支付宝交易号，商家订单号，退款请求号，订单金额，退款金额，退款原因 } <br> 未退款：{ N，描述 } <br> 发生错误：{ E，错误代码，错误描述 }
      */
     public String[] queryRefund(String confKey, String outTradeNo, String outRequestNo) {
-        // 设置参数
-        Factory.setOptions(this.getOptions(confKey));
         // 如果请求号为空，则表示全额退款，设置请求号位商家订单号
         if (null == outRequestNo) {
             outRequestNo = outTradeNo;
@@ -296,8 +296,7 @@ public class AlipayService {
      * @return 获取成功：{Y，下载URL} <br> 发生错误：{ E，错误代码，错误描述 }
      */
     public String[] downloadBill(String confKey, String date) {
-        // 设置参数
-        Factory.setOptions(this.getOptions(confKey));
+
         try {
             // 发送请求
             AlipayDataDataserviceBillDownloadurlQueryResponse response = Factory.Payment.Common().downloadBill("trade", date);
@@ -320,14 +319,18 @@ public class AlipayService {
 
 
     /**
-     * 读取配置信息
-     *
-     * @param confKey 支付宝配置信息的KEY。如果加载默认的KEY，输入null
-     * @return 配置信息
+     * 初始化配置信息
      */
-    private Config getOptions(String confKey) {
-        // 从数据库中读取配置信息
-        AlipayBO alipayBO = this.getConfig(confKey);
+    @PostConstruct
+    public void loadAlipayOptions() {
+        AlipayBO alipayBO = this.getConfig();
+        // 公众号配置不为空
+        if (alipayBO != null) {
+            this.addAlipayOptionsRuntime(alipayBO);
+        }
+    }
+
+    private synchronized void addAlipayOptionsRuntime(AlipayBO alipayBO) {
         // 将配置信息写入支付宝支付配置类中
         Config config = new Config();
         config.protocol = alipayBO.getProtocol();
@@ -357,6 +360,6 @@ public class AlipayService {
         //可设置AES密钥，调用AES加解密相关接口时需要（可选）
         config.encryptKey = alipayBO.getEncryptKey();
 
-        return config;
+        Factory.setOptions(config);
     }
 }

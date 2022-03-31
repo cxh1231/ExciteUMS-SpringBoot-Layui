@@ -1,9 +1,9 @@
-package com.zxdmy.excite.component.wechat;
+package com.zxdmy.excite.payment.service.imlp;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.github.binarywang.wxpay.bean.request.WxPayRefundV3Request;
 import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderV3Request;
-import com.github.binarywang.wxpay.bean.result.*;
+import com.github.binarywang.wxpay.bean.result.WxPayOrderQueryV3Result;
+import com.github.binarywang.wxpay.bean.result.WxPayRefundV3Result;
 import com.github.binarywang.wxpay.bean.result.enums.TradeTypeEnum;
 import com.github.binarywang.wxpay.config.WxPayConfig;
 import com.github.binarywang.wxpay.exception.WxPayException;
@@ -12,10 +12,15 @@ import com.github.binarywang.wxpay.service.impl.WxPayServiceImpl;
 import com.zxdmy.excite.common.exception.ServiceException;
 import com.zxdmy.excite.common.service.IGlobalConfigService;
 import com.zxdmy.excite.common.utils.HttpServletRequestUtil;
-import com.zxdmy.excite.component.bo.WeChatPayBO;
+import com.zxdmy.excite.payment.bo.WechatPayBO;
+import com.zxdmy.excite.payment.service.IWechatPayService;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 微信支付服务实现类
@@ -26,9 +31,11 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @AllArgsConstructor
-public class WeChatPayService {
+public class WechatPayServiceImpl implements IWechatPayService {
 
     private IGlobalConfigService configService;
+
+    private WxPayService wxPayService;
 
     private static final String DEFAULT_SERVICE = "wechatPay";
 
@@ -40,17 +47,25 @@ public class WeChatPayService {
     /**
      * 保存微信支付配置信息至数据库
      *
-     * @param weChatPayBO 微信支付实体
+     * @param wechatPayBO 微信支付实体 微信支付实体
      * @return 结果：T|F
-     * @throws JsonProcessingException 异常
      */
-    public boolean saveConfig(WeChatPayBO weChatPayBO) throws JsonProcessingException {
+    @Override
+    public boolean saveConfig(WechatPayBO wechatPayBO) {
         // 必填信息不能为空
-        if (null == weChatPayBO.getAppId() || null == weChatPayBO.getMchId() || null == weChatPayBO.getMchKey()) {
+        if (null == wechatPayBO.getAppId() || null == wechatPayBO.getMchId() || null == wechatPayBO.getMchKey()) {
             throw new ServiceException("APPID、商户号、商户秘钥不能为空！");
         }
         // 保存并返回结果
-        return configService.save(DEFAULT_SERVICE, null != weChatPayBO.getKey() ? weChatPayBO.getKey() : DEFAULT_KEY, weChatPayBO, true);
+        try {
+            if (configService.save(DEFAULT_SERVICE, null != wechatPayBO.getKey() ? wechatPayBO.getKey() : DEFAULT_KEY, wechatPayBO, false)) {
+                this.addWechatPayConfigToRuntime(wechatPayBO);
+                return true;
+            }
+        } catch (Exception e) {
+            throw new ServiceException(e.getMessage());
+        }
+        return false;
     }
 
     /**
@@ -59,11 +74,12 @@ public class WeChatPayService {
      * @param confKey 微信支付的配置KEY
      * @return 微信支付配置信息
      */
-    public WeChatPayBO getConfig(String confKey) {
+    @Override
+    public WechatPayBO getConfig(String confKey) {
         if (null == confKey) {
             return this.getConfig();
         }
-        return (WeChatPayBO) configService.get(DEFAULT_SERVICE, confKey, new WeChatPayBO());
+        return (WechatPayBO) configService.get(DEFAULT_SERVICE, confKey, new WechatPayBO());
     }
 
     /**
@@ -71,7 +87,8 @@ public class WeChatPayService {
      *
      * @return 微信支付配置信息
      */
-    public WeChatPayBO getConfig() {
+    @Override
+    public WechatPayBO getConfig() {
         return this.getConfig(DEFAULT_KEY);
     }
 
@@ -86,6 +103,7 @@ public class WeChatPayService {
      * @param openId      特殊必填：支付用户的OpenId，JSAPI支付时必填。
      * @return 支付返回结果：<br>APP支付、JSAPI支付为[预支付交易会话标识] <br>Native支付为[二维码链接] <br>H5支付为[支付跳转链接]
      */
+    @Override
     public String pay(String confKey, String tradeType, String description, String outTradeNo, Integer total, String openId) {
         // 构建统一下单请求参数对象
         WxPayUnifiedOrderV3Request wxPayUnifiedOrderV3Request = new WxPayUnifiedOrderV3Request();
@@ -118,12 +136,12 @@ public class WeChatPayService {
             switch (tradeType.toLowerCase()) {
                 // Native支付
                 case "native":
-                    return this.getWxPayService(confKey).unifiedOrderV3(TradeTypeEnum.NATIVE, wxPayUnifiedOrderV3Request).getCodeUrl();
+                    return this.wxPayService.unifiedOrderV3(TradeTypeEnum.NATIVE, wxPayUnifiedOrderV3Request).getCodeUrl();
                 // JSAPI支付
                 case "jsapi":
                     // 用户在直连商户appid下的唯一标识。 下单前需获取到用户的Openid
                     wxPayUnifiedOrderV3Request.setPayer(new WxPayUnifiedOrderV3Request.Payer().setOpenid(openId));
-                    return this.getWxPayService(confKey).unifiedOrderV3(TradeTypeEnum.JSAPI, wxPayUnifiedOrderV3Request).getPrepayId();
+                    return this.wxPayService.unifiedOrderV3(TradeTypeEnum.JSAPI, wxPayUnifiedOrderV3Request).getPrepayId();
                 // H5支付
                 case "h5":
                     wxPayUnifiedOrderV3Request.setSceneInfo(
@@ -136,10 +154,10 @@ public class WeChatPayService {
                                                     .setType("wechat")
                                     )
                     );
-                    return this.getWxPayService(confKey).unifiedOrderV3(TradeTypeEnum.H5, wxPayUnifiedOrderV3Request).getH5Url();
+                    return this.wxPayService.unifiedOrderV3(TradeTypeEnum.H5, wxPayUnifiedOrderV3Request).getH5Url();
                 // APP支付
                 case "app":
-                    return this.getWxPayService(confKey).unifiedOrderV3(TradeTypeEnum.APP, wxPayUnifiedOrderV3Request).getPrepayId();
+                    return this.wxPayService.unifiedOrderV3(TradeTypeEnum.APP, wxPayUnifiedOrderV3Request).getPrepayId();
                 default:
                     throw new ServiceException("输入的[" + tradeType + "]不合法，只能为native、jsapi、h5、app其一，请核实！");
             }
@@ -156,12 +174,9 @@ public class WeChatPayService {
      * @param outTradeNo    商户系统内部的订单号，当没提供transactionId时需要传这个。
      * @return 查询订单 返回结果对象
      */
+    @Override
     public WxPayOrderQueryV3Result query(String confKey, String transactionId, String outTradeNo) {
-        try {
-            return this.getWxPayService(confKey).queryOrderV3(transactionId, outTradeNo);
-        } catch (WxPayException e) {
-            throw new ServiceException(e.getMessage());
-        }
+        return null;
     }
 
     /**
@@ -184,40 +199,44 @@ public class WeChatPayService {
                         .setCurrency("CNY")
                 );
         try {
-            return this.getWxPayService(confKey).refundV3(wxPayRefundV3Request);
+            return this.wxPayService.refundV3(wxPayRefundV3Request);
         } catch (WxPayException e) {
             throw new ServiceException(e.getMessage());
         }
     }
 
     /**
-     * 获取微信支付相关接口的服务
-     * （后续的几个服务方法，实现了基本的实例）
-     * （此接口也可以直接在controller中使用）
-     *
-     * @return 微信支付服务接口
+     * 项目启动后，即注入公众号的配置（单个注册）
      */
-    public WxPayService getWxPayService(String confKey) {
-        if (null == confKey) {
-            return this.getWxPayService();
+    @PostConstruct
+    public void loadWxPayConfigStorages() {
+        WechatPayBO wechatPayBO = this.getConfig();
+        // 公众号配置不为空
+        if (wechatPayBO != null) {
+            this.addWechatPayConfigToRuntime(wechatPayBO);
         }
-        // 读取配置信息
-        WeChatPayBO weChatPayBO = this.getConfig(confKey);
+    }
+
+    /**
+     * 添加账号到当前程序。动态配置使用。首次添加需初始化configStorageMap
+     *
+     * @param wechatPayBO 配置
+     */
+    private synchronized void addWechatPayConfigToRuntime(WechatPayBO wechatPayBO) {
         // 生成配置
         WxPayConfig payConfig = new WxPayConfig();
         // 填充基本配置信息
-        payConfig.setAppId(StringUtils.trimToNull(weChatPayBO.getAppId()));
-        payConfig.setMchId(StringUtils.trimToNull(weChatPayBO.getMchId()));
-        payConfig.setMchKey(StringUtils.trimToNull(weChatPayBO.getMchKey()));
-        payConfig.setApiV3Key(StringUtils.trimToNull(weChatPayBO.getApiV3Key()));
-        payConfig.setSubAppId(StringUtils.trimToNull(weChatPayBO.getSubAppId()));
-        payConfig.setSubMchId(StringUtils.trimToNull(weChatPayBO.getSubMchId()));
-        payConfig.setKeyPath(StringUtils.trimToNull(weChatPayBO.getKeyPath()));
-        payConfig.setPrivateCertPath(StringUtils.trimToNull(weChatPayBO.getPrivateCertPath()));
-        payConfig.setPrivateKeyPath(StringUtils.trimToNull(weChatPayBO.getPrivateKeyPath()));
-        payConfig.setNotifyUrl(StringUtils.trimToNull(weChatPayBO.getNotifyUrl()));
-        // 创建配置服务
-        WxPayService wxPayService = new WxPayServiceImpl();
+        payConfig.setAppId(StringUtils.trimToNull(wechatPayBO.getAppId()));
+        payConfig.setMchId(StringUtils.trimToNull(wechatPayBO.getMchId()));
+        payConfig.setMchKey(StringUtils.trimToNull(wechatPayBO.getMchKey()));
+        payConfig.setApiV3Key(StringUtils.trimToNull(wechatPayBO.getApiV3Key()));
+        payConfig.setSubAppId(StringUtils.trimToNull(wechatPayBO.getSubAppId()));
+        payConfig.setSubMchId(StringUtils.trimToNull(wechatPayBO.getSubMchId()));
+        payConfig.setKeyPath(StringUtils.trimToNull(wechatPayBO.getKeyPath()));
+        payConfig.setPrivateCertPath(StringUtils.trimToNull(wechatPayBO.getPrivateCertPath()));
+        payConfig.setPrivateKeyPath(StringUtils.trimToNull(wechatPayBO.getPrivateKeyPath()));
+        payConfig.setNotifyUrl(StringUtils.trimToNull(wechatPayBO.getNotifyUrl()));
+        // 尝试动态添加配置类
         wxPayService.setConfig(payConfig);
         // 可以指定是否使用沙箱环境
         payConfig.setUseSandboxEnv(SAND_BOX_ENV);
@@ -229,17 +248,5 @@ public class WeChatPayService {
                 throw new ServiceException(e.getMessage());
             }
         }
-        // 返回结果
-        return wxPayService;
     }
-
-    /**
-     * 获取微信支付相关接口的服务（默认KEY）
-     *
-     * @return 微信支付服务接口
-     */
-    public WxPayService getWxPayService() {
-        return this.getWxPayService(DEFAULT_KEY);
-    }
-
 }

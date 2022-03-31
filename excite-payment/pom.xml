@@ -26,7 +26,7 @@
         <dependency>
             <groupId>com.github.binarywang</groupId>
             <artifactId>weixin-java-pay</artifactId>
-            <version>4.2.2.B</version>
+            <version>4.2.8.B</version>
         </dependency>
 
         <!-- 支付宝支付依赖 -->

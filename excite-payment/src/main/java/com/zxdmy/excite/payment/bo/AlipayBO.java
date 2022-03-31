@@ -1,4 +1,4 @@
-package com.zxdmy.excite.component.bo;
+package com.zxdmy.excite.payment.bo;
 
 import lombok.Data;
 import lombok.experimental.Accessors;

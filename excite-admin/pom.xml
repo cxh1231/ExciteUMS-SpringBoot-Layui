@@ -37,6 +37,12 @@
             <version>2.0.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.zxdmy.excite</groupId>
+            <artifactId>excite-payment</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+
         <!-- Spring Boot Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

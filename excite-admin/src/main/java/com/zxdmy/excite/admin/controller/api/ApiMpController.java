@@ -10,7 +10,7 @@ import com.zxdmy.excite.common.base.BaseController;
  * @author 拾年之璐
  * @since 2022/3/30 11:25
  */
-public class MpApiController extends BaseController {
+public class ApiMpController extends BaseController {
 
 
     public String getAccessToken() {

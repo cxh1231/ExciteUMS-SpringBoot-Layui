@@ -35,6 +35,7 @@
         <module>excite-offiaccount</module>
         <module>excite-payment</module>
         <module>excite-oauth</module>
+        <module>excite-ums</module>
         <!-- 如果还有其他，继续增加 -->
         <!-- <module>excite-third</module>-->
     </modules>

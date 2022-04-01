@@ -15,12 +15,16 @@ import org.springframework.web.bind.annotation.RestController;
         "com.zxdmy.excite",
         "com.zxdmy.excite.system.service",
         "com.zxdmy.excite.common.service",
+        "com.zxdmy.excite.ums.service",
         "com.zxdmy.excite.offiaccount.service",
+        "com.zxdmy.excite.payment.service",
 })
 @MapperScan(basePackages = {
         "com.zxdmy.excite.system.mapper",
         "com.zxdmy.excite.common.mapper",
+        "com.zxdmy.excite.ums.mapper",
         "com.zxdmy.excite.offiaccount.mapper",
+        "com.zxdmy.excite.payment.mapper",
 })
 public class ExciteAdminApplication {
 

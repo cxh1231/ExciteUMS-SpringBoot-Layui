@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zxdmy.excite.payment.mapper.UmsOrderMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.zxdmy.excite.payment.entity.UmsOrder">
+        <id column="id" property="id" />
+        <result column="app_id" property="appId" />
+        <result column="trade_no" property="tradeNo" />
+        <result column="out_trade_no" property="outTradeNo" />
+        <result column="title" property="title" />
+        <result column="amount" property="amount" />
+        <result column="status" property="status" />
+        <result column="pay_channel" property="payChannel" />
+        <result column="pay_scene" property="payScene" />
+        <result column="notify_url" property="notifyUrl" />
+        <result column="return_url" property="returnUrl" />
+        <result column="cancel_url" property="cancelUrl" />
+        <result column="attach" property="attach" />
+        <result column="notify_result" property="notifyResult" />
+        <result column="create_time" property="createTime" />
+        <result column="paid_time" property="paidTime" />
+        <result column="notify_time" property="notifyTime" />
+        <result column="update_time" property="updateTime" />
+        <result column="delete_time" property="deleteTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, app_id, trade_no, out_trade_no, title, amount, status, pay_channel, pay_scene, notify_url, return_url, cancel_url, attach, notify_result, create_time, paid_time, notify_time, update_time, delete_time
+    </sql>
+
+</mapper>

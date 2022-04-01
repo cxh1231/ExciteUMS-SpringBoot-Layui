@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @AllArgsConstructor
 @RequestMapping("/api/oauth")
-public class OauthApiController extends BaseController {
+public class ApiOauthController extends BaseController {
 
 
     /**

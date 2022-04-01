@@ -18,7 +18,7 @@
         <!-- 加载Common依赖，一些常用的工具包 -->
         <dependency>
             <groupId>com.zxdmy.excite</groupId>
-            <artifactId>excite-common</artifactId>
+            <artifactId>excite-ums</artifactId>
             <version>2.0.0</version>
         </dependency>
 

@@ -46,6 +46,23 @@ public enum ReturnCode {
     METHOD_NOT_ALLOWED(405, "Method Not Allowed"),
 
     // 当然还可以添加自定义的其他返回码。
+    /**
+     * 缺少参数，请检查参数列表。状态码：40001
+     */
+    MISSING_PARAMETER(40001, "缺少参数，请检查参数列表"),
+    /**
+     * 参数无效，请检查参数格式。状态码：40002
+     */
+    INVALID_PARAMETER(40002, "参数错误，请检查参数格式"),
+    /**
+     * APPID无效，请检查APPID参数，或APPID已被禁用。状态码：40003
+     */
+    INVALID_APP_ID(40003, "APPID无效，请检查APPID参数，或APPID已被禁用"),
+    /**
+     * 签名无效，请检查签名算法。状态码：40004
+     */
+    INVALID_SIGNATURE(40004, "签名无效，请检查签名算法"),
+
     INVALID_ID(40001, "不合法的ID"),
     INVALID_FILE_TYPE(40002, "不合法的文件类型"),
     INVALID_FILE_SIZE(40003, "不合法的文件大小"),

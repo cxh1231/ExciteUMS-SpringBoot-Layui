@@ -1,6 +1,7 @@
 package com.zxdmy.excite.common.utils;
 
 import cn.hutool.crypto.digest.MD5;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 
@@ -43,7 +44,8 @@ public class SignUtils {
         // 待签名的字串
         StringBuilder str = new StringBuilder();
         for (String key : map.keySet()) {
-            if (map.get(key) != null) {
+            // 参数的值为空（含""、"  "、null）均不参与签名；
+            if (map.get(key) != null && StringUtils.isNotBlank(map.get(key).toString())) {
                 str.append(key).append("=").append(map.get(key)).append("&");
             }
         }

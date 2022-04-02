@@ -1,15 +1,11 @@
 package com.zxdmy.excite.admin.offiaccount;
 
-import com.zxdmy.excite.offiaccount.bo.OffiAccount;
-import com.zxdmy.excite.offiaccount.service.IOffiAccountService;
-import com.zxdmy.excite.offiaccount.service.IQrCodeService;
+import com.zxdmy.excite.offiaccount.bo.WechatMpBo;
+import com.zxdmy.excite.offiaccount.service.IWechatMpService;
 import me.chanjar.weixin.common.error.WxErrorException;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * <p>
@@ -23,22 +19,21 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class OffiAccountTest {
 
     @Autowired
-    private IOffiAccountService accountService;
-    @Autowired
-    private IQrCodeService qrCodeService;
+    private IWechatMpService accountService;
+
 
     @Test
     void saveAccountTest() {
-        OffiAccount account = new OffiAccount()
+        WechatMpBo account = new WechatMpBo()
                 .setAppid("wxf33dd15c03a05edd")
                 .setAppSecret("6865f84a88d51320c2f897678a7142eb")
                 .setToken("chenxiuhao")
                 .setAesKey("111");
-        accountService.saveOffiAccount(account);
+        accountService.saveWechatMpConfig(account);
     }
     @Test
     void saveAccountTest2() throws WxErrorException {
-        System.out.println(qrCodeService.get());
+
     }
 
 }

@@ -5,6 +5,8 @@ import cn.dev33.satoken.exception.NotLoginException;
 import cn.dev33.satoken.exception.NotPermissionException;
 import cn.dev33.satoken.exception.NotRoleException;
 import com.zxdmy.excite.common.base.BaseController;
+import com.zxdmy.excite.common.enums.ReturnCode;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -34,7 +36,7 @@ public class GlobalException extends BaseController {
         System.out.println("==============全局异常==============");
         e.printStackTrace();
         // 不同异常返回不同状态码
-
+        Integer code = 500;
         String result = "系统错误，请重试！";
         // 如果是未登录异常
         if (e instanceof NotLoginException) {
@@ -60,7 +62,11 @@ public class GlobalException extends BaseController {
         }
         // 不支持的请求
         else if (e instanceof HttpRequestMethodNotSupportedException) {
-            return "请求不支持";
+            result = "不支持的请求";
+        }
+        // HttpMessageNotReadableException
+        else if (e instanceof HttpMessageNotReadableException) {
+            result = "请求参数错误：只支持接收Body类型参数";
         }
         // 信息校验失败提示
         else if (e instanceof BindException) {
@@ -69,17 +75,20 @@ public class GlobalException extends BaseController {
             if (bindingResult.hasErrors()) {
                 Integer i = 1;
                 for (FieldError fieldError : bindingResult.getFieldErrors()) {
-                    errMsg.append(i).append(". ").append(fieldError.getDefaultMessage()).append("！");
+                    errMsg.append(i).append(". ").append(fieldError.getDefaultMessage()).append("; ");
                     i++;
                 }
             }
             result = errMsg.toString();
+            code = ReturnCode.INVALID_PARAMETER.getCode();
         }
         // 其他异常, 输出：500 + 异常信息
         else {
-            result = e.getMessage();
+//            result = e.getMessage();
+            // TODO 生成环境记得修改！
+            result = "其他错误，请查看系统日志！";
         }
         // 返回给前端
-        return error(500, result);
+        return error(code, result);
     }
 }

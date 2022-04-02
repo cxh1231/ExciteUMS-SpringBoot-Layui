@@ -127,6 +127,8 @@ public class UmsOrder implements Serializable {
 
     public static final String ID = "id";
 
+    public static final String APPID = "appid";
+
     public static final String APP_ID = "app_id";
 
     public static final String TRADE_NO = "trade_no";

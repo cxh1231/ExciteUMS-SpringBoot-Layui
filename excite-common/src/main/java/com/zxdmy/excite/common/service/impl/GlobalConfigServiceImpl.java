@@ -86,6 +86,9 @@ public class GlobalConfigServiceImpl extends ServiceImpl<GlobalConfigMapper, Glo
         QueryWrapper<GlobalConfig> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("conf_service", confService).eq("conf_key", confKey);
         GlobalConfig globalConfig = this.getOne(queryWrapper);
+        if(null == globalConfig){
+            return null;
+        }
         String confValue = globalConfig.getConfValue();
         // 为空：返回null
         if (null == confValue || "".equals(confValue)) {

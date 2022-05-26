@@ -1,6 +1,6 @@
-package com.zxdmy.excite.payment.mapper;
+package com.zxdmy.excite.ums.mapper;
 
-import com.zxdmy.excite.payment.entity.UmsOrder;
+import com.zxdmy.excite.ums.entity.UmsOrder;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -10,7 +10,7 @@ import org.apache.ibatis.annotations.Mapper;
  * </p>
  *
  * @author 拾年之璐
- * @since 2022-04-01
+ * @since 2022-05-26
  */
 @Mapper
 public interface UmsOrderMapper extends BaseMapper<UmsOrder> {

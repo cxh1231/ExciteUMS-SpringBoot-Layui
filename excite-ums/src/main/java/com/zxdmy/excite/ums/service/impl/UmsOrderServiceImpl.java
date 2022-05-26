@@ -1,8 +1,8 @@
-package com.zxdmy.excite.payment.service.impl;
+package com.zxdmy.excite.ums.service.impl;
 
-import com.zxdmy.excite.payment.entity.UmsOrder;
-import com.zxdmy.excite.payment.mapper.UmsOrderMapper;
-import com.zxdmy.excite.payment.service.IUmsOrderService;
+import com.zxdmy.excite.ums.entity.UmsOrder;
+import com.zxdmy.excite.ums.mapper.UmsOrderMapper;
+import com.zxdmy.excite.ums.service.IUmsOrderService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
  * </p>
  *
  * @author 拾年之璐
- * @since 2022-04-01
+ * @since 2022-05-26
  */
 @Service
 public class UmsOrderServiceImpl extends ServiceImpl<UmsOrderMapper, UmsOrder> implements IUmsOrderService {

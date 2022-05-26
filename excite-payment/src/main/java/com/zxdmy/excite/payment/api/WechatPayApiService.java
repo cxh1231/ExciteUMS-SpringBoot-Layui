@@ -10,7 +10,6 @@ import com.github.binarywang.wxpay.service.WxPayService;
 import com.zxdmy.excite.common.consts.PaymentConsts;
 import com.zxdmy.excite.common.exception.ServiceException;
 import com.zxdmy.excite.common.utils.HttpServletRequestUtil;
-import com.zxdmy.excite.payment.service.IPaymentConfigService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 

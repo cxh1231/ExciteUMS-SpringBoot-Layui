@@ -2,7 +2,8 @@ package com.zxdmy.excite.admin.payment;
 
 import com.zxdmy.excite.payment.api.WechatPayApiService;
 import com.zxdmy.excite.payment.bo.WechatPayBO;
-import com.zxdmy.excite.payment.service.IPaymentConfigService;
+import com.zxdmy.excite.payment.service.IAlipayConfigService;
+import com.zxdmy.excite.payment.service.IWechatPayConfigService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,7 +23,7 @@ public class wechatpayTest {
     WechatPayApiService wechatPayApiService;
 
     @Autowired
-    IPaymentConfigService paymentConfigService;
+    IWechatPayConfigService paymentConfigService;
 
     @Test
     void saveTest() {

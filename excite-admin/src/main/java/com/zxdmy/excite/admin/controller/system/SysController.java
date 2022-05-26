@@ -34,13 +34,13 @@ public class SysController extends BaseController {
      */
     @RequestMapping("")
     public String defaultPage() {
-        return "redirect:/system/login";
+        return "redirect:/backstage/login";
     }
 
     /**
      * @return 【后台主页】访问入口
      */
-    @RequestMapping("system/index")
+    @RequestMapping("backstage/index")
     public String index(ModelMap map) {
         // 已登录，访问后台主页
         if (StpUtil.isLogin()) {
@@ -49,17 +49,17 @@ public class SysController extends BaseController {
             return "system/index";
         }
         // 未登录，跳转至登录页面
-        return "redirect:/system/login";
+        return "redirect:/backstage/login";
     }
 
     /**
      * @return 【登录】页面入口
      */
-    @RequestMapping("system/login")
+    @RequestMapping("backstage/login")
     public String login() {
         // 已登录：跳转至后台首页
         if (StpUtil.isLogin()) {
-            return "redirect:/system/index";
+            return "redirect:/backstage/index";
         }
         // 未登录，跳转至登录页面
         return "system/login";

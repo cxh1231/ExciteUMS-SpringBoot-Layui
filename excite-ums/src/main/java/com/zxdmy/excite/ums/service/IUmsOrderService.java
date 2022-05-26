@@ -1,6 +1,6 @@
-package com.zxdmy.excite.payment.service;
+package com.zxdmy.excite.ums.service;
 
-import com.zxdmy.excite.payment.entity.UmsOrder;
+import com.zxdmy.excite.ums.entity.UmsOrder;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * </p>
  *
  * @author 拾年之璐
- * @since 2022-04-01
+ * @since 2022-05-26
  */
 public interface IUmsOrderService extends IService<UmsOrder> {
 

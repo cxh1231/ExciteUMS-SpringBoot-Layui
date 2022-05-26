@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>APP用户管理</title>
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <link rel="stylesheet" href="/lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+</head>
+<body>
+<div class="layuimini-container">
+    <div class="layuimini-main">
+        <!-- 上方搜索栏 -->
+        <fieldset class="table-search-fieldset">
+            <legend>搜索</legend>
+            <div class="layui-form layui-form-pane">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label" style="width: 100px">APP ID</label>
+                        <div class="layui-input-inline" style="width: 150px">
+                            <input type="text" id="inputAppId" autocomplete="off" class="layui-input" placeholder="输入appid"/>
+                        </div>
+                        <label class="layui-form-label" style="width: 100px">应用名称</label>
+                        <div class="layui-input-inline" style="width: 150px">
+                            <input type="text" id="inputAppName" autocomplete="off" class="layui-input" placeholder="输入应用名称"/>
+                        </div>
+                    </div>
+                    <!-- 搜索、清除按钮 -->
+                    <div class="layui-inline">
+                        <button type="button" class="layui-btn layui-btn-primary layui-border-green btn-app-action" data-type="search">
+                            <i class="layui-icon layui-icon-search"></i> 搜 索
+                        </button>
+                        <button type="button" class="layui-btn layui-btn-primary btn-app-action" data-type="refresh">
+                            <i class="layui-icon layui-icon-refresh"></i> 清 除
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <!-- 表格 -->
+        <table class="layui-hide" id="table-ums-app" lay-filter="table-ums-app"></table>
+    </div>
+</div>
+<!--表格头部工具类（左上）-->
+<script type="text/html" id="toolbar-table-app">
+    <div class="layui-btn-container">
+        <!-- 【刷新】-->
+        <button class="layui-btn layui-btn-sm layuimini-btn-primary" lay-event="btn-app-reload"><i class="fa fa-refresh"></i></button>
+        <!-- 【添加】-->
+        <button class="layui-btn layui-btn-sm layui-btn-normal" lay-event="btn-app-add"><i class="fa fa-plus"></i> 添加应用</button>
+    </div>
+</script>
+<!--表格每行末尾的操作按钮-->
+<script type="text/html" id="tool-table-app">
+    <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="app-delete">删除</a>
+</script>
+<!--引入JS文件-->
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script src="/js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script>
+    layui.use(['table', 'dropdown'], function () {
+        let $ = layui.jquery,
+            form = layui.form,
+            layer = layui.layer,
+            table = layui.table;
+
+        let currPage = 1                    // 定义全局变量：记录当前页码
+        // 表格
+        let table_app = table.render({
+            elem: '#table-ums-app',     // 绑定的表格ID
+            url: '/ums/app/list',       // 表格数据请求URL
+            response: {statusCode: 200},    // 请求成功的返回码
+            height: 'full-158',             // 表格高度：高度最大化减去差值
+            toolbar: '#toolbar-table-app', //开启头部工具栏，并为其绑定左侧模板
+            defaultToolbar: ['filter', 'exports'],  // 工具栏
+            title: '系统用户数据表',           // 表名，导出数据的时候有用
+            cols: [
+                [
+                    {type: "checkbox", width: 50},
+                    {field: 'id', title: 'ID', width: 80, align: 'center', sort: true},
+                    {field: 'appName', title: '应用名称', align: 'center'},
+                    {field: 'appId', title: '应用ID', align: 'center'},
+                    {field: 'appSecret', title: '应用秘钥', align: 'center'},
+
+                    {
+                        field: 'status', title: '状态', align: 'center', width: 95, templet: function (d) {
+                            let checkStr = "";
+                            if (d.status === 1) {
+                                checkStr += " checked "
+                            } else if (d.status === 2) {
+                                checkStr += " checked disabled "
+                            }
+                            return '<input type="checkbox" lay-filter="check-app-status" value="' + d.id + '" lay-skin="switch" lay-text="正常|禁用" ' + checkStr + '/>'
+                        }
+                    },
+                    {field: 'createTime', title: '注册时间', align: 'center'},
+                    {fixed: 'right', title: '操作', align: 'center', toolbar: '#tool-table-app', width: 80}
+                ]
+            ],
+            page: true,
+            done: function (res, curr, count) {
+                // 此处修复bug：删除最后一页数据后，跳转至上一页
+                if (res.data.length === 0 && curr > 1) {
+                    table_app.reload({page: {curr: curr - 1}})
+                }
+                currPage = curr
+            }
+        });
+
+        // 表格的搜索加载与刷新，几个参数的定义，详见如下注释！
+        let active = {
+            // 重载：刷新本页数据，检索等数据不变 （直接使用表格的table_app.reload() 即可）
+            // 搜索：从第一页开始，检索数据不变
+            search: function () {
+                //执行重载
+                table.reload('table-ums-app', {
+                    page: {curr: 1},            // 页码
+                    where: {                    // 检索数据
+                        username: $('#inputAppId').val(),
+                        account: $('#inputAppName').val()
+                    }
+                });
+            },
+            // 刷新：从第一页开始，检索数据清空
+            refresh: function () {
+                //执行刷新
+                table.reload('table-ums-app', {
+                    page: {curr: 1},                    // 页码
+                    where: {username: "", account: ""}  // 检索数据清空
+                });
+                $('#inputAppId').val('')             // 检索栏输入的数据清空
+                $('#inputAppName').val('')
+            }
+        };
+        // 【搜索】【清除】按钮的响应事件
+        $('.btn-app-action').on('click', function () {
+            let type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+        // 【左上】操作按钮
+        table.on('toolbar(table-ums-app)', function (obj) {
+            let that = this;
+            switch (obj.event) {
+                // 【刷新】按钮
+                case "btn-app-reload":
+                    table_app.reload()
+                    break;
+                // 【添加新用户】按钮
+                case "btn-app-add":
+                    layer.open({
+                        title: '添加新用户',             // 添加用户 窗口的标题
+                        type: 2,                        // 窗口类型：0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
+                        shade: 0.2,                     // 遮罩透明度
+                        maxmin: true,                   // 是否允许最大最小化
+                        shadeClose: false,              // 是否点击遮罩关闭
+                        area: ['600px', '500px'],       // 弹窗大小
+                        content: '/ums/app/goAdd',  // 窗口显示的内容
+                        end: function () {
+                            table_app.reload();        // 添加结束后，窗口关闭，刷新表格
+                        }
+                    });
+                    break;
+
+            }
+        });
+
+        // 【行操作】监听表格行末按钮
+        table.on('tool(table-ums-app)', function (obj) {
+            let that = this;
+            let data = obj.data;
+            let layEvent = obj.event;
+            switch (layEvent) {
+                case "app-delete":
+                    // 删除用户 - 第 1 次确认
+                    layer.confirm("<a style='color: red'>确认要删除用户 " + data.nickname + "(" + data.id + ") 吗？</a>", {
+                        icon: 3, title: '删除用户确认【1/2】'
+                    }, function (index) {
+                        layer.close(index);
+                        // 删除用户 - 第 2 次确认
+                        layer.confirm("<a style='color: red'>真的要删除用户 " + data.nickname + "(" + data.id + ") 吗？删除后不可恢复，请三思而后行！</a>", {
+                            icon: 3, title: '删除用户确认【2/2】'
+                        }, function (index) {
+                            // 加载层
+                            let index_loading = layer.load(1, {
+                                shade: [0.2, '#fff'] //0.1透明度的白色背景
+                            });
+                            // 发起 删除用户 请求
+                            $.post("/ums/app/delete", {userIds: data.id}, function (d) {
+                                // 关闭加载层
+                                layer.close(index_loading)
+                                // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
+                                if (d.code === 200) {
+                                    layer.msg(d.msg, {time: 3000, icon: 1});
+                                    table_app.reload()
+                                } else {
+                                    layer.msg(d.msg, {time: 3000, icon: 2});
+                                }
+                            });
+                        });
+                    });
+                    break;
+
+            }
+        })
+        ;
+
+        // 【行操作】修改用户状态（用户行的switch开关切换事件）
+        form.on('switch(check-app-status)', function (data) {
+            // 注意：isChecked是操作之后的值
+            let isChecked = data.elem.checked;
+            let actionText = isChecked ? "开启" : "禁用"
+            let newStatus = isChecked ? "1" : "0"
+            let userId = data.value;
+            layer.confirm('确认要 ' + actionText + ' ID为 ' + data.value + ' 的用户吗？', {
+                title: false,
+                btn: ['确定', '取消'],
+                closeBtn: 0,        // 不显示右上角的关闭（X）按钮
+                // 按钮【确定】的回调
+                btn1: function (index) {
+                    $.post("/ums/app/changeStatus/" + newStatus, {userIds: userId}, function (d) {
+                        if (d.code === 200) {
+                            layer.msg(d.msg, {time: 3000, icon: 1});
+                            data.elem.checked = isChecked;
+                            form.render();
+                        } else {
+                            layer.msg(d.msg, {time: 3000, icon: 2});
+                            data.elem.checked = !isChecked;
+                            form.render();
+                        }
+                    });
+                },
+                // 按钮【取消】的回调
+                btn2: function (index) {
+                    data.elem.checked = !isChecked;
+                    form.render();
+                    layer.close(index);
+                }
+            });
+        });
+
+
+    });
+</script>
+</body>
+</html>

@@ -81,8 +81,9 @@ public class UmsAppController extends BaseController {
                     .setAppType("1")
                     .setStatus(1)
                     .setCreateTime(LocalDateTime.now())
-            ))
+            )) {
                 return success("应用创建成果！");
+            }
             return error("添加失败");
         } else {
             return addApp(appName);

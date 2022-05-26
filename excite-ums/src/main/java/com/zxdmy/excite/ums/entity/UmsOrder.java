@@ -1,12 +1,10 @@
-package com.zxdmy.excite.payment.entity;
+package com.zxdmy.excite.ums.entity;
 
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
-
 import java.io.Serializable;
 import java.time.LocalDateTime;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -17,7 +15,7 @@ import lombok.experimental.Accessors;
  * </p>
  *
  * @author 拾年之璐
- * @since 2022-04-01
+ * @since 2022-05-26
  */
 @Getter
 @Setter
@@ -127,8 +125,6 @@ public class UmsOrder implements Serializable {
 
     public static final String ID = "id";
 
-    public static final String APPID = "appid";
-
     public static final String APP_ID = "app_id";
 
     public static final String TRADE_NO = "trade_no";
@@ -164,13 +160,5 @@ public class UmsOrder implements Serializable {
     public static final String UPDATE_TIME = "update_time";
 
     public static final String DELETE_TIME = "delete_time";
-
-    // 以下三项是不存在的值
-
-    public static final String TIME = "time";
-
-    public static final String NONCE  = "nonce";
-
-    public static final String HASH = "hash";
 
 }

@@ -3,6 +3,7 @@ package com.zxdmy.excite.admin;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
  *
  * @author 拾年之璐
  */
+@EnableAsync
 @RestController
 @SpringBootApplication(scanBasePackages = {
         "com.zxdmy.excite",

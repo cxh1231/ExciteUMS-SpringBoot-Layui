@@ -13,4 +13,15 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IUmsOrderService extends IService<UmsOrder> {
 
+
+    // 生成订单
+    void createOrder(UmsOrder order);
+
+    // 根据官方回调更新订单
+    void updateOrderByNotifyReceive(UmsOrder order);
+
+    // 根据下游回调更新订单
+    void updateOrderByNotifySend(UmsOrder order);
+
+
 }

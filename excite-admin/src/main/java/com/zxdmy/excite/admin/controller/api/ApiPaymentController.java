@@ -14,13 +14,16 @@ import com.zxdmy.excite.common.base.BaseController;
 import com.zxdmy.excite.common.base.BaseResult;
 import com.zxdmy.excite.common.consts.PaymentConsts;
 import com.zxdmy.excite.common.enums.ReturnCode;
+import com.zxdmy.excite.common.utils.OrderUtils;
 import com.zxdmy.excite.common.utils.SignUtils;
 import com.zxdmy.excite.payment.api.AlipayApiService;
 import com.zxdmy.excite.payment.api.WechatPayApiService;
 import com.zxdmy.excite.payment.vo.PaymentCreateReturnVo;
 import com.zxdmy.excite.payment.vo.PaymentCreateVo;
 import com.zxdmy.excite.ums.entity.UmsApp;
+import com.zxdmy.excite.ums.entity.UmsOrder;
 import com.zxdmy.excite.ums.service.IUmsAppService;
+import com.zxdmy.excite.ums.service.IUmsOrderService;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
@@ -52,6 +55,8 @@ public class ApiPaymentController extends BaseController {
 
     private IUmsAppService appService;
 
+    private IUmsOrderService orderService;
+
     private WxPayService wxPayService;
 
     /**
@@ -72,15 +77,15 @@ public class ApiPaymentController extends BaseController {
         // 验签通过，则核验信息，进行支付
         if (SignUtils.checkSignMD5(paymentCreateVo.getTreeMap(), app.getAppSecret(), paymentCreateVo.getHash())) {
             // 生成订单号
-            String outTradeNo = IdUtil.simpleUUID();
-            // 返回的实体
-            PaymentCreateReturnVo returnVo = new PaymentCreateReturnVo();
+            String outTradeNo = OrderUtils.createOrderCode();
             // 三项返回参数
             String qrcode = null;
             String page = null;
             String wechat = null;
             // 微信支付
             if (PaymentCreateReturnVo.WECHAT.equalsIgnoreCase(paymentCreateVo.getPayChannel())) {
+                // 订单号加前缀
+                outTradeNo = PaymentConsts.Order.ORDER_CODE_WECHAT + outTradeNo;
                 // 修改金额格式（微信支付的单位是分）
                 BigDecimal decimal = new BigDecimal(paymentCreateVo.getAmount()).multiply(new BigDecimal("100"));
                 Integer amount = decimal.intValue();
@@ -100,6 +105,8 @@ public class ApiPaymentController extends BaseController {
             }
             // 支付宝支付（已经做了二选一校验，无需多次校验）
             else {
+                // 订单号加前缀
+                outTradeNo = PaymentConsts.Order.ORDER_CODE_ALIPAY + outTradeNo;
                 // 二维码支付
                 if (PaymentCreateReturnVo.QRCODE.equalsIgnoreCase(paymentCreateVo.getPayScene())) {
                     qrcode = alipayApiService.pay(
@@ -117,14 +124,32 @@ public class ApiPaymentController extends BaseController {
                     // TODO 支付宝电脑支付
                 }
             }
-            // 如果所有的支付字段均不为空
+            // 如果所有的支付字段均为空，说明订单未生成
             if (StringUtils.isAllEmpty(qrcode, page, wechat)) {
                 return error(9000, "发起支付请求错误，请重试！");
             }
+
+            // 生成订单实体，并保存至数据库
+            UmsOrder order = new UmsOrder();
+            order.setAppId(app.getAppId())
+                    .setOutTradeNo(outTradeNo)
+                    .setTitle(paymentCreateVo.getTitle())
+                    .setAmount(paymentCreateVo.getAmount())
+                    .setStatus(PaymentConsts.Status.WAIT)
+                    .setPayChannel(paymentCreateVo.getPayChannel())
+                    .setPayScene(paymentCreateVo.getPayScene())
+                    .setNotifyUrl(paymentCreateVo.getNotifyUrl())
+                    .setReturnUrl(paymentCreateVo.getReturnUrl())
+                    .setCancelUrl(paymentCreateVo.getCancelUrl())
+                    .setAttach(paymentCreateVo.getAttach());
+            orderService.createOrder(order);
+
             // 生成签名
             String time = String.valueOf((int) (System.currentTimeMillis() / 1000));
             // 随机值
             String nonce = RandomUtil.randomString(16);
+            // 返回的实体
+            PaymentCreateReturnVo returnVo = new PaymentCreateReturnVo();
             // 填充返回的参数
             returnVo.setAppid(app.getAppId()).setTime(time).setNonce(nonce);
             returnVo.setTitle(paymentCreateVo.getTitle()).setAmount(paymentCreateVo.getAmount()).setOutTradeNo(outTradeNo)
@@ -141,6 +166,32 @@ public class ApiPaymentController extends BaseController {
     }
 
     /**
+     * 对外：查询订单接口
+     *
+     * @return 支付结果
+     */
+    @RequestMapping(value = "/query", method = {RequestMethod.POST})
+    @ResponseBody
+    public BaseResult query() {
+        // TODO 查询微信 → 查询支付宝 → 返回查询结果
+
+        // TODO 异步：根据查询结果，更新数据库里的信息
+
+        return error("666");
+    }
+
+    /**
+     * 退款接口
+     *
+     * @return 支付结果
+     */
+    @RequestMapping(value = "/refund", method = {RequestMethod.POST})
+    @ResponseBody
+    public BaseResult refund() {
+        return error("666");
+    }
+
+    /**
      * 微信支付的官方回调地址
      *
      * @param notifyData 收到的Body JSON数据
@@ -151,14 +202,14 @@ public class ApiPaymentController extends BaseController {
      * @return 状态码200
      * @throws WxPayException
      */
-    @PostMapping("/notify")
+    @PostMapping("/notify/wechat")
     @ResponseBody
-    public String getNotify(@RequestBody String notifyData,
-                            @RequestHeader("Wechatpay-Timestamp") String timeStamp,
-                            @RequestHeader("Wechatpay-Nonce") String nonce,
-                            @RequestHeader("Wechatpay-Signature") String signature,
-                            @RequestHeader("Wechatpay-Serial") String serial
-    ) throws WxPayException {
+    public String wechatPayNotify(@RequestBody String notifyData,
+                                  @RequestHeader("Wechatpay-Timestamp") String timeStamp,
+                                  @RequestHeader("Wechatpay-Nonce") String nonce,
+                                  @RequestHeader("Wechatpay-Signature") String signature,
+                                  @RequestHeader("Wechatpay-Serial") String serial
+    ) {
         // 设置签名实体
         SignatureHeader signatureHeader = new SignatureHeader();
         signatureHeader.setNonce(nonce);
@@ -184,18 +235,9 @@ public class ApiPaymentController extends BaseController {
         return WxPayNotifyResponse.success("成功");
     }
 
-    /**
-     * 查询订单
-     *
-     * @return 支付结果
-     */
-    @RequestMapping(value = "/query", method = {RequestMethod.POST})
+    @PostMapping("/notify/alipay")
     @ResponseBody
-    public BaseResult query() {
-        return error("666");
+    public String alipayNotify() {
+        return "";
     }
-
-    // 退款接口
-
-
 }

@@ -90,6 +90,21 @@ spring:
     prefix: classpath:/templates/
     suffix: .html
 
+  # Spring Boot原生异步任务
+  task:
+    execution:
+      pool:
+        # 最大线程数
+        # max-size: 32
+        # 核心线程数
+        # core-size: 32
+        # 存活时间
+        # keep-alive: 120s
+        # 队列大小
+        # queue-capacity: 200
+        # 是否允许核心线程超时
+        allow-core-thread-timeout: true
+      thread-name-prefix: ums-async-task-
   devtools:
     restart:
       enabled: true

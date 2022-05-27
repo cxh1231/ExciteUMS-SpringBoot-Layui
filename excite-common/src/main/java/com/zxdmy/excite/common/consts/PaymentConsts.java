@@ -48,6 +48,15 @@ public class PaymentConsts {
     }
 
     /**
+     * 订单前缀类别头
+     */
+    public static class Order {
+        public static final String ORDER_CODE_WECHAT = "WX";
+
+        public static final String ORDER_CODE_ALIPAY = "AL";
+    }
+
+    /**
      * 支付结果
      */
     public static class Status {

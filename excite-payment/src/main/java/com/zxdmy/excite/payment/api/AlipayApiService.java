@@ -14,6 +14,7 @@ import com.alipay.easysdk.payment.wap.models.AlipayTradeWapPayResponse;
 import com.zxdmy.excite.common.consts.PaymentConsts;
 import com.zxdmy.excite.common.exception.ServiceException;
 import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 /**
@@ -24,7 +25,7 @@ import org.springframework.stereotype.Service;
  * @author 拾年之璐
  * @since 2022/4/1 11:59
  */
-@Service
+@Component
 @AllArgsConstructor
 public class AlipayApiService {
 

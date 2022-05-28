@@ -11,9 +11,7 @@ import java.io.Serializable;
 import java.util.TreeMap;
 
 /**
- * <p>
- * 描述
- * </p>
+ * 订单查询接口请求数据
  *
  * @author 拾年之璐
  * @since 2022/4/2 20:11
@@ -21,7 +19,7 @@ import java.util.TreeMap;
 @Getter
 @Setter
 @Accessors(chain = true)
-public class PaymentQueryVO extends BasePaymentVo implements Serializable {
+public class PaymentQueryRequestVO extends BasePaymentVo implements Serializable {
 
     /**
      * 交易单号（官方渠道的账号）

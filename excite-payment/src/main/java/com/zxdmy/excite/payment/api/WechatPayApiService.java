@@ -1,5 +1,9 @@
 package com.zxdmy.excite.payment.api;
 
+import cn.hutool.core.date.LocalDateTimeUtil;
+import com.github.binarywang.wxpay.bean.notify.SignatureHeader;
+import com.github.binarywang.wxpay.bean.notify.WxPayNotifyResponse;
+import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyV3Result;
 import com.github.binarywang.wxpay.bean.request.WxPayRefundV3Request;
 import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderV3Request;
 import com.github.binarywang.wxpay.bean.result.WxPayOrderQueryV3Result;
@@ -10,9 +14,15 @@ import com.github.binarywang.wxpay.service.WxPayService;
 import com.zxdmy.excite.common.consts.PaymentConsts;
 import com.zxdmy.excite.common.exception.ServiceException;
 import com.zxdmy.excite.common.utils.HttpServletRequestUtil;
+import com.zxdmy.excite.payment.model.PaymentNotifyModel;
+import com.zxdmy.excite.ums.entity.UmsOrder;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+
+import java.text.DecimalFormat;
 
 /**
  * <p>
@@ -131,4 +141,40 @@ public class WechatPayApiService {
             throw new ServiceException(e.getMessage());
         }
     }
+
+
+    public PaymentNotifyModel verifyNotify(String notifyData, String timeStamp, String nonce, String signature, String serial) {
+        // 设置签名实体
+        SignatureHeader signatureHeader = new SignatureHeader();
+        signatureHeader.setNonce(nonce);
+        signatureHeader.setSignature(signature);
+        signatureHeader.setSerial(serial);
+        signatureHeader.setTimeStamp(timeStamp);
+        try {
+            // 验签，并解析数据
+            final WxPayOrderNotifyV3Result notifyResult = wxPayService.parseOrderNotifyV3Result(notifyData, signatureHeader);
+            // 支付成功
+            if (PaymentConsts.Status.SUCCESS.equalsIgnoreCase(notifyResult.getResult().getTradeState())) {
+                DecimalFormat df = new DecimalFormat("0.00");
+                // 返回的实体
+                PaymentNotifyModel notifyModel = new PaymentNotifyModel();
+                notifyModel.setTitle("None")
+                        .setAmount("" + df.format((float) notifyResult.getResult().getAmount().getTotal() / 100))
+                        .setTradeNo(notifyResult.getResult().getTransactionId())
+                        .setOutTradeNo(notifyResult.getResult().getOutTradeNo())
+                        .setPaidTime(notifyResult.getResult().getSuccessTime().substring(0, 19))
+                        .setUserId(notifyResult.getResult().getPayer().getOpenid())
+                        .setStatus(PaymentConsts.Status.SUCCESS);
+                // 返回回调数据
+                return notifyModel;
+            } else {
+                System.err.println("签名验证失败，请求数据非官方请求！");
+            }
+
+        } catch (WxPayException e) {
+            System.err.println("微信支付验签异常，详情：" + e.getMessage());
+        }
+        return null;
+    }
+
 }

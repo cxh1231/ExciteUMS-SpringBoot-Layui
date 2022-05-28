@@ -13,9 +13,12 @@ import com.alipay.easysdk.payment.page.models.AlipayTradePagePayResponse;
 import com.alipay.easysdk.payment.wap.models.AlipayTradeWapPayResponse;
 import com.zxdmy.excite.common.consts.PaymentConsts;
 import com.zxdmy.excite.common.exception.ServiceException;
+import com.zxdmy.excite.payment.model.PaymentNotifyModel;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * <p>
@@ -252,4 +255,44 @@ public class AlipayApiService {
         }
     }
 
+    public PaymentNotifyModel verifyNotify(Map<String, String[]> requestParameterMap) {
+        // 参数不能为空
+        if (null == requestParameterMap) {
+            throw new ServiceException("请求数据为空，请检查系统日志！");
+        }
+        // 将支付宝异步回调信息，转换为 Map<String, String> 格式
+        Map<String, String> map = new HashMap<>();
+        for (String key : requestParameterMap.keySet()) {
+            String[] values = requestParameterMap.get(key);
+            String value = "";
+            for (int i = 0; i < values.length; i++) {
+                value = (i == values.length - 1) ? value + values[i] : value + values[i] + ",";
+            }
+            map.put(key, value);
+        }
+        // 尝试验签
+        try {
+            // 验证签名成功
+            if (Factory.Payment.Common().verifyNotify(map)) {
+                // 定义返回实体
+                PaymentNotifyModel notifyModel = new PaymentNotifyModel();
+                notifyModel.setTitle(map.getOrDefault("subject", "无标题"))
+                        .setAmount(map.get("receipt_amount"))
+                        .setTradeNo(map.get("trade_no"))
+                        .setOutTradeNo(map.get("out_trade_no"))
+                        .setPaidTime(map.get("gmt_payment").replace(' ', 'T'))
+                        .setUserId(map.getOrDefault("buyer_id", "None"));
+                if (map.get("trade_status").contains(PaymentConsts.Status.SUCCESS)) {
+                    notifyModel.setStatus(PaymentConsts.Status.SUCCESS);
+                }
+                // 返回回调数据
+                return notifyModel;
+            } else {
+                System.err.println("签名验证失败，请求数据非官方请求！");
+            }
+        } catch (Exception e) {
+            System.err.println("支付宝验签异常，详情：" + e.getMessage());
+        }
+        return null;
+    }
 }

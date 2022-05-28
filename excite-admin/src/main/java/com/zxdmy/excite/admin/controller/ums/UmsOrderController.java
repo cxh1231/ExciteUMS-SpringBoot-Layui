@@ -1,5 +1,6 @@
 package com.zxdmy.excite.admin.controller.ums;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.zxdmy.excite.common.base.BaseResult;
 import com.zxdmy.excite.common.utils.OrderUtils;
 import com.zxdmy.excite.ums.entity.UmsOrder;
@@ -84,7 +85,9 @@ public class UmsOrderController extends BaseController {
     @GetMapping(value = "/list")
     @ResponseBody
     public BaseResult getOrderList() {
-        List<UmsOrder> orderList = orderService.list();
+        QueryWrapper<UmsOrder> wrapper = new QueryWrapper<>();
+        wrapper.orderByDesc(UmsOrder.ID);
+        List<UmsOrder> orderList = orderService.list(wrapper);
         return success("查询成功", orderList);
     }
 

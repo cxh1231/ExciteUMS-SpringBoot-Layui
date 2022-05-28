@@ -84,37 +84,69 @@
                 [
                     {field: 'id', title: 'ID', width: 60, align: 'center', sort: true},
                     {
-                        field: 'appId', title: '应用信息', align: 'center', templet: function (d) {
-                            return '<div">名称：' + d.title + '<br/>ID：' + d.appId + '</div>';
+                        field: 'appId', title: '应用信息', align: 'center', width: 130, templet: function (d) {
+                            return d.appId;
+                            // return '<div">名称：' + d.title + '<br/>ID：' + d.appId + '</div>';
                         }
                     },
                     {
                         field: 'title', title: '订单信息', align: 'center', templet: function (d) {
-                            return '<div">商品：' + d.title + '<br/>价格：' + d.amount + '</div>';
+                            return '标题：' + d.title + '<br/>价格：' + d.amount + '';
                         }
                     },
-                    {field: 'amount', title: '价格', align: 'center'},
                     {
-                        field: 'outTradeNo', title: '订单单号', align: 'center', templet: function (d) {
-                            return '<div">商户单号：' + d.outTradeNo + '<br/>交易单号：' + d.tradeNo + '</div>';
-                        }
-                    },
-                    {field: 'status', title: '订单状态', align: 'center'},
-                    {field: 'payChannel', title: '支付渠道', align: 'center'},
-                    {field: 'appSecret', title: '应用秘钥', align: 'center'},
-
-                    {
-                        field: 'status', title: '状态', align: 'center', width: 95, templet: function (d) {
-                            let checkStr = "";
-                            if (d.status === 1) {
-                                checkStr += " checked "
-                            } else if (d.status === 2) {
-                                checkStr += " checked disabled "
+                        field: 'payChannel', title: '支付方式', width: 100, align: 'center', templet: function (d) {
+                            let ret = ''
+                            if (d.payChannel === 'wechat') {
+                                ret += '<b style="color: #04be02">微信</b><br>';
+                            } else {
+                                ret += '<b style="color: #029fe8">支付宝</b><br>';
                             }
-                            return '<input type="checkbox" lay-filter="check-app-status" value="' + d.id + '" lay-skin="switch" lay-text="正常|禁用" ' + checkStr + '/>'
+                            if (d.payScene === 'qrcode') {
+                                ret += '手机扫码';
+                            } else if (d.payScene === 'page') {
+                                ret += '电脑网站';
+                            } else {
+                                ret += '微信应用';
+                            }
+                            return ret;
                         }
                     },
-                    {field: 'createTime', title: '注册时间', align: 'center'},
+                    {
+                        field: 'outTradeNo', title: '单号信息', width: 330, align: 'center', templet: function (d) {
+                            let ret = '';
+                            if (d.outTradeNo !== null) {
+                                ret += '商户号：' + d.outTradeNo + '<br>';
+                            }
+                            if (d.tradeNo !== null) {
+                                ret += '交易号：' + d.tradeNo;
+                            }
+                            return ret;
+                        }
+                    },
+                    {
+                        field: 'status', title: '订单状态', width: 100, align: 'center', templet: function (d) {
+                            if (d.status === 'WAIT') {
+                                return '<b style="color: orange">未支付</b>';
+                            } else if (d.status === 'CLOSED') {
+                                return '<b style="color: gray">已关闭</b>';
+                            } else {
+                                return '<b style="color: #6bc235">已支付</b>';
+                            }
+                        }
+                    },
+                    {
+                        field: 'createTime', title: '时间信息', align: 'center', templet: function (d) {
+                            let ret = '';
+                            if (d.createTime !== null) {
+                                ret += '创建时间：' + d.createTime + '<br>';
+                            }
+                            if (d.paidTime !== null) {
+                                ret += '付款时间：' + d.paidTime;
+                            }
+                            return ret;
+                        }
+                    },
                     {fixed: 'right', title: '操作', align: 'center', toolbar: '#tool-table-app', width: 80}
                 ]
             ],

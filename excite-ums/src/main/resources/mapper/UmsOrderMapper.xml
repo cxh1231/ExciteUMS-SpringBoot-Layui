@@ -6,6 +6,7 @@
     <resultMap id="BaseResultMap" type="com.zxdmy.excite.ums.entity.UmsOrder">
         <id column="id" property="id" />
         <result column="app_id" property="appId" />
+        <result column="user_id" property="userId" />
         <result column="trade_no" property="tradeNo" />
         <result column="out_trade_no" property="outTradeNo" />
         <result column="title" property="title" />

@@ -1,12 +1,10 @@
 package com.zxdmy.excite.admin.controller.api;
 
-import ch.qos.logback.core.joran.spi.XMLUtil;
-import cn.hutool.core.util.IdUtil;
+import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.binarywang.wxpay.bean.notify.SignatureHeader;
 import com.github.binarywang.wxpay.bean.notify.WxPayNotifyResponse;
-import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyResult;
 import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyV3Result;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
@@ -18,8 +16,9 @@ import com.zxdmy.excite.common.utils.OrderUtils;
 import com.zxdmy.excite.common.utils.SignUtils;
 import com.zxdmy.excite.payment.api.AlipayApiService;
 import com.zxdmy.excite.payment.api.WechatPayApiService;
+import com.zxdmy.excite.payment.model.PaymentNotifyModel;
 import com.zxdmy.excite.payment.vo.PaymentCreateReturnVo;
-import com.zxdmy.excite.payment.vo.PaymentCreateVo;
+import com.zxdmy.excite.payment.vo.PaymentCreateRequestVo;
 import com.zxdmy.excite.ums.entity.UmsApp;
 import com.zxdmy.excite.ums.entity.UmsOrder;
 import com.zxdmy.excite.ums.service.IUmsAppService;
@@ -30,11 +29,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.math.BigDecimal;
-import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * <p>
@@ -67,7 +62,7 @@ public class ApiPaymentController extends BaseController {
      */
     @RequestMapping(value = "/pay", method = {RequestMethod.POST})
     @ResponseBody
-    public BaseResult pay(@RequestBody @Validated PaymentCreateVo paymentCreateVo) {
+    public BaseResult pay(@RequestBody @Validated PaymentCreateRequestVo paymentCreateVo) {
         // 获取应用信息
         UmsApp app = appService.getOne(new QueryWrapper<UmsApp>().eq(UmsApp.APP_ID, paymentCreateVo.getAppid()));
         if (null == app) {
@@ -200,7 +195,6 @@ public class ApiPaymentController extends BaseController {
      * @param signature  Header里的签名
      * @param serial     Header里的序列值
      * @return 状态码200
-     * @throws WxPayException
      */
     @PostMapping("/notify/wechat")
     @ResponseBody
@@ -210,34 +204,49 @@ public class ApiPaymentController extends BaseController {
                                   @RequestHeader("Wechatpay-Signature") String signature,
                                   @RequestHeader("Wechatpay-Serial") String serial
     ) {
-        // 设置签名实体
-        SignatureHeader signatureHeader = new SignatureHeader();
-        signatureHeader.setNonce(nonce);
-        signatureHeader.setSignature(signature);
-        signatureHeader.setSerial(serial);
-        signatureHeader.setTimeStamp(timeStamp);
-        System.out.println(signatureHeader);
-        try {
-            final WxPayOrderNotifyV3Result notifyResult = wxPayService.parseOrderNotifyV3Result(notifyData, signatureHeader);
-            if (PaymentConsts.Status.SUCCESS.equalsIgnoreCase(notifyResult.getResult().getTradeState())) {
-                System.out.println("支付成功");
-            }
-//            System.out.println(notifyResult.getRawData().getEventType());
-//            System.out.println(notifyResult.getRawData().getSummary());
-//            System.out.println(notifyResult.getResult().getTransactionId());
-//            System.out.println(notifyResult.getResult().getOutTradeNo());
-//            System.out.println(notifyResult.getResult().getAmount().getPayerTotal());
-//            System.out.println(notifyResult.getResult().getTradeState());
-//            System.out.println(notifyResult.getResult().getPayer().getOpenid());
-        } catch (WxPayException e) {
+        PaymentNotifyModel notifyModel = wechatPayApiService.verifyNotify(notifyData, timeStamp, nonce, signature, serial);
+        // 验签成功
+        if (null != notifyModel) {
+            // 更新系统订单
+            this.saveNotify2Order(notifyModel);
+            // TODO 向下游发送POST推送
 
+
+            return WxPayNotifyResponse.success("成功");
         }
-        return WxPayNotifyResponse.success("成功");
+        // 验签失败
+        return WxPayNotifyResponse.fail("签名验证失败，请查询系统日志！");
     }
 
     @PostMapping("/notify/alipay")
     @ResponseBody
     public String alipayNotify() {
-        return "";
+        // 将请求数据交给接口验签并返回结果
+        PaymentNotifyModel notifyModel = alipayApiService.verifyNotify(request.getParameterMap());
+        // 验签成功
+        if (null != notifyModel) {
+            // 更新系统订单
+            this.saveNotify2Order(notifyModel);
+            // TODO 向下游发送POST推送
+
+
+            return "success";
+        }
+        return "error";
+    }
+
+    /**
+     * 根据回调信息更新系统的订单数据
+     *
+     * @param notifyModel 回调信息
+     */
+    private void saveNotify2Order(PaymentNotifyModel notifyModel) {
+        UmsOrder order = new UmsOrder();
+        order.setOutTradeNo(notifyModel.getOutTradeNo())
+                .setTradeNo(notifyModel.getTradeNo())
+                .setPaidTime(LocalDateTimeUtil.parse(notifyModel.getPaidTime()))
+                .setUserId(notifyModel.getUserId())
+                .setStatus(notifyModel.getStatus());
+        orderService.updateOrderByNotifyReceive(order);
     }
 }

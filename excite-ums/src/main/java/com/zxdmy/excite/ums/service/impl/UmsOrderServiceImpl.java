@@ -1,5 +1,6 @@
 package com.zxdmy.excite.ums.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.zxdmy.excite.ums.entity.UmsOrder;
 import com.zxdmy.excite.ums.mapper.UmsOrderMapper;
 import com.zxdmy.excite.ums.service.IUmsOrderService;
@@ -31,13 +32,9 @@ public class UmsOrderServiceImpl extends ServiceImpl<UmsOrderMapper, UmsOrder> i
     @Async
     @Override
     public void updateOrderByNotifyReceive(UmsOrder order) {
-        try {
-            System.out.println("收到官方Notify，更新数据库！");
-            Thread.sleep(5000L);
-            System.out.println("收到官方Notify，数据库更新完毕！");
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        QueryWrapper<UmsOrder> wrapper = new QueryWrapper<>();
+        wrapper.eq(UmsOrder.OUT_TRADE_NO, order.getOutTradeNo());
+        orderMapper.update(order, wrapper);
     }
 
     /**

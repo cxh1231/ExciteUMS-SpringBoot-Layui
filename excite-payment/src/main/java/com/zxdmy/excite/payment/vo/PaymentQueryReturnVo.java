@@ -24,6 +24,15 @@ import java.util.TreeMap;
 public class PaymentQueryReturnVo extends BasePaymentVo implements Serializable {
 
     /**
+     * 订单标题
+     */
+    private String title;
+
+    /**
+     * 订单金额
+     */
+    private String amount;
+    /**
      * 交易单号（官方渠道的账号）
      */
     @JsonProperty(value = "trade_no")
@@ -34,16 +43,6 @@ public class PaymentQueryReturnVo extends BasePaymentVo implements Serializable 
      */
     @JsonProperty(value = "out_trade_no")
     private String outTradeNo;
-
-    /**
-     * 订单标题
-     */
-    private String title;
-
-    /**
-     * 订单金额
-     */
-    private String amount;
 
     /**
      * 订单状态
@@ -85,10 +84,10 @@ public class PaymentQueryReturnVo extends BasePaymentVo implements Serializable 
     public TreeMap<String, Object> getTreeMap() {
         TreeMap<String, Object> treeMap = new TreeMap<>();
         treeMap.put(APPID, this.getAppid());
-        treeMap.put(TRADE_NO, this.tradeNo);
-        treeMap.put(OUT_TRADE_NO, this.outTradeNo);
         treeMap.put(TITLE, this.title);
         treeMap.put(AMOUNT, this.amount);
+        treeMap.put(TRADE_NO, this.tradeNo);
+        treeMap.put(OUT_TRADE_NO, this.outTradeNo);
         treeMap.put(STATUS, this.status);
         treeMap.put(CREATE_TIME, this.createTime);
         treeMap.put(PAID_TIME, this.paidTime);

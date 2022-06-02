@@ -14,7 +14,10 @@ import com.alipay.easysdk.payment.wap.models.AlipayTradeWapPayResponse;
 import com.zxdmy.excite.common.consts.PaymentConsts;
 import com.zxdmy.excite.common.exception.ServiceException;
 import com.zxdmy.excite.payment.model.PaymentNotifyModel;
+import com.zxdmy.excite.payment.vo.PaymentQueryReturnVo;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -32,6 +35,8 @@ import java.util.Map;
 @AllArgsConstructor
 public class AlipayApiService {
 
+    final Logger log = LoggerFactory.getLogger(this.getClass());
+
     /**
      * 支付宝支付：统一支付服务接口（当面付、电脑网站支付、手机网站支付、APP支付）
      *
@@ -46,7 +51,9 @@ public class AlipayApiService {
     public String pay(String payScene, String subject, String outTradeNo, String totalAmount, String returnUrl, String quitUrl) {
         // 必填信息不能为空
         if (null == subject || null == outTradeNo || null == totalAmount) {
-            throw new ServiceException("商品名称、商户订单号、商品价格不能为空！");
+            // throw new ServiceException("商品名称、商户订单号、商品价格不能为空！");
+            System.err.println("商品名称、商户订单号、商品价格不能为空！");
+            return null;
         }
         try {
             // 调用API发起创建支付
@@ -61,7 +68,9 @@ public class AlipayApiService {
             // 场景：网站支付（返回网址body的html代码）
             else if (PaymentConsts.Scene.PAGE.equalsIgnoreCase(payScene)) {
                 if (null == returnUrl) {
-                    throw new ServiceException("电脑网站支付的跳转地址（returnUrl）不能为空！");
+                    // throw new ServiceException("电脑网站支付的跳转地址（returnUrl）不能为空！");
+                    System.err.println("电脑网站支付的跳转地址（returnUrl）不能为空！");
+                    return null;
                 }
                 // 调用接口
                 AlipayTradePagePayResponse response1 = Factory.Payment.Page().pay(subject, outTradeNo, totalAmount, returnUrl);
@@ -72,7 +81,9 @@ public class AlipayApiService {
             // 手机网站支付
             else if (PaymentConsts.Scene.WAP.equalsIgnoreCase(payScene)) {
                 if (null == returnUrl || null == quitUrl) {
-                    throw new ServiceException("手机网站支付的取消跳转地址（quitUrl）、成功跳转地址（returnUrl）不能为空！");
+                    // throw new ServiceException("手机网站支付的取消跳转地址（quitUrl）、成功跳转地址（returnUrl）不能为空！");
+                    System.err.println("手机网站支付的取消跳转地址（quitUrl）、成功跳转地址（returnUrl）不能为空！");
+                    return null;
                 }
                 AlipayTradeWapPayResponse response2 = Factory.Payment.Wap().pay(subject, outTradeNo, totalAmount, quitUrl, returnUrl);
                 // 成功
@@ -88,12 +99,10 @@ public class AlipayApiService {
             }
             // 其他情况：错误
             else {
-                throw new ServiceException("支付场景[" + payScene + "]不在许可支付类型范围内。许可类型：当面付（qrcode），电脑网站支付（page），手机网站支付（wap），APP支付（app）");
-
+                System.err.println("支付场景[" + payScene + "]不在许可支付类型范围内。许可类型：当面付（qrcode），电脑网站支付（page），手机网站支付（wap），APP支付（app）");
             }
         } catch (Exception e) {
             System.err.println("调用遭遇异常，原因：" + e.getMessage());
-            throw new ServiceException(e.getMessage());
         }
         return null;
     }
@@ -116,6 +125,16 @@ public class AlipayApiService {
             AlipayTradeQueryResponse response = Factory.Payment.Common().optional("trade_no", tradeNo).query(outTradeNo);
             // 请求成功（即返回信息中没有sub_code）
             if (ResponseChecker.success(response)) {
+                // 返回查询结果
+                PaymentQueryReturnVo returnVo = new PaymentQueryReturnVo();
+                returnVo.setTitle(response.subject)
+                        .setAmount(response.totalAmount)
+                        .setTradeNo(response.tradeNo)
+                        .setOutTradeNo(response.outTradeNo)
+                        .setStatus(response.tradeStatus);
+
+                this.log.info("\n【查询成功】商户单号：{}\n交易单号：{}", response.outTradeNo, response.tradeNo);
+
                 return new String[]{
                         "Y",
                         response.tradeNo,

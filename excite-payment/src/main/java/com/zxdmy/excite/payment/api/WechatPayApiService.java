@@ -17,6 +17,8 @@ import com.zxdmy.excite.common.utils.HttpServletRequestUtil;
 import com.zxdmy.excite.payment.model.PaymentNotifyModel;
 import com.zxdmy.excite.ums.entity.UmsOrder;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,6 +39,8 @@ import java.text.DecimalFormat;
 public class WechatPayApiService {
 
     private WxPayService wxPayService;
+
+    final Logger log = LoggerFactory.getLogger(this.getClass());
 
     /**
      * 下单接口（只设置了必填信息）（V3版本）
@@ -143,6 +147,16 @@ public class WechatPayApiService {
     }
 
 
+    /**
+     * 验证支付结果异步通知
+     *
+     * @param notifyData 通知数据
+     * @param timeStamp  时间戳
+     * @param nonce      随机串
+     * @param signature  已签名字符串
+     * @param serial     证书序列号
+     * @return 校验结果
+     */
     public PaymentNotifyModel verifyNotify(String notifyData, String timeStamp, String nonce, String signature, String serial) {
         // 设置签名实体
         SignatureHeader signatureHeader = new SignatureHeader();

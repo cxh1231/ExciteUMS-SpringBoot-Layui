@@ -1,7 +1,10 @@
 package com.zxdmy.excite.admin.controller.ums;
 
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.zxdmy.excite.common.base.BaseResult;
+import com.zxdmy.excite.common.utils.HttpUtils;
 import com.zxdmy.excite.common.utils.OrderUtils;
 import com.zxdmy.excite.ums.entity.UmsOrder;
 import com.zxdmy.excite.ums.service.IUmsOrderService;
@@ -74,9 +77,9 @@ public class UmsOrderController extends BaseController {
         System.out.println("endTime-startTime:" + (endTime - startTime));
 
         // 更新数据库
-        orderService.updateOrderByNotifyReceive(order);
+//        orderService.updateOrderByNotifyReceive(order);
         // 向下游推送
-        orderService.updateOrderByNotifySend(order);
+//        orderService.updateOrderByNotifySend(order);
         // 返回结果
         return success("请实现接口！", order);
     }
@@ -85,6 +88,15 @@ public class UmsOrderController extends BaseController {
     @GetMapping(value = "/list")
     @ResponseBody
     public BaseResult getOrderList() {
+//        String json = HttpUtils.post("http://ip.tool.zxdmy.com/", null);
+//        System.out.println(json);
+
+        HttpResponse response = HttpRequest.get("http://ip.tool.zxdmy.com/")
+                .timeout(10000)
+                .execute();
+        System.out.println(response.getStatus());
+        System.out.println(response.body());
+
         QueryWrapper<UmsOrder> wrapper = new QueryWrapper<>();
         wrapper.orderByDesc(UmsOrder.ID);
         List<UmsOrder> orderList = orderService.list(wrapper);

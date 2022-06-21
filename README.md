@@ -1,10 +1,10 @@
 <p align="center">
-	<img alt="logo" src="https://img.zxdmy.com/2022/202206210954691.png">
+	<img alt="logo" src="https://img.zxdmy.com/2022/202206211055043.png">
 </p>
 
 <h1 align="center" >ExciteUMS-Layui</h1>
 
-<p align="center"><b>基于Spring Boot 2 + Layui 开发的服务号与商户统一管理系统</b></p>
+<p align="center"><b>基于Spring Boot 2 + Layui 的服务号与商户统一管理系统</b></p>
 
 <p align="center">
 	<a href="https://gitee.com/geekrdc/ExciteCMS-SpringBoot-Layui/stargazers" target="_blank">
@@ -93,28 +93,30 @@
 |:------------------|:----------------|
 | Spring Boot 2.5.X | Spring框架        |
 | Sa-Token          | 权限认证框架          |
-| thymeleaf         | 前端模板引擎          |
-| nekohtml          | 提供非严格HTML模式支持   |
-| mybatis-plus      | Mybatis 的增强工具   |
-| freemarker        | 代码生成器模板         |
-| lombok            | Lombok，Java开发工具 |
-| druid             | 数据库连接池          |
-| openapi           | 接口文档            |
-| fastjson          | 阿里巴巴的开源JSON解析库  |
+| Thymeleaf         | 前端模板引擎          |
+| Nekohtml          | 提供非严格HTML模式支持   |
+| Mybatis-Plus      | Mybatis 的增强工具   |
+| Freemarker        | 代码生成器模板         |
+| Lombok            | Lombok，Java开发工具 |
+| Druid             | 数据库连接池          |
+| Openapi           | 接口文档            |
+| Fastjson          | 阿里巴巴的开源JSON解析库  |
 
 **前端模板：**
 
 + Layui
-+ miniLayui
++ Layuimini
 
 ## 5、支持
 
-如果你觉得 ExciteCMS 还不错，可以通过点亮仓库右上角的 Star 来支持我们~
+如果你觉得 ExciteUMS 还不错，可以通过点亮仓库右上角的 Star 来支持我们 ~
 
 ## 6、反馈
 
-发现BUG？发现功能错误？欢迎提交**issues**：[Gitee](https://gitee.com/cxh1231/ExciteUMS-SpringBoot-Layui/issues)
+发现BUG？发现功能错误？欢迎提交 **issues**：[Gitee](https://gitee.com/cxh1231/ExciteUMS-SpringBoot-Layui/issues) | [Github](https://github.com/cxh1231/ExciteUMS-SpringBoot-Layui/issues)
 
 ## 7、开源协议
 
-[Apache License 2.0](https://gitee.com/ExciteTeam/ExciteCMS-SpringBoot-Layui/blob/master/LICENSE)
+[**GPL-3.0**](https://gitee.com/ExciteTeam/ExciteCMS-SpringBoot-Layui/blob/master/LICENSE) 
+
+基于本项目的源码，你可以任意修改、使用，但**需开源并采用相同的开源协议**。

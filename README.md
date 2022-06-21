@@ -36,7 +36,7 @@
 + 支付宝支付：集成支付宝支付证书配置、支付、查询、退款功能，以及第四方 API 签名支付功能；
 + 公众号管理：集成对公众号用户、消息、事件的管理；
 
-## 3、主要功能演示
+## 2、主要功能演示
 
 **系统功能** 同 [ExciteCMS-SpringBoot-Layui](https://gitee.com/geekrdc/ExciteCMS-SpringBoot-Layui) 一致，请前往查看。
 
@@ -85,7 +85,7 @@
 </tr>
 </table>
 
-## 4、主要技术栈
+## 3、主要技术栈
 
 **后端技术栈：**
 
@@ -107,15 +107,15 @@
 + Layui
 + Layuimini
 
-## 5、支持
+## 4、支持
 
 如果你觉得 ExciteUMS 还不错，可以通过点亮仓库右上角的 Star 来支持我们 ~
 
-## 6、反馈
+## 5、反馈
 
 发现BUG？发现功能错误？欢迎提交 **issues**：[Gitee](https://gitee.com/cxh1231/ExciteUMS-SpringBoot-Layui/issues) | [Github](https://github.com/cxh1231/ExciteUMS-SpringBoot-Layui/issues)
 
-## 7、开源协议
+## 6、开源协议
 
 [**GPL-3.0**](https://gitee.com/ExciteTeam/ExciteCMS-SpringBoot-Layui/blob/master/LICENSE) 
 

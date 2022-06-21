@@ -28,14 +28,14 @@ public class wechatpayTest {
     @Test
     void saveTest() {
         WechatPayBO weChatPayBO = new WechatPayBO();
-        weChatPayBO.setAppId("wx7cd3849a05d3db6e")
-                .setMchId("1623473640")
-                .setMchKey("cxh1231cxh1231cxh1231cxh1231cxh1")
-                .setApiV3Key("cxh1231cxh1231cxh1231cxh1231cxh1")
+        weChatPayBO.setAppId("")
+                .setMchId("")
+                .setMchKey("")
+                .setApiV3Key("")
                 .setKeyPath("E:\\微信支付\\MyCert\\apiclient_cert.p12")
                 .setPrivateKeyPath("E:\\微信支付\\MyCert\\apiclient_key.pem")
                 .setPrivateCertPath("E:\\微信支付\\MyCert\\apiclient_cert.pem")
-                .setNotifyUrl("http://dev.open.zxdmy.com/api/payment/notify");
+                .setNotifyUrl("");
         if (paymentConfigService.saveWechatPayConfig(weChatPayBO))
             System.out.println("成功！");
 

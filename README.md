@@ -2,39 +2,40 @@
 	<img alt="logo" src="https://excitecms.gitee.io/static/images/logo.png">
 </p>
 
-<h1 align="center" >ExciteCMS-Layui</h1>
+<h1 align="center" >ExciteUMS-Layui</h1>
 
-<p align="center"><b>基于Spring Boot 2 + Layui 开发的内容管理系统 / 快速开发脚手架</b></p>
+<p align="center"><b>基于Spring Boot 2 + Layui 开发的服务号与商户统一管理系统</b></p>
 
 <p align="center">
-	<a href="https://gitee.com/ExciteTeam/ExciteCMS-SpringBoot-Layui/stargazers" target="_blank">
+	<a href="https://gitee.com/geekrdc/ExciteCMS-SpringBoot-Layui/stargazers" target="_blank">
         <img src="https://gitee.com/ExciteTeam/ExciteCMS-SpringBoot-Layui/badge/star.svg"></a>
-    <a href="https://gitee.com/ExciteTeam/ExciteCMS-SpringBoot-Layui/members" target="_blank">
+    <a href="https://gitee.com/geekrdc/ExciteCMS-SpringBoot-Layui/members" target="_blank">
         <img src="https://gitee.com/ExciteTeam/ExciteCMS-SpringBoot-Layui/badge/fork.svg"></a>
 	<a href="https://github.com/cxh1231/ExciteCMS-SpringBoot-Layui/stargazers" target="_blank">
         <img src="https://img.shields.io/github/stars/cxh1231/ExciteCMS-SpringBoot-Layui?style=flat-square&logo=GitHub"></a>
 	<a href="https://github.com/cxh1231/ExciteCMS-SpringBoot-Layui/network/members" target="_blank">
         <img src="https://img.shields.io/github/forks/cxh1231/ExciteCMS-SpringBoot-Layui?style=flat-square&logo=GitHub"></a>
-	<a href="https://gitee.com/ExciteTeam/ExciteCMS-SpringBoot-Layui" target="_blank">
-        <img src="https://img.shields.io/badge/ExciteCMS%20Layui-1.0.0-brightgreen.svg"></a>
-	<a href="https://gitee.com/ExciteTeam/ExciteCMS-SpringBoot-Layui/blob/master/LICENSE" target="_blank">
-        <img src="https://img.shields.io/github/license/cxh1231/ExciteCMS-SpringBoot-Layui.svg?style=flat-square"></a>
 </p>
 
 ## 1、主要功能简介
+
+### 系统功能：
 
 + 用户管理：基本的增删改查与授权角色；
 + 角色管理：基本的增删改查与授权用户和授权菜单；
 + 菜单管理：基本的增删改查，其中以树状展示；
 + 日志管理：即操作日志管理、登录日志管理等功能；
 + 监控管理：即服务器监控、数据库监控等功能；
-+ 开发功能：即代码生成等功能；
-+ 第三方功能：如微信支付、支付宝支付、七牛云OSS等功能；
-+
++ 开发功能：即代码生成等功能。
 
-## 2、视频演示
+### 业务功能：
 
-详情请访问：[https://www.bilibili.com/video/BV1Wq4y1h78B](https://www.bilibili.com/video/BV1Wq4y1h78B)
++ APP管理：调用业务功能开放 API 的 APP 信息管理；
++ 微信支付：集成微信支付证书配置、支付、查询、退款功能，以及第四方 API 签名支付功能；
++ 支付宝支付：集成支付宝支付证书配置、支付、查询、退款功能，以及第四方 API 签名支付功能；
++ 订单管理：统一管理微信支付和支付宝支付的订单；
++ 
+
 
 ## 3、主要功能演示
 
@@ -89,18 +90,18 @@
 
 **后的技术栈：**
 
-| 技术栈            | 说明                     |
-| :---------------- | :----------------------- |
-| Spring Boot 2.5.X | Spring框架               |
-| Sa-Token          | 权限认证框架             |
-| thymeleaf         | 前端模板引擎             |
+| 技术栈               | 说明              |
+|:------------------|:----------------|
+| Spring Boot 2.5.X | Spring框架        |
+| Sa-Token          | 权限认证框架          |
+| thymeleaf         | 前端模板引擎          |
 | nekohtml          | 提供非严格HTML模式支持   |
-| mybatis-plus      | Mybatis 的增强工具       |
-| freemarker        | 代码生成器模板           |
-| lombok            | Lombok，Java开发工具     |
-| druid             | 数据库连接池             |
-| openapi           | 接口文档                 |
-| fastjson          | 阿里巴巴的开源JSON解析库 |
+| mybatis-plus      | Mybatis 的增强工具   |
+| freemarker        | 代码生成器模板         |
+| lombok            | Lombok，Java开发工具 |
+| druid             | 数据库连接池          |
+| openapi           | 接口文档            |
+| fastjson          | 阿里巴巴的开源JSON解析库  |
 
 **前端模板：**
 

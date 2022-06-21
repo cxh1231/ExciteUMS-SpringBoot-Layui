@@ -111,10 +111,10 @@
 
 如果你觉得 ExciteCMS 还不错，可以通过点亮仓库右上角的 Star 来支持我们~
 
-## 8、贡献
+## 6、反馈
 
 发现BUG？发现功能错误？欢迎提交**issues**：[Gitee](https://gitee.com/cxh1231/ExciteUMS-SpringBoot-Layui/issues)
 
-## 9、开源协议
+## 7、开源协议
 
 [Apache License 2.0](https://gitee.com/ExciteTeam/ExciteCMS-SpringBoot-Layui/blob/master/LICENSE)

@@ -1,5 +1,5 @@
 <p align="center">
-	<img alt="logo" src="https://excitecms.gitee.io/static/images/logo.png">
+	<img alt="logo" src="https://img.zxdmy.com/2022/202206210954691.png">
 </p>
 
 <h1 align="center" >ExciteUMS-Layui</h1>
@@ -31,60 +31,59 @@
 ### 业务功能：
 
 + APP管理：调用业务功能开放 API 的 APP 信息管理；
++ 订单管理：统一管理微信支付和支付宝支付的订单；
 + 微信支付：集成微信支付证书配置、支付、查询、退款功能，以及第四方 API 签名支付功能；
 + 支付宝支付：集成支付宝支付证书配置、支付、查询、退款功能，以及第四方 API 签名支付功能；
-+ 订单管理：统一管理微信支付和支付宝支付的订单；
-+ 
-
++ 公众号管理：集成对公众号用户、消息、事件的管理；
 
 ## 3、主要功能演示
 
-> **系统功能**：主要实现了基本的RBAC，即用户管理、权限控制、日志管理、代码生成与系统监控等功能。其预览图如下所示。
+**系统功能** 同 [ExciteCMS-SpringBoot-Layui](https://gitee.com/geekrdc/ExciteCMS-SpringBoot-Layui) 一致，请前往查看。
+
+**业务功能截图：**
 
 <table>
 <tr>
 <td>
-<img src="https://img.zxdmy.com/2022/202201302055725.png">
-<center><b>首页</b></center>
+<img src="https://img.zxdmy.com/2022/202206210959047.png" alt="">
+<center><b>APP ID管理</b></center>
 </td>
 <td>
-<img src="https://img.zxdmy.com/2022/202201262036756.png">
-<center><b>用户管理</b></center>
-</td>
-</tr>
-<tr>
-<td>
-<img src="https://img.zxdmy.com/2022/202201262036690.png">
-<center><b>角色管理</b></center>
-</td>
-<td>
-<img src="https://img.zxdmy.com/2022/202201262034888.png">
-<center><b>菜单/权限管理</b></center>
+<img src="https://img.zxdmy.com/2022/202206211000306.png" alt="">
+<center><b>订单管理</b></center>
 </td>
 </tr>
 <tr>
 <td>
-<img src="https://img.zxdmy.com/2022/202201262041698.png">
-<center><b>操作日志</b></center>
+<img src="https://img.zxdmy.com/2022/202206211001747.png" alt="">
+<center><b>支付宝支付配置</b></center>
 </td>
 <td>
-<img src="https://img.zxdmy.com/2022/202201262042293.png">
-<center><b>登录日志</b></center>
+<img src="https://img.zxdmy.com/2022/202206211002007.png" alt="">
+<center><b>微信支付配置</b></center>
 </td>
 </tr>
 <tr>
 <td>
-<img src="https://img.zxdmy.com/2022/202201262044870.png">
-<center><b>代码生成</b></center>
+<img src="https://img.zxdmy.com/2022/202206211003323.png" alt="文件管理">
+<center><b>文件管理</b></center>
 </td>
 <td>
-<img src="https://img.zxdmy.com/2022/202201262044488.png">
-<center><b>服务器监控</b></center>
+<center>敬请期待</center>
+<center><b>互联登录管理</b></center>
+</td>
+</tr>
+<tr>
+<td>
+<center>敬请期待</center>
+<center><b>公众平台管理</b></center>
+</td>
+<td>
+<center>敬请期待</center>
+<center><b>更多功能</b></center>
 </td>
 </tr>
 </table>
-
-> **集成功能**：主要实现了部分第三方组件功能，如支付宝、微信等支付功能，对象存储服务功能，短信服务功能等。其预览见演示视频。
 
 ## 4、主要技术栈
 
@@ -108,31 +107,13 @@
 + Layui
 + miniLayui
 
-## 5、开发文档
-
-网址1：[https://excitecms.gitee.io](https://excitecms.gitee.io)
-
-网址2：[https://excite.zxdmy.com](https://excite.zxdmy.com)
-
-> 以上两个开发文档网址内容一致，区别是部署的仓库不同（Gitee和GitHub）。
-
-## 6、在线体验
-
-网址：[http://demo.excite.zxdmy.com](http://demo.excite.zxdmy.com)
-
-体验账号：demo@zxdmy.com
-
-登录密码：123456
-
-> 注：① 体验账号只有浏览权限，无增删改的权限。② 由于部分页面设置了固定的长宽，使用电脑浏览器访问体验更佳！
-
-## 7、支持
+## 5、支持
 
 如果你觉得 ExciteCMS 还不错，可以通过点亮仓库右上角的 Star 来支持我们~
 
 ## 8、贡献
 
-发现BUG？发现功能错误？欢迎提交**issues**：[Gitee](https://gitee.com/ExciteTeam/ExciteCMS-SpringBoot-Layui/issues) | [GitHub](https://github.com/cxh1231/ExciteCMS-SpringBoot-Layui/issues)
+发现BUG？发现功能错误？欢迎提交**issues**：[Gitee](https://gitee.com/cxh1231/ExciteUMS-SpringBoot-Layui/issues)
 
 ## 9、开源协议
 

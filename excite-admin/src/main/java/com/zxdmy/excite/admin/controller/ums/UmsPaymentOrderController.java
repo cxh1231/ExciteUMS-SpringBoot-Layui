@@ -4,7 +4,6 @@ import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.zxdmy.excite.common.base.BaseResult;
-import com.zxdmy.excite.common.utils.HttpUtils;
 import com.zxdmy.excite.common.utils.OrderUtils;
 import com.zxdmy.excite.ums.entity.UmsOrder;
 import com.zxdmy.excite.ums.service.IUmsOrderService;
@@ -32,7 +31,7 @@ import java.util.concurrent.CountDownLatch;
 @Controller
 @AllArgsConstructor
 @RequestMapping("/ums/order")
-public class UmsOrderController extends BaseController {
+public class UmsPaymentOrderController extends BaseController {
 
     private IUmsOrderService orderService;
 

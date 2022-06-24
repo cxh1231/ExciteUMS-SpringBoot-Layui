@@ -1,6 +1,6 @@
 package com.zxdmy.excite.admin.offiaccount;
 
-import com.zxdmy.excite.offiaccount.bo.WechatMpBo;
+import com.zxdmy.excite.offiaccount.bo.OffiaccountBO;
 import com.zxdmy.excite.offiaccount.service.IWechatMpService;
 import me.chanjar.weixin.common.error.WxErrorException;
 import org.junit.jupiter.api.Test;
@@ -24,7 +24,7 @@ public class OffiAccountTest {
 
     @Test
     void saveAccountTest() {
-        WechatMpBo account = new WechatMpBo()
+        OffiaccountBO account = new OffiaccountBO()
                 .setAppid("wxf33dd15c03a05edd")
                 .setAppSecret("6865f84a88d51320c2f897678a7142eb")
                 .setToken("chenxiuhao")

@@ -24,7 +24,7 @@ import java.io.IOException;
 @Controller
 @AllArgsConstructor
 @RequestMapping("/ums/config")
-public class UmsConfigController extends BaseController {
+public class UmsPaymentConfigController extends BaseController {
 
     private IAlipayConfigService alipayConfigService;
 

@@ -1,6 +1,6 @@
 package com.zxdmy.excite.offiaccount.service;
 
-import com.zxdmy.excite.offiaccount.bo.WechatMpBo;
+import com.zxdmy.excite.offiaccount.bo.OffiaccountBO;
 
 import java.util.List;
 
@@ -14,11 +14,11 @@ import java.util.List;
  */
 public interface IWechatMpService {
 
-    boolean saveWechatMpConfig(WechatMpBo wechatMpBo);
+    boolean saveWechatMpConfig(OffiaccountBO wechatMpBo);
 
-    WechatMpBo getWechatMpConfig(String key);
+    OffiaccountBO getWechatMpConfig(String key);
 
-    WechatMpBo getWechatMpConfig();
+    OffiaccountBO getWechatMpConfig();
 
-    List<WechatMpBo> getWechatMpConfigList();
+    List<OffiaccountBO> getWechatMpConfigList();
 }

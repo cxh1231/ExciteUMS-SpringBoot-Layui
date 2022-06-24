@@ -1,9 +1,7 @@
 package com.zxdmy.excite.common.consts;
 
 /**
- * <p>
- * 描述
- * </p>
+ * 支付用到的常量
  *
  * @author 拾年之璐
  * @since 2022/4/1 14:15

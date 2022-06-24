@@ -3,7 +3,7 @@ package com.zxdmy.excite.offiaccount.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zxdmy.excite.common.exception.ServiceException;
 import com.zxdmy.excite.common.service.IGlobalConfigService;
-import com.zxdmy.excite.offiaccount.bo.WechatMpBo;
+import com.zxdmy.excite.offiaccount.bo.OffiaccountBO;
 import com.zxdmy.excite.offiaccount.service.IWechatMpService;
 import lombok.AllArgsConstructor;
 import me.chanjar.weixin.mp.api.WxMpService;
@@ -45,7 +45,7 @@ public class WechatMpServiceImpl implements IWechatMpService {
      * @return 保存结果
      */
     @Override
-    public boolean saveWechatMpConfig(WechatMpBo wechatMpBo) {
+    public boolean saveWechatMpConfig(OffiaccountBO wechatMpBo) {
         // 如果必填信息为空，则返回错误
         if (null == wechatMpBo.getAppid() || null == wechatMpBo.getAppSecret() || null == wechatMpBo.getToken() || null == wechatMpBo.getAesKey()) {
             throw new ServiceException("appid、appSecret、token或AesKey为空，请核实！");
@@ -68,26 +68,26 @@ public class WechatMpServiceImpl implements IWechatMpService {
      * @return 公众号配置信息
      */
     @Override
-    public WechatMpBo getWechatMpConfig(String key) {
-        WechatMpBo wechatMpBo = new WechatMpBo();
-        return (WechatMpBo) configService.get(DEFAULT_SERVICE, key, wechatMpBo);
+    public OffiaccountBO getWechatMpConfig(String key) {
+        OffiaccountBO wechatMpBo = new OffiaccountBO();
+        return (OffiaccountBO) configService.get(DEFAULT_SERVICE, key, wechatMpBo);
     }
 
     @Override
-    public WechatMpBo getWechatMpConfig() {
-        WechatMpBo wechatMpBo = new WechatMpBo();
-        return (WechatMpBo) configService.get(DEFAULT_SERVICE, DEFAULT_KEY, wechatMpBo);
+    public OffiaccountBO getWechatMpConfig() {
+        OffiaccountBO wechatMpBo = new OffiaccountBO();
+        return (OffiaccountBO) configService.get(DEFAULT_SERVICE, DEFAULT_KEY, wechatMpBo);
     }
 
 
     @Override
-    public List<WechatMpBo> getWechatMpConfigList() {
-        WechatMpBo account = new WechatMpBo();
+    public List<OffiaccountBO> getWechatMpConfigList() {
+        OffiaccountBO account = new OffiaccountBO();
         // 加载公众号配置
         List<Object> objectList = configService.getList(DEFAULT_SERVICE, account);
         // 公众号配置不为空
         if (objectList != null && !objectList.isEmpty()) {
-            List<WechatMpBo> accountList = new ArrayList<>();
+            List<OffiaccountBO> accountList = new ArrayList<>();
             ObjectMapper objectMapper = new ObjectMapper();
             // 遍历
             for (Object o : objectList) {
@@ -127,7 +127,7 @@ public class WechatMpServiceImpl implements IWechatMpService {
      */
     @PostConstruct
     public void loadWxMpConfigStorages() {
-        WechatMpBo wechatMpBo = this.getWechatMpConfig();
+        OffiaccountBO wechatMpBo = this.getWechatMpConfig();
         // 公众号配置不为空
         if (wechatMpBo != null) {
             this.addWechatMpConfigToRuntime(wechatMpBo);
@@ -139,7 +139,7 @@ public class WechatMpServiceImpl implements IWechatMpService {
      *
      * @param account 公众号配置
      */
-    private synchronized void addWechatMpConfigToRuntime(WechatMpBo account) {
+    private synchronized void addWechatMpConfigToRuntime(OffiaccountBO account) {
         // 配置类
         WxMpDefaultConfigImpl config = new WxMpDefaultConfigImpl();
         config.setAppId(account.getAppid());

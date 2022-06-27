@@ -1,8 +1,10 @@
 package com.zxdmy.excite.admin.controller.api;
 
 import com.zxdmy.excite.common.base.BaseController;
+import com.zxdmy.excite.common.base.BaseResult;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpMessageRouter;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
@@ -120,6 +122,11 @@ public class ApiMpController extends BaseController {
         return out;
     }
 
+    @GetMapping(value = "access")
+    @ResponseBody
+    public BaseResult getAccessToken() throws WxErrorException {
+        return success(wxService.getAccessToken());
+    }
 
     /**
      * 进行路由操作

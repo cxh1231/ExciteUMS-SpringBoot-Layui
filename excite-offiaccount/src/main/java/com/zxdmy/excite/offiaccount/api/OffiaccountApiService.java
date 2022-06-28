@@ -1,5 +1,6 @@
 package com.zxdmy.excite.offiaccount.api;
 
+import com.zxdmy.excite.common.exception.ServiceException;
 import com.zxdmy.excite.offiaccount.vo.OffiaccountMenuVo;
 import lombok.AllArgsConstructor;
 import me.chanjar.weixin.common.bean.menu.WxMenu;
@@ -108,7 +109,7 @@ public class OffiaccountApiService {
                 }
             }
             // 当前一级菜单没有子菜单，则添加该菜单的其他信息，否则不要添加，会导致子菜单不生效
-            else{
+            else {
                 button.setType(menu.getType());
                 button.setKey(menu.getKey());
                 button.setUrl(menu.getUrl());
@@ -122,7 +123,8 @@ public class OffiaccountApiService {
             return true;
         } catch (WxErrorException e) {
             this.log.info("\n配置菜单失败，错误信息：{}", e.getMessage());
+            System.out.println(e.getError().getErrorMsg());
+            throw new ServiceException(e.getError().getErrorMsg());
         }
-        return false;
     }
 }

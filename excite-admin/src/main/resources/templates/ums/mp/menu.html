@@ -146,26 +146,7 @@
                 // 当前初始化的 主菜单 编号，在菜单列表内
                 if (i < menus.length) {
                     // 遍历子菜单，并构造追加的HTML代码
-                    // 添加 父级菜单 代码
-                    let appendHtml = "<span class='active-menu'> <i class='icon-sub'></i>" + menus[i].name + "</span>"
-                    // 添加 子级菜单 代码
-                    appendHtml += "<div class='sub-menu'><ul>"
-                    // 遍历 子级菜单 添加
-                    for (let k = 0; k < menus[i].sub_button.length; k++) {
-                        appendHtml += "<li data-id=" + i + "_" + k + ">" +
-                            "<span class='active-menu'>" + menus[i].sub_button[k].name + "</span>" +
-                            "</li>"
-                    }
-                    // 如果 子级菜单 不足5个，则添加[+]
-                    if (menus[i].sub_button.length < 5) {
-                        appendHtml += "<li data-id=" + i + "_" + menus[i].sub_button.length + " class='add-menu'>" +
-                            "<i class='icon-add'></i>" +
-                            "</li>"
-                    }
-                    // 追加剩余代码
-                    appendHtml += "</ul></div>"
-                    // 追加至菜单
-                    $('#menu_' + i).append(appendHtml);
+                    buildMenuByOneLevel(i)
                 }
                 // 否则，说明 已有的菜单 不足3个，将剩下的只初始化为 只有父级 菜单
                 else {
@@ -255,34 +236,24 @@
                 btn: ['确定', '取消'],
                 yes: function (index) {
                     layer.close(index);
-                    // 执行删除操作
-                    let data_id = $('.active').parent();
-
                     // 用于判断几级菜单
-                    let ids = data_id.attr("data-id");
-                    let id = ids.split("_");
+                    let dataId = $('.active').parent().attr("data-id");
+                    let ids = dataId.split("_");
 
                     // 删除 一级菜单
-                    if (id.length === 1) {
-                        let one_id = $('.active').parent().index();
-                        menus.splice(one_id, 1);
+                    if (ids.length === 1) {
+                        menus.splice(ids[0], 1);
                         if (menus.length === 2) {
-                            data_id = parseInt(id[0]) + 1;
+                            let data_id = ids[0];
                             $('#menu').append("<li data-id='" + data_id + " ' class='add-menu'> <i class='icon-add'></i></li>");
                         }
                     }
-                    // 删除 二级菜单
+                    // 删除 二级菜单（删除完成后，需要重新构建几个按钮）
                     else {
-                        let two_id = $('.active').parent().index();
-                        let one_id = $('.active').parent().parent().parent().parent().index();
-                        menus[one_id].sub_button.splice(two_id, 1);
-                        if (menus[one_id].sub_button.length < 5) {
-                            let sub_button_id = parseInt(id[1]) + 1
-                            data_id = id[0] + '_' + sub_button_id;
-                            if (menus[one_id].sub_button.length === 4) {
-                                $('.active').parent().parent().append("<li  data-id='" + data_id + " ' class='add-menu'><i class='icon-add'></i></li>");
-                            }
-                        }
+                        // 删除菜单
+                        menus[ids[0]].sub_button.splice(ids[1], 1);
+                        // 重新构建菜单
+                        buildMenuByOneLevel(ids[0])
                     }
                     $('.active').parent().remove()
                     $('.active').removeClass('active');
@@ -390,6 +361,33 @@
         })
 
         /**
+         * 根据一级菜单的ID，构建该菜单
+         *
+         * @param id
+         */
+        function buildMenuByOneLevel(id) {
+            // 添加 父级菜单 代码
+            let appendHtml = "<span class='active-menu'> <i class='icon-sub'></i>" + menus[id].name + "</span>"
+            // 添加 子级菜单 代码
+            appendHtml += "<div class='sub-menu'><ul>"
+            // 遍历 子级菜单 添加
+            for (let k = 0; k < menus[id].sub_button.length; k++) {
+                appendHtml += "<li data-id=" + id + "_" + k + ">" +
+                    "<span class='active-menu'>" + menus[id].sub_button[k].name + "</span>" +
+                    "</li>"
+            }
+            // 如果 子级菜单 不足5个，则添加[+]
+            if (menus[id].sub_button.length < 5) {
+                appendHtml += "<li data-id=" + id + "_" + menus[id].sub_button.length + " class='add-menu'>" +
+                    "<i class='icon-add'></i>" +
+                    "</li>"
+            }
+            // 追加剩余代码
+            appendHtml += "</ul></div>"
+            $('#menu_' + id).html(appendHtml)
+        }
+
+        /**
          * 回显菜单信息至输入框
          *
          * @param menu_info 菜单信息
@@ -442,6 +440,13 @@
                     $('.view').css('display', 'block');
                     $('.miniprogram').css('display', 'block');
                     $('.click').css('display', 'none');
+                }
+                // 都不是，则初始化为新状态
+                else {
+                    $('#key').val('');
+                    $('#url').val('');
+                    $('#appid').val('');
+                    $('#pagepath').val('');
                 }
             }
         }

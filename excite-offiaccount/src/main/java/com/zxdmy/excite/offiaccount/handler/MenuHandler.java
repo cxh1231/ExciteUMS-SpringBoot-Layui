@@ -11,9 +11,7 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 /**
- * <p>
- * 描述
- * </p>
+ * 自定义菜单点击事件
  *
  * @author 拾年之璐
  * @since 2022/3/31 19:40
@@ -23,17 +21,30 @@ public class MenuHandler extends AbstractHandler {
 
     @Override
     public WxMpXmlOutMessage handle(WxMpXmlMessage wxMessage, Map<String, Object> context, WxMpService wxMpService, WxSessionManager sessionManager) throws WxErrorException {
-        String msg = String.format("type:%s, event:%s, key:%s",
-                wxMessage.getMsgType(), wxMessage.getEvent(),
-                wxMessage.getEventKey());
-        if (WxConsts.EventType.VIEW.equals(wxMessage.getEvent())) {
+
+        // 事件类型：CLICK（即点击菜单拉取消息时的事件推送，需要给用户返回消息）
+        if (WxConsts.EventType.CLICK.equals(wxMessage.getEvent())) {
+//            String msg = String.format("type:%s, event:%s, key:%s",
+//                    wxMessage.getMsgType(),
+//                    wxMessage.getEvent(),
+//                    wxMessage.getEventKey());
+
+            // TODO 从数据库的回复列表中选择需要回复的内容
+
+            // TODO 进行其他处理，将消息返回给用户
+
+            return WxMpXmlOutMessage
+                    .TEXT()
+                    .content(wxMessage.getEventKey())
+                    .fromUser(wxMessage.getToUser())
+                    .toUser(wxMessage.getFromUser())
+                    .build();
+        }
+        // 事件类型：VIEW（点击菜单跳转链接时的事件推送，即跳转网页）
+        else if (WxConsts.EventType.VIEW.equals(wxMessage.getEvent())) {
             return null;
         }
 
-        return WxMpXmlOutMessage
-                .TEXT()
-                .content(msg)
-                .fromUser(wxMessage.getToUser()).toUser(wxMessage.getFromUser())
-                .build();
+        return null;
     }
 }

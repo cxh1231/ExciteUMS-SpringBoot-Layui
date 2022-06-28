@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN" xmlns:th="http://www.w3.org/1999/xhtml">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <title>公众号配置</title>
@@ -17,37 +17,123 @@
 <body>
 <div class="layuimini-container">
     <div class="layuimini-main">
-        用户管理
+        <!-- 公众号用户列表-->
+        <table class="layui-hide" id="mp_user_table" lay-filter="test"></table>
     </div>
 </div>
+<!-- 表格顶部菜单 -->
+<script type="text/html" id="mp_user_toolbar">
+    <div class="layui-btn-container">
+<!--        <button class="layui-btn layui-btn-sm" lay-event="getCheckData">获取选中行数据</button>-->
+
+        <button class="layui-btn layui-btn-sm layui-bg-blue" id="mp_user_more_toolbar">
+            更多功能 <i class="layui-icon layui-icon-down layui-font-12"></i>
+        </button>
+    </div>
+</script>
 <!--引入JS文件-->
 <script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
 <script src="/js/lay-config.js?v=1.0.4" charset="utf-8"></script>
 
 <script>
-    layui.use(['table', 'upload'], function () {
+    layui.use(['table', 'dropdown'], function () {
         let $ = layui.jquery,
             form = layui.form,
-            upload = layui.upload,
-            laydate = layui.laydate,
+            dropdown = layui.dropdown,
             table = layui.table;
 
-        // 保存配置
-        form.on('submit(form-mpConfig-save)', function (data) {
-            console.log(JSON.stringify(data.field))
-            layer.load();
-            $.post("/ums/mp/config/save", data.field, function (data) {
-                layer.closeAll('loading');
-                if (data.code === 200) {
-                    layer.alert(data.msg, {icon: 1});
-                } else {
-                    layer.alert(data.msg, {icon: 2});
+        // 基础信息维护
+        let subscribeScene = {
+            'ADD_SCENE_SEARCH': '公众号搜索',
+            "ADD_SCENE_ACCOUNT_MIGRATION": "公众号迁移",
+            "ADD_SCENE_PROFILE_CARD": "名片分享",
+            "ADD_SCENE_QR_CODE": "扫描二维码",
+            "ADD_SCENE_PROFILE_LINK": "图文页内名称点击",
+            "ADD_SCENE_PROFILE_ITEM": "图文页右上角菜单",
+            "ADD_SCENE_PAID": "支付后关注",
+            "ADD_SCENE_WECHAT_ADVERTISEMENT": "微信广告",
+            "ADD_SCENE_REPRINT": "他人转载",
+            "ADD_SCENE_LIVESTREAM": "视频号直播",
+            "ADD_SCENE_CHANNELS": "视频号",
+            "ADD_SCENE_OTHERS": "其他"
+        }
+
+        let table_mp_user = table.render({
+            elem: '#mp_user_table',
+            url: '/ums/mp/user/getList',
+            toolbar: '#mp_user_toolbar',
+            response: {statusCode: 200},
+            defaultToolbar: ['filter', 'exports', 'print'],
+            height: 'full-88',
+            page: true,
+            cols: [
+                [
+                    {field: 'id', width: 50, title: 'ID', align: 'center'},
+                    {field: 'nickname', width: 80, title: '昵称', align: 'center'},
+                    {field: 'headimgUrl', width: 100, title: '头像', align: 'center'},
+                    {
+                        field: 'sex', width: 80, title: '性别', align: 'center', templet: function (d) {
+                            return d.sex === 1 ? "男" : d.sex === 2 ? "女" : "";
+                        }
+                    },
+                    {field: 'openId', width: 180, title: 'OpenID'},
+                    {
+                        field: 'subscribe', width: 100, title: '订阅状态', align: 'center', templet: function (d) {
+                            if (d.subscribe === 1) {
+                                return '<a class="layui-btn layui-btn-xs">已订阅</a>'
+                            } else {
+                                return '<a class="layui-btn layui-btn-xs layui-btn-danger">未订阅</a>'
+                            }
+
+                        }
+                    },
+                    {
+                        field: 'subscribeScene', title: '订阅渠道', align: 'center', width: 130, templet: function (d) {
+                            return subscribeScene[d.subscribeScene]
+                        }
+                    },
+                    {field: 'subscribeTime', width: 180, title: '订阅时间', align: 'center'},
+                    {fixed: 'right', title: '操作', width: 125, minWidth: 125, toolbar: '#barDemo'}
+                ]
+            ]
+        })
+
+        // 更多功能
+        dropdown.render({
+            elem: '#mp_user_more_toolbar',
+            data: [
+                {
+                    title: '<a style="color: red">同步用户</a>', id: 'synchrony'
                 }
-            });
-            return false;
+            ],
+            // 菜单被点击的事件
+            click: function (obj) {
+                switch (obj.id) {
+                    // 同步用户
+                    case 'synchrony':
+                        // 确认对话框
+                        layer.confirm('确定要通过公众号同步用户信息吗？<br>同步需要一定时间，用户量越大用时越久。', {
+                            icon: 3, title: '同步用户信息'
+                        }, function (index) {
+                            layer.close(index)
+                            layer.load();
+                            $.post("/ums/mp/user/synchronyFromMp", function (d) {
+                                layer.closeAll('loading');
+                                if (d.code === 200) {
+                                    layer.msg(d.msg, {time: 3000, icon: 1});
+                                    table_mp_user.reload()
+                                } else {
+                                    layer.msg(d.msg, {time: 3000, icon: 2});
+                                }
+                            });
+                        });
+                        break;
+                }
+            }
         });
 
-    });
+    })
+
 </script>
 </body>
 </html>

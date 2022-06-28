@@ -9,6 +9,8 @@ import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.menu.WxMpGetSelfMenuInfoResult;
 import me.chanjar.weixin.mp.bean.menu.WxMpSelfMenuInfo;
+import me.chanjar.weixin.mp.bean.result.WxMpUser;
+import me.chanjar.weixin.mp.bean.result.WxMpUserList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -124,6 +126,38 @@ public class OffiaccountApiService {
         } catch (WxErrorException e) {
             this.log.info("\n配置菜单失败，错误信息：{}", e.getMessage());
             System.out.println(e.getError().getErrorMsg());
+            throw new ServiceException(e.getError().getErrorMsg());
+        }
+    }
+
+    /**
+     * 获取公众号所有的用户OpenID列表
+     *
+     * @return OpenId列表
+     */
+    public List<String> getAllUsersOpenId() {
+        try {
+            // 先获取第一批次
+            WxMpUserList mpUserList = wxService.getUserService().userList(null);
+            // 复制给列表
+            List<String> openIds = new ArrayList<>(mpUserList.getOpenids());
+            // 如果 total 大于 count
+            while (mpUserList.getTotal() > mpUserList.getCount()) {
+                mpUserList = wxService.getUserService().userList(mpUserList.getNextOpenid());
+                // 继续追加至列表
+                openIds.addAll(mpUserList.getOpenids());
+            }
+            // 返回列表
+            return openIds;
+        } catch (WxErrorException e) {
+            throw new ServiceException(e.getError().getErrorMsg());
+        }
+    }
+
+    public WxMpUser getUserInfo(String openId) {
+        try {
+            return wxService.getUserService().userInfo(openId);
+        } catch (WxErrorException e) {
             throw new ServiceException(e.getError().getErrorMsg());
         }
     }

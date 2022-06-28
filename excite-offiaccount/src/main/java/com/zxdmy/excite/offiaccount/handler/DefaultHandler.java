@@ -13,18 +13,15 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 
 /**
- * <p>
- * 转发客户消息给客服Handler
- * </p>
+ * 默认的消息路由
  *
  * @author 拾年之璐
- * @since 2022/3/31 19:10
+ * @since 2022/6/28 17:19
  */
 @Component
-public class MsgHandler extends AbstractHandler {
+public class DefaultHandler extends AbstractHandler {
     @Override
     public WxMpXmlOutMessage handle(WxMpXmlMessage wxMessage, Map<String, Object> context, WxMpService wxMpService, WxSessionManager sessionManager) throws WxErrorException {
-
         if (!wxMessage.getMsgType().equals(WxConsts.XmlMsgType.EVENT)) {
             //TODO 可以选择将消息保存到本地
         }
@@ -42,10 +39,9 @@ public class MsgHandler extends AbstractHandler {
             e.printStackTrace();
         }
 
-        //TODO 组装回复消息
+        // TODO 组装回复消息
         String content = "收到信息内容：" + gson.toJson(wxMessage);
 
         return new TextBuilder().build(content, wxMessage, wxMpService);
-
     }
 }

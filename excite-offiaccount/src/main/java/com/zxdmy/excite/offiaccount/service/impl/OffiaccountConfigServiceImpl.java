@@ -57,7 +57,6 @@ public class OffiaccountConfigServiceImpl implements IOffiaccountConfigService {
                 return true;
             }
         } catch (Exception e) {
-
             throw new ServiceException(e.getMessage());
         }
         return false;
@@ -136,12 +135,14 @@ public class OffiaccountConfigServiceImpl implements IOffiaccountConfigService {
         config.setAesKey(account.getAesKey());
         // 尝试动态添加配置类
         try {
-            wxMpService.addConfigStorage(account.getAppid(), config);
+            wxMpService.setWxMpConfigStorage(config);
+            System.out.println("公众号配置信息已更新");
         } catch (NullPointerException e) {
             // 首次添加需要初始化
             Map<String, WxMpConfigStorage> configStorages = new HashMap<>(4);
-            configStorages.put(account.getAppid(), config);
-            wxMpService.setMultiConfigStorages(configStorages, account.getAppid());
+            configStorages.put(DEFAULT_KEY, config);
+            wxMpService.setMultiConfigStorages(configStorages, DEFAULT_KEY);
+            System.out.println("公众号配置信息已初始化！");
         }
     }
 }

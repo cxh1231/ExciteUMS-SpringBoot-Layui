@@ -39,7 +39,7 @@ public class UmsMpMenuController extends BaseController {
      *
      * @return 公众号菜单列表
      */
-    @GetMapping(value = "get")
+    @RequestMapping(value = "/get", method = {RequestMethod.GET})
     @ResponseBody
     public BaseResult getMenu() {
         List<OffiaccountMenuVo> menu = offiaccountApiService.getMenu();
@@ -59,10 +59,9 @@ public class UmsMpMenuController extends BaseController {
     public BaseResult createMenu(@RequestBody List<OffiaccountMenuVo> menus) {
         System.out.println(menus);
         if (offiaccountApiService.createMenu(menus)) {
-            return success("菜单配置成功！");
+            return success("菜单配置成功，马上生效！");
         } else {
             return error("菜单配置失败，请查看系统日志！");
         }
-
     }
 }

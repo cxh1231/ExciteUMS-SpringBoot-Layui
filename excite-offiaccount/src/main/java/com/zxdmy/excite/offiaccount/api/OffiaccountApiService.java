@@ -6,6 +6,7 @@ import me.chanjar.weixin.common.bean.menu.WxMenu;
 import me.chanjar.weixin.common.bean.menu.WxMenuButton;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpService;
+import me.chanjar.weixin.mp.bean.menu.WxMpGetSelfMenuInfoResult;
 import me.chanjar.weixin.mp.bean.menu.WxMpSelfMenuInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +52,7 @@ public class OffiaccountApiService {
                         .setAppId(menuButton.getAppId())
                         .setPagePath(menuButton.getPagePath());
                 // 如果当前 一级菜单 有 二级菜单，则遍历 二级菜单，继续添加
-                if (menuButton.getSubButtons().getSubButtons() != null) {
+                if (null != menuButton.getSubButtons() && null != menuButton.getSubButtons().getSubButtons()) {
                     // 创建放子菜单的列表
                     List<OffiaccountMenuVo> subMenuList = new ArrayList<>();
                     // 遍历子菜单，添加至列表中
@@ -88,16 +89,13 @@ public class OffiaccountApiService {
         WxMenu wxMenu = new WxMenu();
         // 遍历菜单实体，构造菜单
         for (OffiaccountMenuVo menu : menuList) {
+            // 一级菜单
             WxMenuButton button = new WxMenuButton();
             button.setName(menu.getName());
-            button.setType(menu.getType());
-            button.setKey(menu.getKey());
-            button.setUrl(menu.getUrl());
-            button.setAppId(menu.getAppId());
-            button.setPagePath(menu.getPagePath());
             // 如果该菜单还有子菜单，则继续追加子菜单
             if (menu.getSubButtons().size() > 0) {
                 for (OffiaccountMenuVo subMenu : menu.getSubButtons()) {
+                    // 二级菜单
                     WxMenuButton subButton = new WxMenuButton();
                     subButton.setName(subMenu.getName());
                     subButton.setType(subMenu.getType());
@@ -105,8 +103,17 @@ public class OffiaccountApiService {
                     subButton.setUrl(subMenu.getUrl());
                     subButton.setAppId(subMenu.getAppId());
                     subButton.setPagePath(subMenu.getPagePath());
+                    // 将二级菜单追加至当前的一级菜单
                     button.getSubButtons().add(subButton);
                 }
+            }
+            // 当前一级菜单没有子菜单，则添加该菜单的其他信息，否则不要添加，会导致子菜单不生效
+            else{
+                button.setType(menu.getType());
+                button.setKey(menu.getKey());
+                button.setUrl(menu.getUrl());
+                button.setAppId(menu.getAppId());
+                button.setPagePath(menu.getPagePath());
             }
             wxMenu.getButtons().add(button);
         }

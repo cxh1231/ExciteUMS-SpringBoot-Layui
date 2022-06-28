@@ -140,7 +140,6 @@
         // 获取菜单并初始化至前端显示
         $.get("/ums/mp/menu/get", function (data) {
             menus = data.data
-            console.log(menus)
 
             // 初始化三个菜单
             for (let i = 0; i < 3; i++) {
@@ -187,7 +186,7 @@
                 });
                 return false;
             }
-            console.log(menus)
+            layer.load();
             $.ajax({
                 type: "POST",
                 url: "/ums/mp/menu/create",
@@ -195,6 +194,7 @@
                 headers: {'Content-Type': 'application/json;charset=utf8'},
                 dataType: "json",
                 success: function (data) {
+                    layer.closeAll('loading');
                     if (data.code === 200) {
                         layer.alert(data.msg, {icon: 1});
                     } else {
@@ -202,7 +202,8 @@
                     }
                 },
                 error: function (xhr, status) {
-                    window.alert("请求数据失败");
+                    layer.closeAll('loading');
+                    layer.alert("请求数据失败", {icon: 2});
                 }
             });
         })
@@ -214,7 +215,6 @@
             // 获取选中菜单的ID信息
             let dataId = $(this).parent().attr("data-id");
             let ids = dataId.split("_");
-            console.log(ids)
             // 移出已被激活的菜单按钮
             $('.active').removeClass('active');
             // 激活当前菜单按钮

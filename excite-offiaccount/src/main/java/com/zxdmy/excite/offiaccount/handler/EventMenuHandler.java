@@ -17,7 +17,7 @@ import java.util.Map;
  * @since 2022/3/31 19:40
  */
 @Component
-public class MenuHandler extends AbstractHandler {
+public class EventMenuHandler extends AbstractHandler {
 
     @Override
     public WxMpXmlOutMessage handle(WxMpXmlMessage wxMessage, Map<String, Object> context, WxMpService wxMpService, WxSessionManager sessionManager) throws WxErrorException {

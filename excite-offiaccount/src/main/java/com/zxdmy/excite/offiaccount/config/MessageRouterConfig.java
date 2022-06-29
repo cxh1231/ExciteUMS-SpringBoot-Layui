@@ -22,12 +22,13 @@ public class MessageRouterConfig {
 
     private final MsgTextHandler textHandler;
 
-    private final MenuHandler menuHandler;
+    private final EventSubscribeHandler subscribeHandler;
 
-    private final SubscribeHandler subscribeHandler;
+    private final EventSubscribeCancelHandler subscribeCancelHandler;
 
-    private final SubscribeCancelHandler subscribeCancelHandler;
+    private final EventScanHandler scanHandler;
 
+    private final EventMenuHandler menuHandler;
     private final DefaultHandler defaultHandler;
 
     /**
@@ -47,6 +48,15 @@ public class MessageRouterConfig {
         // 接收文本消息事件
         router.rule().async(false).msgType(WxConsts.XmlMsgType.TEXT).handler(this.textHandler).end();
 
+        // 关注事件
+        router.rule().async(false).msgType(WxConsts.XmlMsgType.EVENT).event(WxConsts.EventType.SUBSCRIBE).handler(this.subscribeHandler).end();
+
+        // 取消关注事件
+        router.rule().async(false).msgType(WxConsts.XmlMsgType.EVENT).event(WxConsts.EventType.UNSUBSCRIBE).handler(this.subscribeCancelHandler).end();
+
+        // 已关注后扫描带参数二维码
+        router.rule().async(false).msgType(WxConsts.XmlMsgType.EVENT).event(WxConsts.EventType.SCAN).handler(this.scanHandler).end();
+
         // 自定义菜单事件
         // 详情：https://developers.weixin.qq.com/doc/offiaccount/Message_Management/Receiving_event_pushes.html#自定义菜单事件
         router.rule().async(false).msgType(WxConsts.XmlMsgType.EVENT).event(WxConsts.EventType.CLICK).handler(this.menuHandler).end();
@@ -54,11 +64,6 @@ public class MessageRouterConfig {
         // 点击菜单链接事件
         router.rule().async(false).msgType(WxConsts.XmlMsgType.EVENT).event(WxConsts.EventType.VIEW).handler(this.menuHandler).end();
 
-        // 关注事件
-        router.rule().async(false).msgType(WxConsts.XmlMsgType.EVENT).event(WxConsts.EventType.SUBSCRIBE).handler(this.subscribeHandler).end();
-
-        // 取消关注事件
-        router.rule().async(false).msgType(WxConsts.XmlMsgType.EVENT).event(WxConsts.EventType.UNSUBSCRIBE).handler(this.subscribeCancelHandler).end();
 
         // 默认
         router.rule().async(false).handler(this.defaultHandler).end();

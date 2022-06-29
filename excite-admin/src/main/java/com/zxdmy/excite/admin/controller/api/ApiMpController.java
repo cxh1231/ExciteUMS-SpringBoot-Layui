@@ -111,14 +111,19 @@ public class ApiMpController extends BaseController {
         // aes加密的消息
         else if ("aes".equalsIgnoreCase(encType)) {
             // 消息解密
-            WxMpXmlMessage inMessage = WxMpXmlMessage.fromEncryptedXml(requestBody, wxService.getWxMpConfigStorage(), timestamp, nonce, msgSignature);
-            // 将消息交给route处理
-            WxMpXmlOutMessage outMessage = this.route(inMessage);
-            if (outMessage == null) {
-                return "";
+            try {
+                WxMpXmlMessage inMessage = WxMpXmlMessage.fromEncryptedXml(requestBody, wxService.getWxMpConfigStorage(), timestamp, nonce, msgSignature);
+                // 将消息交给route处理
+                WxMpXmlOutMessage outMessage = this.route(inMessage);
+                if (outMessage == null) {
+                    return "";
+                }
+                // 返回的消息，同样加墨
+                out = outMessage.toEncryptedXml(wxService.getWxMpConfigStorage());
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+                System.out.println("解密出错，可能来自非官方的请求！");
             }
-            // 返回的消息，同样加墨
-            out = outMessage.toEncryptedXml(wxService.getWxMpConfigStorage());
         }
         // 返回组装后的消息
         return out;
@@ -127,7 +132,15 @@ public class ApiMpController extends BaseController {
     @GetMapping(value = "access")
     @ResponseBody
     public BaseResult getAccessToken() throws WxErrorException {
+
         return success(wxService.getAccessToken());
+    }
+
+    @GetMapping(value = "test")
+    @ResponseBody
+    public BaseResult test() throws WxErrorException {
+
+        return success(wxService.getQrcodeService().qrCodeCreateTmpTicket(123456, 2048));
     }
 
     /**

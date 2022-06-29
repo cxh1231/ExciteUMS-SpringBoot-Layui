@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zxdmy.excite.ums.mapper.UmsMpEventMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.zxdmy.excite.ums.entity.UmsMpEvent">
+        <id column="id" property="id" />
+        <result column="wechat_id" property="wechatId" />
+        <result column="open_id" property="openId" />
+        <result column="event" property="event" />
+        <result column="event_key" property="eventKey" />
+        <result column="event_ticket" property="eventTicket" />
+        <result column="event_latitude" property="eventLatitude" />
+        <result column="event_longitude" property="eventLongitude" />
+        <result column="event_precision" property="eventPrecision" />
+        <result column="event_menu_id" property="eventMenuId" />
+        <result column="event_scan_type" property="eventScanType" />
+        <result column="event_scan_result" property="eventScanResult" />
+        <result column="rep_type" property="repType" />
+        <result column="rep_content" property="repContent" />
+        <result column="rep_title" property="repTitle" />
+        <result column="rep_description" property="repDescription" />
+        <result column="rep_pic_url" property="repPicUrl" />
+        <result column="rep_url" property="repUrl" />
+        <result column="rep_media_id" property="repMediaId" />
+        <result column="rep_music_url" property="repMusicUrl" />
+        <result column="rep_hq_music_url" property="repHqMusicUrl" />
+        <result column="rep_thumb_media_id" property="repThumbMediaId" />
+        <result column="remark" property="remark" />
+        <result column="event_create_time" property="eventCreateTime" />
+        <result column="rep_create_time" property="repCreateTime" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+        <result column="delete_time" property="deleteTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, wechat_id, open_id, event, event_key, event_ticket, event_latitude, event_longitude, event_precision, event_menu_id, event_scan_type, event_scan_result, rep_type, rep_content, rep_title, rep_description, rep_pic_url, rep_url, rep_media_id, rep_music_url, rep_hq_music_url, rep_thumb_media_id, remark, event_create_time, rep_create_time, create_time, update_time, delete_time
+    </sql>
+
+</mapper>

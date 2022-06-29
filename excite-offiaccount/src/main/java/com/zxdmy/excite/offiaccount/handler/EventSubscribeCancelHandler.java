@@ -18,7 +18,7 @@ import java.util.Map;
  * @since 2022/3/31 20:03
  */
 @Component
-public class SubscribeCancelHandler extends AbstractHandler{
+public class EventSubscribeCancelHandler extends AbstractHandler{
     @Override
     public WxMpXmlOutMessage handle(WxMpXmlMessage wxMessage, Map<String, Object> context, WxMpService wxMpService, WxSessionManager sessionManager) throws WxErrorException {
         String openId = wxMessage.getFromUser();

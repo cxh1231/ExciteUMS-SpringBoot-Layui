@@ -17,24 +17,96 @@
 <body>
 <div class="layuimini-container">
     <div class="layuimini-main">
+        <!-- 上方搜索栏 -->
+        <fieldset class="table-search-fieldset">
+            <legend>搜索与操作</legend>
+            <div class="layui-form layui-form-pane">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label" style="width: 80px">关键词</label>
+                        <div class="layui-input-inline" style="width: 200px">
+                            <input type="text" id="searchKey" autocomplete="off" class="layui-input" placeholder="输入昵称/OpenID/备注等"/>
+                        </div>
+                    </div>
+                    <!-- 搜索、清除按钮 -->
+                    <div class="layui-inline">
+                        <!-- 搜索按钮 -->
+                        <button type="button" class="layui-btn layui-btn-primary layui-border-blue btn-app-action" data-type="search">
+                            <i class="layui-icon layui-icon-search"></i> 搜 索
+                        </button>
+                        <button type="button" class="layui-btn layui-btn-primary btn-app-action" data-type="refresh">
+                            <i class="layui-icon layui-icon-refresh"></i> 清 除
+                        </button>
+                        <button type="button" class="layui-btn layui-btn-primary" id="mp-user-more-toolbar">
+                            更多操作 <i class="layui-icon layui-icon-down layui-font-12"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
         <!-- 公众号用户列表-->
-        <table class="layui-hide" id="mp_user_table" lay-filter="test"></table>
+        <table class="layui-hide" id="mp-user-table" lay-filter="mp-user-table"></table>
     </div>
 </div>
-<!-- 表格顶部菜单 -->
-<script type="text/html" id="mp_user_toolbar">
-    <div class="layui-btn-container">
-<!--        <button class="layui-btn layui-btn-sm" lay-event="getCheckData">获取选中行数据</button>-->
-
-        <button class="layui-btn layui-btn-sm layui-bg-blue" id="mp_user_more_toolbar">
-            更多功能 <i class="layui-icon layui-icon-down layui-font-12"></i>
-        </button>
-    </div>
-</script>
 <!--引入JS文件-->
 <script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
 <script src="/js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<!-- 【行内按钮】表格每行末尾的操作按钮-->
+<script type="text/html" id="tool-table-mp-user">
+    <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="mp-user-detail">详情</a>
+    <a class="layui-btn layui-btn-xs" lay-event="mp-user-remark">备注</a>
+    <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="mp-user-refresh"><i class="fa fa-refresh"></i></a>
+</script>
+<!-- 点击行末【详情】后的弹窗内容 -->
+<div id="dom_req_details" style="display: none;">
+    <div class="layuimini-main">
+        <div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><b>请求用户：</b></label>
+                <div class="layui-input-block">
+                    <div class="layui-form-mid" id="reqLogUserId"></div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><b>请求IP：</b></label>
+                <div class="layui-input-block">
+                    <div class="layui-form-mid" id="reqLogIp"></div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><b>用户UA：</b></label>
+                <div class="layui-input-block">
+                    <div class="layui-form-mid" id="reqLogUserAgent"></div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><b>请求URI：</b></label>
+                <div class="layui-input-block">
+                    <div class="layui-form-mid" id="reqLogUri"></div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><b>请求函数：</b></label>
+                <div class="layui-input-block">
+                    <div class="layui-form-mid" id="reqLogFunction"></div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><b>请求数据：</b></label>
+                <div class="layui-input-block">
+                    <pre><code class="language-json" id="logReqData"></code></pre>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><b>响应数据：</b></label>
+                <div class="layui-input-block">
+                    <pre><code class="language-json" id="logResData"></code></pre>
+                </div>
+            </div>
 
+        </div>
+    </div>
+</div>
 <script>
     layui.use(['table', 'dropdown'], function () {
         let $ = layui.jquery,
@@ -59,21 +131,33 @@
         }
 
         let table_mp_user = table.render({
-            elem: '#mp_user_table',
+            elem: '#mp-user-table',
             url: '/ums/mp/user/getList',
-            toolbar: '#mp_user_toolbar',
             response: {statusCode: 200},
-            defaultToolbar: ['filter', 'exports', 'print'],
-            height: 'full-88',
+            height: 'full-158',
             page: true,
             cols: [
                 [
                     {field: 'id', width: 50, title: 'ID', align: 'center'},
-                    {field: 'nickname', width: 80, title: '昵称', align: 'center'},
-                    {field: 'headimgUrl', width: 100, title: '头像', align: 'center'},
+                    {field: 'nickname', width: 150, title: '昵称', align: 'center'},
+                    {
+                        field: 'headimgUrl', width: 60, title: '头像', align: 'center', templet: function (d) {
+                            if (d.headimgUrl !== null) {
+                                return '<div ><img onclick="show_img(this)" style="height:30px;width:30px;" src="' + d.headimgUrl + '"></div>'
+                            } else {
+                                return "";
+                            }
+                        }
+                    },
                     {
                         field: 'sex', width: 80, title: '性别', align: 'center', templet: function (d) {
-                            return d.sex === 1 ? "男" : d.sex === 2 ? "女" : "";
+                            if (d.sex === 1) {
+                                return '<a class="layui-btn layui-btn-primary layui-border-blue layui-btn-xs">男</a>'
+                            } else if (d.sex === 2) {
+                                return '<a class="layui-btn layui-btn-primary layui-border-red layui-btn-xs">女</a>'
+                            } else {
+                                return '<a class="layui-btn layui-btn-primary layui-border-black layui-btn-xs">未知</a>'
+                            }
                         }
                     },
                     {field: 'openId', width: 180, title: 'OpenID'},
@@ -88,23 +172,23 @@
                         }
                     },
                     {
-                        field: 'subscribeScene', title: '订阅渠道', align: 'center', width: 130, templet: function (d) {
+                        field: 'subscribeScene', title: '订阅渠道', align: 'center', width: 120, templet: function (d) {
                             return subscribeScene[d.subscribeScene]
                         }
                     },
+                    {field: 'remark', minWidth: 100, title: '备注名'},
+                    {field: 'umsRemark', minWidth: 100, title: '备注信息'},
                     {field: 'subscribeTime', width: 180, title: '订阅时间', align: 'center'},
-                    {fixed: 'right', title: '操作', width: 125, minWidth: 125, toolbar: '#barDemo'}
+                    {fixed: 'right', title: '操作', width: 170, minWidth: 125, align: 'center', toolbar: '#tool-table-mp-user'}
                 ]
             ]
         })
 
         // 更多功能
         dropdown.render({
-            elem: '#mp_user_more_toolbar',
+            elem: '#mp-user-more-toolbar',
             data: [
-                {
-                    title: '<a style="color: red">同步用户</a>', id: 'synchrony'
-                }
+                {title: '同步用户', id: "synchrony", templet: '<a style="color: red">同步用户 <i class="fa fa-rss"></i></a>'},
             ],
             // 菜单被点击的事件
             click: function (obj) {
@@ -133,6 +217,20 @@
         });
 
     })
+
+    /**
+     * 显示头像
+     * @param t
+     */
+    function show_img(t) {
+        layer.open({
+            type: 1,
+            title: false,
+            skin: 'layui-layer-nobg', //没有背景色
+            shadeClose: true,
+            content: '<img style="display: inline-block; width: 100%; height: 100%;max-height: 320px;max-width: 320px" src="' + t.src + '">'
+        });
+    }
 
 </script>
 </body>

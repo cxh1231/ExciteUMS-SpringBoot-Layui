@@ -8,18 +8,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 构造类
+ * 微信回复消息构造器
  *
  * @author 拾年之璐
- * @since 2022/3/31 19:13
+ * @since 2022/6/29 16:32
  */
-public abstract class AbstractBuilder {
+public abstract class AbstractMsgBuilder {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
+    /**
+     * 构造消息
+     *
+     * @param mpReply   回复消息实体
+     * @param wxMessage 接收到的消息
+     * @param service   微信服务类
+     * @return 发送给微信服务器的XML消息
+     */
     public abstract WxMpXmlOutMessage build(
-            String mpReply,
+            UmsMpReply mpReply,
             WxMpXmlMessage wxMessage,
             WxMpService service
     );
+
 }

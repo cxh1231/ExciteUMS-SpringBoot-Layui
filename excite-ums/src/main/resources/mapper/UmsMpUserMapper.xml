@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zxdmy.excite.ums.mapper.UmsMpUserMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.zxdmy.excite.ums.entity.UmsMpUser">
+        <id column="id" property="id" />
+        <result column="open_id" property="openId" />
+        <result column="union_id" property="unionId" />
+        <result column="headimg_url" property="headimgUrl" />
+        <result column="nickname" property="nickname" />
+        <result column="sex" property="sex" />
+        <result column="country" property="country" />
+        <result column="city" property="city" />
+        <result column="province" property="province" />
+        <result column="language" property="language" />
+        <result column="remark" property="remark" />
+        <result column="group_id" property="groupId" />
+        <result column="tagid_list" property="tagidList" />
+        <result column="subscribe" property="subscribe" />
+        <result column="subscribe_scene" property="subscribeScene" />
+        <result column="subscribe_time" property="subscribeTime" />
+        <result column="subscribe_num" property="subscribeNum" />
+        <result column="unsubscribe_time" property="unsubscribeTime" />
+        <result column="qr_scene_str" property="qrSceneStr" />
+        <result column="qr_scene" property="qrScene" />
+        <result column="latitude" property="latitude" />
+        <result column="longitude" property="longitude" />
+        <result column="ums_remark" property="umsRemark" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+        <result column="delete_time" property="deleteTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, open_id, union_id, headimg_url, nickname, sex, country, city, province, language, remark, group_id, tagid_list, subscribe, subscribe_scene, subscribe_time, subscribe_num, unsubscribe_time, qr_scene_str, qr_scene, latitude, longitude, ums_remark, create_time, update_time, delete_time
+    </sql>
+
+</mapper>

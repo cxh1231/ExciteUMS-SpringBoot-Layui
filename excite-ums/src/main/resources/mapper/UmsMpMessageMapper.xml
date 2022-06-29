@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zxdmy.excite.ums.mapper.UmsMpMessageMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.zxdmy.excite.ums.entity.UmsMpMessage">
+        <id column="id" property="id" />
+        <result column="msg_id" property="msgId" />
+        <result column="wechat_id" property="wechatId" />
+        <result column="open_id" property="openId" />
+        <result column="msg_type" property="msgType" />
+        <result column="msg_content" property="msgContent" />
+        <result column="msg_pic_url" property="msgPicUrl" />
+        <result column="msg_format" property="msgFormat" />
+        <result column="msg_thumb_media_id" property="msgThumbMediaId" />
+        <result column="msg_media_id" property="msgMediaId" />
+        <result column="msg_location_x" property="msgLocationX" />
+        <result column="msg_location_y" property="msgLocationY" />
+        <result column="msg_scale" property="msgScale" />
+        <result column="msg_label" property="msgLabel" />
+        <result column="msg_title" property="msgTitle" />
+        <result column="msg_description" property="msgDescription" />
+        <result column="msg_url" property="msgUrl" />
+        <result column="rep_type" property="repType" />
+        <result column="rep_content" property="repContent" />
+        <result column="rep_title" property="repTitle" />
+        <result column="rep_description" property="repDescription" />
+        <result column="rep_pic_url" property="repPicUrl" />
+        <result column="rep_url" property="repUrl" />
+        <result column="rep_media_id" property="repMediaId" />
+        <result column="rep_music_url" property="repMusicUrl" />
+        <result column="rep_hq_music_url" property="repHqMusicUrl" />
+        <result column="rep_thumb_media_id" property="repThumbMediaId" />
+        <result column="remark" property="remark" />
+        <result column="msg_create_time" property="msgCreateTime" />
+        <result column="rep_create_time" property="repCreateTime" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+        <result column="delete_time" property="deleteTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, msg_id, wechat_id, open_id, msg_type, msg_content, msg_pic_url, msg_format, msg_thumb_media_id, msg_media_id, msg_location_x, msg_location_y, msg_scale, msg_label, msg_title, msg_description, msg_url, rep_type, rep_content, rep_title, rep_description, rep_pic_url, rep_url, rep_media_id, rep_music_url, rep_hq_music_url, rep_thumb_media_id, remark, msg_create_time, rep_create_time, create_time, update_time, delete_time
+    </sql>
+
+</mapper>

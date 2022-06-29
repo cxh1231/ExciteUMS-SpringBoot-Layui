@@ -1,13 +1,18 @@
 package com.zxdmy.excite.offiaccount.handler;
 
+import com.zxdmy.excite.common.consts.OffiaccountConsts;
+import com.zxdmy.excite.offiaccount.builder.MsgBuilder;
 import com.zxdmy.excite.offiaccount.builder.TextBuilder;
-import me.chanjar.weixin.common.api.WxConsts;
+import com.zxdmy.excite.ums.entity.UmsMpReply;
+import com.zxdmy.excite.ums.service.IUmsMpEventService;
+import com.zxdmy.excite.ums.service.IUmsMpMessageService;
+import com.zxdmy.excite.ums.service.IUmsMpReplyService;
+import lombok.AllArgsConstructor;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.common.session.WxSessionManager;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlOutMessage;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -19,33 +24,29 @@ import java.util.Map;
  * @since 2022/6/28 17:20
  */
 @Component
+@AllArgsConstructor
 public class MsgTextHandler extends AbstractHandler {
+
+    private IUmsMpEventService mpEventService;
+
+    private IUmsMpMessageService mpMessageService;
+
+    private IUmsMpReplyService mpReplyService;
+
     @Override
     public WxMpXmlOutMessage handle(WxMpXmlMessage wxMessage, Map<String, Object> context, WxMpService wxMpService, WxSessionManager sessionManager) throws WxErrorException {
         // 获取用户发送的消息
         String content = wxMessage.getContent();
-        // TODO 根据用户的消息进行处理
+        // 从[关键词]数据库检索需要回复的信息（如果有多条，选择最近的一条）
+        UmsMpReply msgReply = mpReplyService.getReplyByType(OffiaccountConsts.ReplyType.KEYWORD_REPLY, content);
+        // 如果[关键词]为空，则返回默认的信息
+        if (null == msgReply) {
 
-        // 组装返回的消息
-        String replyContent = "收到消息：" + content;
+            msgReply = mpReplyService.getReplyByType(OffiaccountConsts.ReplyType.MESSAGE_REPLY, content);
+        }
+        // TODO 异步消息：写入数据库，持久化
 
-        // 返回消息
-        return new TextBuilder().build(replyContent, wxMessage, wxMpService);
-
-
-        //当用户输入关键词如“你好”，“客服”等，并且有客服在线时，把消息转发给在线客服
-//        try {
-//            if (StringUtils.startsWithAny(wxMessage.getContent(), "你好", "客服")
-//                    && wxMpService.getKefuService().kfOnlineList()
-//                    .getKfOnlineList().size() > 0) {
-//                return WxMpXmlOutMessage.TRANSFER_CUSTOMER_SERVICE()
-//                        .fromUser(wxMessage.getToUser())
-//                        .toUser(wxMessage.getFromUser()).build();
-//            }
-//        } catch (WxErrorException e) {
-//            e.printStackTrace();
-//        }
-
-
+        // 根据回复详情，构造消息，并返回
+        return new MsgBuilder().build(msgReply, wxMessage, wxMpService);
     }
 }

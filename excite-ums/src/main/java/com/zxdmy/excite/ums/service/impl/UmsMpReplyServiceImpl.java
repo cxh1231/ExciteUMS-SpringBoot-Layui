@@ -30,12 +30,12 @@ public class UmsMpReplyServiceImpl extends ServiceImpl<UmsMpReplyMapper, UmsMpRe
     /**
      * 根据消息类型获取一条最新的自动回复消息
      *
-     * @param type    枚举：消息类型
-     * @param keyword 关键词
+     * @param type 枚举：消息类型
+     * @param key  关键词 | 或菜单的KEY
      * @return 一条自动回复
      */
     @Override
-    public UmsMpReply getReplyByType(Integer type, String keyword) {
+    public UmsMpReply getReplyByType(Integer type, String key) {
         QueryWrapper<UmsMpReply> wrapper = new QueryWrapper<>();
         // 构造检索条件并检索：关键词回复
         if (Objects.equals(type, OffiaccountConsts.ReplyType.KEYWORD_REPLY)) {
@@ -45,17 +45,19 @@ public class UmsMpReplyServiceImpl extends ServiceImpl<UmsMpReplyMapper, UmsMpRe
                     // 全匹配
                     .and(wrapper1 -> wrapper1
                             .eq(UmsMpReply.MATE, OffiaccountConsts.ReplyMate.FULL_MATE)
-                            .eq(UmsMpReply.KEYWORD, keyword))
+                            .eq(UmsMpReply.KEYWORD, key))
                     // 半匹配
                     .or(wrapper2 -> wrapper2
                             .eq(UmsMpReply.MATE, OffiaccountConsts.ReplyMate.HALF_MATE)
-                            .like(UmsMpReply.KEYWORD, keyword))
+                            .like(UmsMpReply.KEYWORD, key))
                     .orderByDesc(UmsMpReply.ID);
         }
         // 其他的回复，直接检索即可
         else {
             wrapper.eq(UmsMpReply.TYPE, type)
                     .eq(UmsMpReply.STATUS, SystemCode.STATUS_Y.getCode())
+                    // 当 KEY 非空，并且非关键词时，是菜单点击的回复
+                    .eq(null != key, UmsMpReply.MENU_KEY, key)
                     .orderByDesc(UmsMpReply.ID);
         }
         // 执行检索

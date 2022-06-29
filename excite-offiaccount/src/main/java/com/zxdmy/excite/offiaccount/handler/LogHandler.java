@@ -19,25 +19,14 @@ import java.util.Map;
  * @since 2022/3/31 19:08
  */
 @Component
-@AllArgsConstructor
 public class LogHandler extends AbstractHandler {
 
-    private IUmsMpEventService mpEventService;
-
-    private IUmsMpMessageService mpMessageService;
-
     @Override
-    public WxMpXmlOutMessage handle(
-            WxMpXmlMessage wxMessage,
-            Map<String, Object> context,
-            WxMpService wxMpService,
-            WxSessionManager sessionManager
-    ) {
+    public WxMpXmlOutMessage handle(WxMpXmlMessage wxMessage, Map<String, Object> context, WxMpService wxMpService, WxSessionManager sessionManager) {
         // 打印日志
         this.logger.info("\n接收到请求消息，内容：【{}】", wxMessage.toString());
+        // 可以进行数据持久化，这里就放在其他地方了
 
-        this.logger.info("信息保存成功");
-        // 可以选择持久化
         return null;
     }
 }

@@ -29,6 +29,7 @@ public class MessageRouterConfig {
     private final EventScanHandler scanHandler;
 
     private final EventMenuHandler menuHandler;
+
     private final DefaultHandler defaultHandler;
 
     /**
@@ -58,34 +59,13 @@ public class MessageRouterConfig {
         router.rule().async(false).msgType(WxConsts.XmlMsgType.EVENT).event(WxConsts.EventType.SCAN).handler(this.scanHandler).end();
 
         // 自定义菜单事件
-        // 详情：https://developers.weixin.qq.com/doc/offiaccount/Message_Management/Receiving_event_pushes.html#自定义菜单事件
         router.rule().async(false).msgType(WxConsts.XmlMsgType.EVENT).event(WxConsts.EventType.CLICK).handler(this.menuHandler).end();
 
         // 点击菜单链接事件
         router.rule().async(false).msgType(WxConsts.XmlMsgType.EVENT).event(WxConsts.EventType.VIEW).handler(this.menuHandler).end();
 
-
         // 默认
         router.rule().async(false).handler(this.defaultHandler).end();
-
-        // 上报地理位置事件
-//        router.rule().async(false).msgType(EVENT).event(EventType.LOCATION).handler(this.locationHandler).end();
-
-        // 接收地理位置消息
-//        newRouter.rule().async(false).msgType(XmlMsgType.LOCATION).handler(this.locationHandler).end();
-
-        // 扫码事件
-//        newRouter.rule().async(false).msgType(EVENT).event(EventType.SCAN).handler(this.scanHandler).end();
-        // 接收客服会话管理事件
-//        newRouter.rule().async(false).msgType(EVENT).event(KF_CREATE_SESSION)
-//                .handler(this.kfSessionHandler).end();
-//        newRouter.rule().async(false).msgType(EVENT).event(KF_CLOSE_SESSION)
-//                .handler(this.kfSessionHandler).end();
-//        newRouter.rule().async(false).msgType(EVENT).event(KF_SWITCH_SESSION)
-//                .handler(this.kfSessionHandler).end();
-
-        // 门店审核事件
-//        newRouter.rule().async(false).msgType(EVENT).event(POI_CHECK_NOTIFY).handler(this.storeCheckNotifyHandler).end();
 
         return router;
     }

@@ -2,7 +2,7 @@ package com.zxdmy.excite.offiaccount.handler;
 
 import com.zxdmy.excite.common.consts.OffiaccountConsts;
 import com.zxdmy.excite.offiaccount.builder.MsgBuilder;
-import com.zxdmy.excite.offiaccount.builder.TextBuilder;
+import com.zxdmy.excite.offiaccount.service.IOffiaccountCommonService;
 import com.zxdmy.excite.ums.entity.UmsMpReply;
 import com.zxdmy.excite.ums.service.IUmsMpEventService;
 import com.zxdmy.excite.ums.service.IUmsMpMessageService;
@@ -33,6 +33,8 @@ public class MsgTextHandler extends AbstractHandler {
 
     private IUmsMpReplyService mpReplyService;
 
+    private IOffiaccountCommonService commonService;
+
     @Override
     public WxMpXmlOutMessage handle(WxMpXmlMessage wxMessage, Map<String, Object> context, WxMpService wxMpService, WxSessionManager sessionManager) throws WxErrorException {
         // 获取用户发送的消息
@@ -41,12 +43,13 @@ public class MsgTextHandler extends AbstractHandler {
         UmsMpReply msgReply = mpReplyService.getReplyByType(OffiaccountConsts.ReplyType.KEYWORD_REPLY, content);
         // 如果[关键词]为空，则返回默认的信息
         if (null == msgReply) {
-
-            msgReply = mpReplyService.getReplyByType(OffiaccountConsts.ReplyType.MESSAGE_REPLY, content);
+            msgReply = mpReplyService.getReplyByType(OffiaccountConsts.ReplyType.DEFAULT_REPLY, null);
         }
-        // TODO 异步消息：写入数据库，持久化
-
-        // 根据回复详情，构造消息，并返回
-        return new MsgBuilder().build(msgReply, wxMessage, wxMpService);
+        // 根据回复详情，构造消息
+        WxMpXmlOutMessage outMessage = new MsgBuilder().build(msgReply, wxMessage, wxMpService);
+        // 异步：写入数据库，持久化
+        commonService.saveMessage2DB(wxMessage, msgReply, outMessage);
+        // 返回消息
+        return outMessage;
     }
 }

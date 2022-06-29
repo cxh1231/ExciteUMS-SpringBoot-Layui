@@ -3,8 +3,11 @@ package com.zxdmy.excite.ums.entity;
 import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
+
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -17,8 +20,7 @@ import lombok.experimental.Accessors;
  * @author 拾年之璐
  * @since 2022-06-29
  */
-@Getter
-@Setter
+@Data
 @Accessors(chain = true)
 @TableName("ums_mp_reply")
 public class UmsMpReply implements Serializable {
@@ -31,7 +33,12 @@ public class UmsMpReply implements Serializable {
     private Long id;
 
     /**
-     * 类型（1、关注时默认回复；2、消息默认回复；3、关键词回复；4、登录成功回复）
+     * 该消息的KEY，可以写入公众号的菜单，回复此消息
+     */
+    private String menuKey;
+
+    /**
+     * 类型（0、消息默认回复；1、关键词回复；2、菜单回复；3、关注时默认回复；4、登录成功回复，）
      */
     private Integer type;
 
@@ -124,6 +131,8 @@ public class UmsMpReply implements Serializable {
 
 
     public static final String ID = "id";
+
+    public static final String MENU_KEY = "menu_key";
 
     public static final String TYPE = "type";
 

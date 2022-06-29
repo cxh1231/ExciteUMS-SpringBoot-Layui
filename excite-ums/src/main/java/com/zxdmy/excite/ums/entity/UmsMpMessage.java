@@ -36,7 +36,7 @@ public class UmsMpMessage implements Serializable {
     /**
      * 官方：消息id，64位整型
      */
-    private String msgId;
+    private Long msgId;
 
     /**
      * 官方：开发者微信号（即公众号的原始ID）

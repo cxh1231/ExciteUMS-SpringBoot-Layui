@@ -76,7 +76,7 @@ public class UmsMpEvent implements Serializable {
     /**
      * 指菜单ID，如果是个性化菜单，则可以通过这个字段，知道是哪个规则的菜单被点击了。	
      */
-    private String eventMenuId;
+    private Long eventMenuId;
 
     /**
      * 菜单扫码：扫描类型，一般是qrcode

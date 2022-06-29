@@ -18,10 +18,10 @@ public interface IUmsMpReplyService extends IService<UmsMpReply> {
     /**
      * 根据消息类型获取一条最新的自动回复消息
      *
-     * @param type    枚举：消息类型
-     * @param keyword 关键词
+     * @param type 枚举：消息类型
+     * @param key  关键词 | 菜单的KEY
      * @return 一条自动回复
      */
-    UmsMpReply getReplyByType(Integer type, String keyword);
+    UmsMpReply getReplyByType(Integer type, String key);
 
 }

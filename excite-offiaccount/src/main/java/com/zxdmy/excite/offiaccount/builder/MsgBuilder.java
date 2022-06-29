@@ -1,12 +1,11 @@
 package com.zxdmy.excite.offiaccount.builder;
 
-import com.zxdmy.excite.common.consts.OffiaccountConsts;
 import com.zxdmy.excite.ums.entity.UmsMpReply;
+import me.chanjar.weixin.common.api.WxConsts;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlOutMessage;
 import me.chanjar.weixin.mp.bean.message.WxMpXmlOutNewsMessage;
-import me.chanjar.weixin.mp.bean.message.WxMpXmlOutTextMessage;
 
 import java.util.List;
 
@@ -32,7 +31,7 @@ public class MsgBuilder extends AbstractMsgBuilder {
             return null;
         }
         // text：文本；
-        else if (mpReply.getRepType().equals(OffiaccountConsts.ReplyMessageType.TEXT)) {
+        else if (mpReply.getRepType().equals(WxConsts.XmlMsgType.TEXT)) {
             return WxMpXmlOutMessage.TEXT()
                     .content(mpReply.getRepContent())
                     .fromUser(wxMessage.getToUser())
@@ -40,7 +39,7 @@ public class MsgBuilder extends AbstractMsgBuilder {
                     .build();
         }
         // news：图文
-        else if (mpReply.getRepType().equals(OffiaccountConsts.ReplyMessageType.NEWS)) {
+        else if (mpReply.getRepType().equals(WxConsts.XmlMsgType.NEWS)) {
             // 构造图文
             WxMpXmlOutNewsMessage.Item article = new WxMpXmlOutNewsMessage.Item();
             article.setTitle(mpReply.getRepTitle());
@@ -55,7 +54,7 @@ public class MsgBuilder extends AbstractMsgBuilder {
                     .build();
         }
         // image：图片；
-        else if (mpReply.getRepType().equals(OffiaccountConsts.ReplyMessageType.IMAGE)) {
+        else if (mpReply.getRepType().equals(WxConsts.XmlMsgType.IMAGE)) {
             return WxMpXmlOutMessage.IMAGE()
                     .mediaId(mpReply.getRepMediaId())
                     .fromUser(wxMessage.getToUser())
@@ -63,7 +62,7 @@ public class MsgBuilder extends AbstractMsgBuilder {
                     .build();
         }
         // voice：语音；
-        else if (mpReply.getRepType().equals(OffiaccountConsts.ReplyMessageType.VOICE)) {
+        else if (mpReply.getRepType().equals(WxConsts.XmlMsgType.VOICE)) {
             return WxMpXmlOutMessage.VOICE()
                     .mediaId(mpReply.getRepMediaId())
                     .fromUser(wxMessage.getToUser())
@@ -72,7 +71,7 @@ public class MsgBuilder extends AbstractMsgBuilder {
         }
 
         // video：视频；
-        else if (mpReply.getRepType().equals(OffiaccountConsts.ReplyMessageType.VIDEO)) {
+        else if (mpReply.getRepType().equals(WxConsts.XmlMsgType.VIDEO)) {
             return WxMpXmlOutMessage.VIDEO()
                     .mediaId(mpReply.getRepMediaId())
                     .title(mpReply.getRepTitle())
@@ -82,7 +81,7 @@ public class MsgBuilder extends AbstractMsgBuilder {
                     .build();
         }
         // music：音乐；
-        else if (mpReply.getRepType().equals(OffiaccountConsts.ReplyMessageType.MUSIC)) {
+        else if (mpReply.getRepType().equals(WxConsts.XmlMsgType.MUSIC)) {
             return WxMpXmlOutMessage.MUSIC()
                     .title(mpReply.getRepTitle())
                     .description(mpReply.getRepDescription())

@@ -68,7 +68,17 @@ public class UmsMpUserController extends BaseController {
             if (null != mpUser) {
                 // 赋值
                 UmsMpUser user = new UmsMpUser();
-                user.setOpenId(openId).setLanguage(mpUser.getLanguage()).setSubscribe(mpUser.getSubscribe() ? 1 : 0).setSubscribeTime(LocalDateTimeUtil.ofUTC(mpUser.getSubscribeTime() * 1000)).setUnionId(mpUser.getUnionId()).setRemark(mpUser.getRemark()).setGroupId(String.valueOf(mpUser.getGroupId())).setTagidList(Arrays.toString(mpUser.getTagIds())).setSubscribeScene(mpUser.getSubscribeScene()).setQrScene(mpUser.getQrScene()).setQrSceneStr(mpUser.getQrSceneStr());
+                user.setOpenId(openId)
+                        .setLanguage(mpUser.getLanguage())
+                        .setSubscribe(mpUser.getSubscribe() ? 1 : 0)
+                        .setSubscribeTime(mpUser.getSubscribeTime())
+                        .setUnionId(mpUser.getUnionId())
+                        .setRemark(mpUser.getRemark())
+                        .setGroupId(mpUser.getGroupId())
+                        .setTagidList(Arrays.toString(mpUser.getTagIds()))
+                        .setSubscribeScene(mpUser.getSubscribeScene())
+                        .setQrScene(mpUser.getQrScene())
+                        .setQrSceneStr(mpUser.getQrSceneStr());
                 // 更新数据库
                 QueryWrapper<UmsMpUser> wrapper = new QueryWrapper<>();
                 wrapper.eq(UmsMpUser.OPEN_ID, openId);

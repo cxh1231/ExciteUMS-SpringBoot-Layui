@@ -2,9 +2,13 @@ package com.zxdmy.excite.offiaccount.api;
 
 import com.zxdmy.excite.common.exception.ServiceException;
 import com.zxdmy.excite.offiaccount.vo.OffiaccountMenuVo;
+import com.zxdmy.excite.ums.vo.OauthUserVo;
 import lombok.AllArgsConstructor;
+import me.chanjar.weixin.common.api.WxConsts;
+import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
 import me.chanjar.weixin.common.bean.menu.WxMenu;
 import me.chanjar.weixin.common.bean.menu.WxMenuButton;
+import me.chanjar.weixin.common.bean.oauth2.WxOAuth2AccessToken;
 import me.chanjar.weixin.common.error.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.menu.WxMpGetSelfMenuInfoResult;
@@ -153,6 +157,49 @@ public class OffiaccountApiService {
             throw new ServiceException(e.getError().getErrorMsg());
         }
     }
+
+    /**
+     * 生成带参数的二维码
+     *
+     * @param key    场景值
+     * @param expire 过期时间
+     * @return null | 二维码链接
+     */
+    public String getQrCodeUrlWithScene(String key, Integer expire) {
+        try {
+            String ticket = wxService.getQrcodeService().qrCodeCreateTmpTicket(key, expire).getTicket();
+            return wxService.getQrcodeService().qrCodePictureUrl(ticket);
+        } catch (WxErrorException e) {
+            System.out.println(e.getError());
+        }
+        return null;
+    }
+
+    /**
+     * 生成登录链接
+     *
+     * @param redirectUrl 用户登录成功后跳转的页面
+     * @return 官方登录链接
+     */
+    public String getAuthorizationUrl(String redirectUrl) {
+        return wxService.getOAuth2Service().buildAuthorizationUrl(redirectUrl, WxConsts.OAuth2Scope.SNSAPI_USERINFO, null);
+    }
+
+    public OauthUserVo getUserInfoByAuthCode(String code) {
+        try {
+            WxOAuth2AccessToken accessToken = wxService.getOAuth2Service().getAccessToken(code);
+            WxOAuth2UserInfo userInfo = wxService.getOAuth2Service().getUserInfo(accessToken, null);
+            OauthUserVo userVo = new OauthUserVo();
+            userVo.setUserid(userInfo.getOpenid())
+                    .setNickname(userInfo.getNickname())
+                    .setAvatar(userInfo.getHeadImgUrl());
+            return userVo;
+        } catch (WxErrorException e) {
+            System.out.println(e.getError().getErrorMsg());
+        }
+        return null;
+    }
+
 
     public WxMpUser getUserInfo(String openId) {
         try {

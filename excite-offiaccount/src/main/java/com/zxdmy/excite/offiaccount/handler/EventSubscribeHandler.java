@@ -36,11 +36,15 @@ public class EventSubscribeHandler extends AbstractHandler {
         UmsMpReply mpReply;
         // 普通关注用户：没有场景值，或场景值为空
         if (wxMessage.getEventKey() == null || wxMessage.getEventKey().equals("")) {
+            // 异步调用：普通关注用户信息入库
+            commonService.saveUserBySubscribe2DB(wxMessage.getFromUser(), wxMessage.getCreateTime());
             // 获取关注后返回的内容
             mpReply = mpReplyService.getReplyByType(OffiaccountConsts.ReplyType.SUBSCRIBE_REPLY, null);
         }
         // 通过带参数的二维码关注：场景值不为空，需要根据场景值进行二次处理（比如登录）
         else {
+            // 异步调用：登录的用户信息入库
+            commonService.saveUserBySubscribeLogin(wxMessage.getEventKey(), wxMessage.getFromUser(), wxMessage.getCreateTime());
             // 获取登录成功后返回的内容
             mpReply = mpReplyService.getReplyByType(OffiaccountConsts.ReplyType.SCAN_LOGIN_REPLY, null);
         }
@@ -49,8 +53,7 @@ public class EventSubscribeHandler extends AbstractHandler {
 
         // 异步调用：事件消息入库
         commonService.saveEvent2DB(wxMessage, mpReply, outMessage);
-        // 异步调用：用户信息入库
-        commonService.saveUser2DB(wxMessage);
+
 
         return outMessage;
     }

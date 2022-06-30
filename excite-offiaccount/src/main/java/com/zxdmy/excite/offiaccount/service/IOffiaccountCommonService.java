@@ -29,9 +29,29 @@ public interface IOffiaccountCommonService {
     void saveEvent2DB(WxMpXmlMessage wxMessage, UmsMpReply mpReply, WxMpXmlOutMessage outMessage);
 
     /**
-     * 保存用户信息至数据库，同时进行其他操作
+     * 保存普通关注用户信息至数据库
      *
-     * @param wxMessage 保存用户信息至数据库
+     * @param openId     用户的OpenID
+     * @param createTime 消息的创建时间（如果无法获取用户详细信息，这个时间就是关注时间）
      */
-    void saveUser2DB(WxMpXmlMessage wxMessage);
+    void saveUserBySubscribe2DB(String openId, Long createTime);
+
+    /**
+     * 保存关注+登录的用户信息至数据库和Redis
+     *
+     * @param sceneStr   关注的场景值
+     * @param openId     用户的OpenID
+     * @param createTime 消息的创建时间（如果无法获取用户详细信息，这个时间就是关注时间）
+     */
+    void saveUserBySubscribeLogin(String sceneStr, String openId, Long createTime);
+
+    /**
+     * 保存登录的用户信息至Redis
+     *
+     * @param sceneStr 场景值，即为Redis的KEY值
+     * @param openId   登录用户的OpenID
+     */
+    void saveUserByScanLogin2Redis(String sceneStr, String openId);
+
+
 }

@@ -1,0 +1,394 @@
+.index-footer {
+    width: 100%;
+    margin: 0 auto;
+    text-align: center;
+    font-size: 14px;
+    color: #777;
+    padding: 20px 0;
+    line-height: 24px;
+    background: #f0f0f0
+}
+
+.index-footer .index-footer-inner {
+    width: 700px;
+    margin: 0 auto;
+    position: relative;
+    padding-right: 260px;
+    text-align: right;
+    padding-top: 22px
+}
+
+.index-footer ul {
+    margin-bottom: 10px
+}
+
+.index-footer li {
+    display: inline-block
+}
+
+.index-footer .partner {
+    margin-bottom: 10px
+}
+
+.index-footer a {
+    color: #777;
+    margin-left: 10px;
+    padding-right: 10px;
+    display: inline-block;
+    font-size: 14px;
+    text-decoration: none
+}
+
+.index-footer a:hover {
+    color: #333;
+    text-decoration: none
+}
+
+.index-footer .tencent {
+    width: 94px;
+    background: url(../../img/home/tencent.png) 0 3px no-repeat
+}
+
+.index-footer .copyright {
+    font-size: 12px;
+    margin-right: 10px
+}
+
+.index-footer .qcloud {
+    position: absolute;
+    right: 80px;
+    top: 34px
+}
+
+.index-footer .billing {
+    position: absolute;
+    right: -87px;
+    top: 35px
+}
+
+.index-footer .billing img {
+    width: 133px
+}
+
+body, html {
+    margin: 0;
+    height: 100%;
+    width: 100%;
+}
+
+.nheader {
+    position: relative;
+    width: 100%;
+    height: 54px;
+    background: #fff;
+    border-bottom: 1px solid #bbb;
+    box-shadow: 0 2px 2px rgba(0, 0, 0, .2);
+    overflow: hidden;
+    z-index: 10
+}
+
+.container {
+    width: 100%;
+    min-width: 1200px;
+    margin: auto;
+    overflow: hidden;
+    /*background-image: linear-gradient(135deg, #52E5E7 5%, #130CB7 100%);*/
+}
+
+.nhclogoArea {
+    position: relative;
+    display: inline-block;
+    height: 54px;
+    vertical-align: top;
+    align-items: center
+}
+
+.nhclogoArea a {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    text-decoration: none
+}
+
+.nhclogoArea img {
+    border: none;
+    margin: auto 15px
+}
+
+.nhclogoArea span {
+    padding-left: 15px;
+    border-left: 1px solid #aaa;
+    color: #aaa
+}
+
+.content {
+    /*background: #f0f0f0;*/
+    /*padding: 0px*/
+}
+
+.mainContainer {
+    display: flex;
+    overflow: hidden;
+    /*position: relative;*/
+    margin: 0 auto;
+    /*box-shadow: 0 1px 2px rgba(0, 0, 0, .2);*/
+    /*min-width: 1200px;*/
+    /*overflow: hidden;*/
+    height: calc(100vh - 213px)
+}
+
+.loginFrame {
+    height: 420px;
+    position: absolute;
+    width: 345px;
+    top: 20%;
+    left: 0;
+    right: 0;
+    margin: auto;
+    border-radius: 10px;
+    background: #848484
+}
+
+.blurbg {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 0;
+    bottom: 0;
+    z-index: 1;
+    filter: blur(3px);
+    background-color: #848484
+}
+
+.LoginTitle {
+    position: absolute;
+    top: 40px;
+    right: 0;
+    left: 0;
+    margin: auto;
+    text-align: center;
+    font-size: 20px;
+    font-family: "Microsoft YaHei", Arial, Helvetica, Tahoma, Verdana, Sans-Serif;
+    color: #fff;
+    z-index: 3
+}
+
+.Logingray {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    z-index: 2
+}
+
+.LoginContent {
+    position: absolute;
+    top: 90px;
+    width: 208px;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin: auto
+}
+
+.LoginQrcode {
+    position: relative;
+    width: 208px;
+    height: 208px;
+    background-color: #fff
+}
+
+.loginQrExpire, .loginQrScan {
+    position: absolute;
+    width: 208px;
+    height: 208px;
+    z-index: 1;
+    background-color: rgba(0, 0, 0, .8)
+}
+
+.loginExpireText, .loginScanText {
+    position: absolute;
+    bottom: 30px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: #fff;
+    font-size: 16px
+}
+
+.loginRefreshNormal, .loginScanIcon {
+    position: absolute;
+    top: 62px;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    width: 60px;
+    height: 60px
+}
+
+.loginRefreshNormalLoading {
+    position: absolute;
+    top: 62px;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    width: 60px;
+    height: 60px;
+    animation: circle 3s linear
+}
+
+@keyframes circle {
+    0% {
+        transform: rotate(0)
+    }
+    100% {
+        transform: rotate(1080deg)
+    }
+}
+
+.switchLogin {
+    display: none;
+    padding-top: 16px;
+    border-top: 1px solid #dcdcdc;
+    z-index: 2;
+    text-align: center
+}
+
+.switchLogin a {
+    color: #fc9532;
+    text-decoration: none;
+    font-size: 16px
+}
+
+.switchLogin a:hover {
+    color: #fc9532;
+    opacity: .8
+}
+
+.footer {
+    width: 100%;
+    color: #777;
+    line-height: 24px;
+    text-shadow: 0 1px 0 rgba(0, 0, 0, .1);
+    text-align: center
+}
+
+.copyright {
+    font-size: 12px
+}
+
+.breadcrumb {
+    padding: 20px 15px 10px;
+    color: rgba(0, 0, 0, .65);
+    border-bottom: 1px solid #e8e8e8
+}
+
+.wx-school {
+    display: inline-block;
+    padding: 24px;
+    margin: 10px 10px 10px 0;
+    border: 1px solid #e8e8e8;
+    cursor: pointer;
+    font-size: 14px;
+    overflow: hidden;
+    color: rgba(0, 0, 0, .65);
+    text-decoration: none
+}
+
+.wx-school:hover {
+    box-shadow: rgba(0, 0, 0, .09) 0 2px 8px;
+    border-color: rgba(0, 0, 0, .09)
+}
+
+.wx-school img {
+    width: 50px;
+    height: 50px;
+    margin-right: 15px;
+    vertical-align: middle;
+    border-radius: 50%
+}
+
+.wx-school span {
+    display: inline-block;
+    width: 100px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    vertical-align: middle
+}
+
+.QrcodePlace {
+    position: relative;
+    width: 208px;
+    height: 208px
+}
+
+.wx-message {
+    position: fixed;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    top: -50px;
+    left: 0;
+    width: 100%;
+    z-index: 1010;
+    pointer-events: none;
+    color: rgba(0, 0, 0, .65);
+    font-size: 14px;
+    transition: wx-message-target 2s linear;
+    opacity: 1
+}
+
+.wx-message-target {
+    top: 16px;
+    opacity: 1
+}
+
+.wx-message-notice {
+    text-align: center
+}
+
+.wx-message-content {
+    display: inline-block;
+    padding: 10px 16px;
+    background: #fff;
+    border-radius: 4px;
+    -webkit-box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+    pointer-events: all
+}
+
+.wx-message i {
+    position: relative;
+    top: 2px;
+    color: #faad14
+}
+
+.loginInfo {
+    /*display: inline-block;*/
+    text-align: center;
+    margin: 20px auto 14px;
+    padding: 5px 30px;
+    line-height: 14px;
+    background: rgba(220, 220, 220, .5);
+    font-size: 12px;
+    color: #fff;
+    -webkit-border-radius: 30px;
+    -moz-border-radius: 30px;
+    border-radius: 30px
+}
+
+.loginInfo p {
+    line-height: 14px;
+    margin: 2px 0
+}
+
+.loginTips {
+    text-align: center;
+    font-size: 14px;
+    color: #fff
+}
+
+.loginTips a {
+    color: #f3b760;
+    text-decoration: none
+}

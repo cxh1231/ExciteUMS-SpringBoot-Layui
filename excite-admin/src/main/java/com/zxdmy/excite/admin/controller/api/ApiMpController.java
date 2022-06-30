@@ -140,7 +140,7 @@ public class ApiMpController extends BaseController {
     @ResponseBody
     public BaseResult test() throws WxErrorException {
 
-        return success(wxService.getQrcodeService().qrCodeCreateTmpTicket(123456, 2048));
+        return success(wxService.getQrcodeService().qrCodeCreateTmpTicket("fhsdakjfhskajdfhskjd", 300));
     }
 
     /**

@@ -133,6 +133,7 @@ public class OffiaccountConfigServiceImpl implements IOffiaccountConfigService {
         config.setSecret(account.getAppSecret());
         config.setToken(account.getToken());
         config.setAesKey(account.getAesKey());
+        config.setOauth2redirectUri("http://dev.open.zxdmy.com/api/oauth/callback");
         // 尝试动态添加配置类
         try {
             wxMpService.setWxMpConfigStorage(config);

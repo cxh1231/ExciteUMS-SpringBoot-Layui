@@ -52,8 +52,6 @@ public class ApiPaymentController extends BaseController {
 
     private IUmsOrderService orderService;
 
-    private WxPayService wxPayService;
-
     /**
      * 发起支付请求
      *

@@ -93,7 +93,7 @@ public class UmsMpUser implements Serializable {
     /**
      * 用户所在的分组ID
      */
-    private String groupId;
+    private Integer groupId;
 
     /**
      * 用户被打上的标签 ID 列表
@@ -113,10 +113,7 @@ public class UmsMpUser implements Serializable {
     /**
      * 关注时间
      */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
-    private LocalDateTime subscribeTime;
+    private Long subscribeTime;
 
     /**
      * 关注次数
@@ -126,10 +123,7 @@ public class UmsMpUser implements Serializable {
     /**
      * 取消关注时间
      */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
-    @JsonSerialize(using = LocalDateTimeSerializer.class)
-    private LocalDateTime unsubscribeTime;
+    private Long unsubscribeTime;
 
     /**
      * 二维码扫码场景描述（开发者自定义）

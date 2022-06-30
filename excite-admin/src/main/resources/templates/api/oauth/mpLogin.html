@@ -1,0 +1,82 @@
+<html>
+<head>
+    <title>微信登录</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <link rel="stylesheet" type="text/css" href="/css/api/oauth.css">
+</head>
+<body>
+<section id="campus">
+    <section data-reactroot="">
+        <div class="content">
+            <div class="mainContainer" style="background-repeat: no-repeat;background-size: 100%;background-image: url(/images/api/wx_bg.png);">
+                <div class="loginFrame">
+                    <div class="blurbg"></div>
+                    <div class="Logingray">
+                        <div class="LoginTitle">微信扫码，安全登录</div>
+                        <div class="LoginContent">
+                            <div id="qrcode">
+                                <div class="loginQrExpire" id="refreshReCode" hidden>
+                                    <img class="loginRefreshNormal" src="/images/api/refresh.png" alt="">
+                                    <div class="loginExpireText"><b>二维码已过期<br>点击刷新</b></div>
+                                </div>
+                                <img th:src="@{(${qrcode})}" class="LoginQrcode" alt="" src="">
+                                <input th:value="${callback}" id="callback" hidden>
+                                <input th:value="${token}" id="token" hidden>
+                            </div>
+                            <div class="loginInfo">
+                                <p><b>请使用微信扫描二维码</b></p>
+                                <p><b>关注公众号完成登录</b></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</section>
+<!--引入JS文件-->
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script src="/js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script>
+    layui.use([], function () {
+        let $ = layui.jquery;
+
+        let callback = $("#callback").val();
+        let token = $("#token").val();
+        let checkTimes = 0;
+
+        // 轮询执行
+        let timer = setInterval(function checkLoginStatus() {
+            /**
+             * 检查登录状态
+             */
+            $.post("/api/oauth/check/" + token, function (data) {
+                if (data.code === 200) {
+                    window.location.replace(callback);
+                } else {
+                    // 记次数
+                    checkTimes++;
+                    // 超过 3 分钟
+                    if (checkTimes > 90) {
+                        // 关闭定时器
+                        window.clearInterval(timer);
+                        // 设置超时，点击刷新
+                        $("#refreshReCode").removeAttr("hidden");
+                    }
+                }
+            });
+        }, 2000);
+        // 刷新二维码
+        $(".loginQrExpire").click(function () {
+            window.location.reload();
+        });
+
+    });
+</script>
+
+</body>
+
+</html>

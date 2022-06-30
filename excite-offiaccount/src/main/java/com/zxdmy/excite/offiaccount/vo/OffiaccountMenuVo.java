@@ -3,8 +3,6 @@ package com.zxdmy.excite.offiaccount.vo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.gson.annotations.SerializedName;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
@@ -12,9 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>
- * 描述
- * </p>
+ * 公众号菜单
  *
  * @author 拾年之璐
  * @since 2022/6/27 16:06

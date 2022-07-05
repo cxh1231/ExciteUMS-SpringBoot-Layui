@@ -8,13 +8,6 @@ package com.zxdmy.excite.common.consts;
  */
 public class OffiaccountConsts {
 
-    public static class User {
-        // 用户缓存的Redis的前缀（根据场景值缓存）
-        public static final String REDIS_KEY_PREFIX = "ums:mp:user:scene:";
-
-        // 默认的过期时间（秒）
-        public static final Long REDIS_DEFAULT_EXPIRE = 300L;
-    }
 
     /**
      * 消息回复的类型

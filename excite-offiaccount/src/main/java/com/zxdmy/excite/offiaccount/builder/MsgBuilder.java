@@ -27,7 +27,7 @@ public class MsgBuilder extends AbstractMsgBuilder {
      */
     @Override
     public WxMpXmlOutMessage build(UmsMpReply mpReply, WxMpXmlMessage wxMessage, WxMpService service) {
-        if (null == mpReply) {
+        if (null == mpReply || mpReply.getRepType() == null) {
             return null;
         }
         // text：文本；

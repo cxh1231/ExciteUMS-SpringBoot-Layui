@@ -19,6 +19,16 @@ public class OauthConsts {
         public static final String MP = "mp";
 
         /**
+         * 公众号登录（关注公众号回复关键字登录）
+         */
+        public static final String MP1 = "mp1";
+
+        /**
+         * 公众号登录（不关注公众号登录）
+         */
+        public static final String MP2 = "mp2";
+
+        /**
          * 普通微信登录（直接登录的形式）
          */
         public static final String WECHAT = "wechat";
@@ -43,5 +53,8 @@ public class OauthConsts {
 
         // 默认的过期时间（秒）
         public static final Long REDIS_DEFAULT_EXPIRE = 300L;
+
+        // 默认的附加文本长度（字符）
+        public static final int REDIS_TEXT_MAX_LENGTH = 64;
     }
 }

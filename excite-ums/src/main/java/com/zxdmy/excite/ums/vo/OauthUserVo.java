@@ -51,6 +51,11 @@ public class OauthUserVo implements Serializable {
     private Integer sex;
 
     /**
+     * 附加信息
+     */
+    private String text;
+
+    /**
      * 该记录的 Token 值
      */
     private String token;

@@ -1,6 +1,8 @@
 package com.zxdmy.excite.offiaccount.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.zxdmy.excite.common.consts.OauthConsts;
 import com.zxdmy.excite.common.consts.OffiaccountConsts;
 import com.zxdmy.excite.common.service.RedisService;
 import com.zxdmy.excite.offiaccount.service.IOffiaccountCommonService;
@@ -154,13 +156,16 @@ public class OffiaccountCommonServiceImpl implements IOffiaccountCommonService {
         // 如果该用户已关注过，则直接关注次数自增
         UmsMpUser user = mpUserService.getOne(new QueryWrapper<UmsMpUser>().eq(UmsMpUser.OPEN_ID, openId));
         if (user != null) {
-            user.setSubscribeNum(user.getSubscribeNum() == null ? 1 : user.getSubscribeNum() + 1);
+            user.setSubscribeNum(user.getSubscribeNum() == null ? 1 : user.getSubscribeNum() + 1)
+                    .setSubscribe(OffiaccountConsts.Subscribe.YES)
+                    .setSubscribeTime(createTime);
             mpUserService.updateById(user);
         }
         // 该用户未关注过，全新入库onx426wOuWK2fFNu1PU3pvLc9ESo
         else {
             // 将基本信息赋值给用户
             user = new UmsMpUser();
+            // TODO 这里的已关注等信息，没有写入数据库，需要在后续完善
             user.setSubscribe(OffiaccountConsts.Subscribe.YES)
                     .setOpenId(openId)
                     .setSubscribeNum(1)
@@ -192,6 +197,15 @@ public class OffiaccountCommonServiceImpl implements IOffiaccountCommonService {
         }
     }
 
+    @Async
+    @Override
+    public void saveUserByUnsubscribe2DB(String openId, Long createTime) {
+        mpUserService.update(new UpdateWrapper<UmsMpUser>()
+                .set(UmsMpUser.SUBSCRIBE, OffiaccountConsts.Subscribe.NO)
+                .set(UmsMpUser.UNSUBSCRIBE_TIME, createTime)
+                .eq(UmsMpUser.OPEN_ID, openId));
+    }
+
     /**
      * 保存关注+登录的用户信息至数据库和Redis
      *
@@ -210,23 +224,38 @@ public class OffiaccountCommonServiceImpl implements IOffiaccountCommonService {
     }
 
     /**
+     * 通过验证码登录用户信息保存
+     *
+     * @param verifyCode 验证码
+     * @param openId     用户的OpenID
+     * @param createTime 消息的创建时间（如果无法获取用户详细信息，这个时间就是关注时间）
+     */
+    @Async
+    @Override
+    public void saveUserByVerifyCodeLogin(String verifyCode, String openId, Long createTime) {
+        // 保存用户信息
+        this.saveUserBySubscribe2DB(openId, createTime);
+        // 保存登录用户的信息至Redis
+        // 这里的场景值需要裁剪
+        this.saveUserByScanLogin2Redis(verifyCode.toLowerCase(), openId);
+    }
+
+    /**
      * 保存登录的用户信息至Redis
      *
      * @param sceneStr 场景值，即为Redis的KEY值
      * @param openId   登录用户的OpenID
      */
+    @Async
     @Override
     public void saveUserByScanLogin2Redis(String sceneStr, String openId) {
         // 先尝试从Redis获取用户 VO，主要是获取用户的过期时间
-        OauthUserVo userVo = (OauthUserVo) redisService.get(OffiaccountConsts.User.REDIS_KEY_PREFIX + sceneStr);
-        // 如果没有，则使用默认的过期时间
-        Long expire = OffiaccountConsts.User.REDIS_DEFAULT_EXPIRE;
-        if (null != userVo) {
-            expire = userVo.getExpire();
-        } else {
-            userVo = new OauthUserVo();
+        OauthUserVo userVo = (OauthUserVo) redisService.get(OauthConsts.User.REDIS_KEY_PREFIX + sceneStr);
+        // 如果Redis中没有用户信息，则不执行登录
+        if (null == userVo) {
+            return;
         }
-        userVo.setUserid(openId).setToken(sceneStr);
+        userVo.setUserid(openId);
         // 先从数据库查找该用户的详细信息
         UmsMpUser user = mpUserService.getOne(new QueryWrapper<UmsMpUser>().eq(UmsMpUser.OPEN_ID, openId));
         // 如果数据库中有该记录，获取更加详细的信息
@@ -236,6 +265,6 @@ public class OffiaccountCommonServiceImpl implements IOffiaccountCommonService {
                     .setSex(user.getSex());
         }
         // 将用户信息保存至redis
-        redisService.set(OffiaccountConsts.User.REDIS_KEY_PREFIX + sceneStr, userVo, expire);
+        redisService.set(OauthConsts.User.REDIS_KEY_PREFIX + sceneStr, userVo, OauthConsts.User.REDIS_DEFAULT_EXPIRE);
     }
 }

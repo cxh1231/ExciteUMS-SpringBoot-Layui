@@ -36,6 +36,8 @@ public interface IOffiaccountCommonService {
      */
     void saveUserBySubscribe2DB(String openId, Long createTime);
 
+    void saveUserByUnsubscribe2DB(String openId, Long createTime);
+
     /**
      * 保存关注+登录的用户信息至数据库和Redis
      *
@@ -53,5 +55,13 @@ public interface IOffiaccountCommonService {
      */
     void saveUserByScanLogin2Redis(String sceneStr, String openId);
 
+    /**
+     * 通过验证码登录用户信息保存
+     *
+     * @param verifyCode 验证码
+     * @param openId     用户的OpenID
+     * @param createTime 消息的创建时间（如果无法获取用户详细信息，这个时间就是关注时间）
+     */
+    void saveUserByVerifyCodeLogin(String verifyCode, String openId, Long createTime);
 
 }

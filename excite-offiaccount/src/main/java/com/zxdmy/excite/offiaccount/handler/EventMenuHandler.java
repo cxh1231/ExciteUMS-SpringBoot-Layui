@@ -33,20 +33,20 @@ public class EventMenuHandler extends AbstractHandler {
     @Override
     public WxMpXmlOutMessage handle(WxMpXmlMessage wxMessage, Map<String, Object> context, WxMpService wxMpService, WxSessionManager sessionManager) throws WxErrorException {
         // 消息
-        UmsMpReply mpReply = new UmsMpReply();
+        UmsMpReply mpReply = null;
         // 事件类型：CLICK（即点击菜单拉取消息时的事件推送，需要给用户返回消息）
         if (wxMessage.getEvent().equals(WxConsts.EventType.CLICK)) {
             // 根据菜单的KEY获取消息
             mpReply = mpReplyService.getReplyByType(OffiaccountConsts.ReplyType.MENU_CLICK_REPLY, wxMessage.getEventKey());
         }
         // 唤起扫码
-        else if (wxMessage.getEvent().equals(WxConsts.EventType.SCAN)) {
-
-        }
+//        else if (wxMessage.getEvent().equals(WxConsts.EventType.SCAN)) {
+//
+//        }
         // 点击网页
-        else if (wxMessage.getEvent().equals(WxConsts.EventType.VIEW)) {
-
-        }
+//        else if (wxMessage.getEvent().equals(WxConsts.EventType.VIEW)) {
+//
+//        }
         // 构造消息
         WxMpXmlOutMessage outMessage = new MsgBuilder().build(mpReply, wxMessage, wxMpService);
         // 消息异步持久化

@@ -161,11 +161,10 @@ public class OffiaccountCommonServiceImpl implements IOffiaccountCommonService {
                     .setSubscribeTime(createTime);
             mpUserService.updateById(user);
         }
-        // 该用户未关注过，全新入库onx426wOuWK2fFNu1PU3pvLc9ESo
+        // 该用户未关注过，全新入库
         else {
             // 将基本信息赋值给用户
             user = new UmsMpUser();
-            // TODO 这里的已关注等信息，没有写入数据库，需要在后续完善
             user.setSubscribe(OffiaccountConsts.Subscribe.YES)
                     .setOpenId(openId)
                     .setSubscribeNum(1)

@@ -32,7 +32,7 @@ public class DefaultHandler extends AbstractHandler {
     @Override
     public WxMpXmlOutMessage handle(WxMpXmlMessage wxMessage, Map<String, Object> context, WxMpService wxMpService, WxSessionManager sessionManager) throws WxErrorException {
         // 从数据库读取默认的消息
-        UmsMpReply mpReply = mpReplyService.getReplyByType(OffiaccountConsts.ReplyType.DEFAULT_REPLY, null);
+        UmsMpReply mpReply = mpReplyService.getOneReplyByType(OffiaccountConsts.ReplyType.DEFAULT_REPLY, null);
         // 构造消息
         WxMpXmlOutMessage outMessage = new MsgBuilder().build(mpReply, wxMessage, wxMpService);
         // 消息异步持久化

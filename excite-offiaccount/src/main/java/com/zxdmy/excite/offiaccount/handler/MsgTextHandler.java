@@ -40,15 +40,15 @@ public class MsgTextHandler extends AbstractHandler {
             // 异步调用：登录的用户信息入库
             commonService.saveUserByVerifyCodeLogin(content, wxMessage.getFromUser(), wxMessage.getCreateTime());
             // 获取登录成功后返回的内容
-            msgReply = mpReplyService.getReplyByType(OffiaccountConsts.ReplyType.SCAN_LOGIN_REPLY, null);
+            msgReply = mpReplyService.getOneReplyByType(OffiaccountConsts.ReplyType.SCAN_LOGIN_REPLY, null);
         }
         // 否则，是普通消息
         else {
             // 从[关键词]数据库检索需要回复的信息（如果有多条，选择最近的一条）
-            msgReply = mpReplyService.getReplyByType(OffiaccountConsts.ReplyType.KEYWORD_REPLY, content);
+            msgReply = mpReplyService.getOneReplyByType(OffiaccountConsts.ReplyType.KEYWORD_REPLY, content);
             // 如果[关键词]为空，则返回默认的信息
             if (null == msgReply) {
-                msgReply = mpReplyService.getReplyByType(OffiaccountConsts.ReplyType.DEFAULT_REPLY, null);
+                msgReply = mpReplyService.getOneReplyByType(OffiaccountConsts.ReplyType.DEFAULT_REPLY, null);
             }
         }
         // 根据回复详情，构造消息

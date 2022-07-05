@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>公众号配置</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <link rel="stylesheet" href="/lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+</head>
+<body>
+<div class="layuimini-container">
+    <div class="layuimini-main">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <!-- 头部菜单 -->
+            <ul class="layui-tab-title">
+                <li class="layui-this">关键词回复</li>
+                <li>收到消息回复</li>
+                <li>被关注回复</li>
+                <li>登录成功回复</li>
+            </ul>
+            <div class="layui-tab-content">
+                <!-- 关键词回复 -->
+                <div class="layui-tab-item layui-show">
+                    <!-- 关键词回复消息列表 -->
+                    <table class="layui-hide" id="mp-reply-keyword-table" lay-filter="mp-reply-keyword-table"></table>
+                </div>
+                <!-- 收到消息默认回复 -->
+                <div class="layui-tab-item">
+                    <!-- 文章 -->
+                    <div class="layui-row">
+                        <div class="layui-col-md3">
+                            text
+                        </div>
+                        <div class="layui-col-md9">
+                            <div class="layui-row">
+                                <div class="layui-col-md12">
+                                    内部列
+                                </div>
+                                <div class="layui-col-md12">
+                                    内部列
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 被关注回复 -->
+                <div class="layui-tab-item">
+                    <!-- 表单 -->
+                    <form class="layui-form layuimini-form" lay-filter="form-subscribe-reply">
+                        <!-- 【基本信息配置】提示信息 -->
+                        <div class="layui-card-body">
+                            <div class="layui-collapse">
+                                <div class="layui-colla-item">
+                                    <h2 class="layui-colla-title"><b> 公众号基本信息配置（点击查看说明）</b></h2>
+                                    <div class="layui-colla-content">
+                                        请登录 <a href="https://mp.weixin.qq.com/" target="_blank">公众号后台</a> → 设置与开发 → 公众号设置 页面查看公众号基本信息。
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="layui-main">
+                        <div>商户单号在哪里？① 【扫码支付演示】页面有显示 ② 支付宝订单页面有显示</div>
+                    </div>
+                </div>
+                <!-- 登录成功回复 -->
+                <div class="layui-tab-item">
+
+                    <div class="layui-main">
+                        <div>商户单号在哪里？① 【扫码支付演示】页面有显示 ② 支付宝订单页面有显示</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 关键词回复表 表头菜单 -->
+<script type="text/html" id="toolbar-mp-reply-keyword-table">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm layui-bg-blue" lay-event="add">添加回复</button>
+    </div>
+</script>
+<!-- 关键词回复表 行末按钮 -->
+<script type="text/html" id="bar-mp-reply-keyword-table">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<!--引入JS文件-->
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script src="/js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+
+<script>
+    layui.use(['table', 'upload'], function () {
+        let $ = layui.jquery,
+            form = layui.form,
+            upload = layui.upload,
+            laydate = layui.laydate,
+            table = layui.table;
+
+        // 关键词回复表
+        let reply_keyword_table = table.render({
+            elem: '#mp-reply-keyword-table',
+            url: '/ums/mp/reply/list?type=1',
+            response: {statusCode: 200},
+            toolbar: '#toolbar-mp-reply-keyword-table',
+            defaultToolbar: ['filter', 'exports', 'print'],
+            height: 'full-145',
+            page: true,
+            cols: [
+                [
+                    {field: 'id', width: 50, title: 'ID', align: 'center'},
+                    {field: 'menuKey', width: 100, title: '菜单KEY', align: 'center'},
+                    {field: 'keyword', minWidth: 150, title: '关键词', align: 'center'},
+                    {
+                        field: 'mate', width: 100, title: '匹配模式', align: 'center', templet: function (d) {
+                            if (d.mate === '2') {
+                                return '<a class="layui-btn layui-btn-xs layui-btn-primary layui-border-blue">半匹配</a>'
+
+                            } else {
+                                return '<a class="layui-btn layui-btn-xs layui-btn-normal">全匹配</a>';
+                            }
+                        }
+                    },
+                    {
+                        field: 'repType', width: 80, title: '类型', align: 'center', templet: function (d) {
+                            return d.repType === 'text' ? '文本' : '图文';
+                        }
+                    },
+                    {
+                        field: 'repContent', width: 330, title: '回复内容', align: 'center', templet: function (d) {
+                            if (d.repType === 'news') {
+                                return '<div class="layui-row" style="width: 300px">' +
+                                    '<div class="layui-col-md3">' +
+                                    '<img src="' + d.repPicUrl + '" style="width: 60px;height: 60px;" alt="" onclick="show_img(this)" >' +
+                                    '</div>' +
+                                    '<div class="layui-col-md9">' +
+                                    '<div class="layui-row">' +
+                                    '<a target="_blank" href="' + d.repUrl + '">' +
+                                    '<div class="layui-col-md12">' +
+                                    '<p>' + d.repTitle + '</p>' +
+                                    '</div>' +
+                                    '<div class="layui-col-md12">' +
+                                    '<p style="color: #867f7f;display: block;height: 2em;font-size: 13px">' + d.repDescription + '</p>' +
+                                    '</div>' +
+                                    '</a>' +
+                                    '</div>' +
+                                    '</div>' +
+                                    '</div>';
+                            } else if (d.repType === 'text') {
+                                return d.repContent;
+                            }
+                            return d.repContent;
+                        }
+                    },
+                    {
+                        field: 'status', width: 80, title: '状态', align: 'center', templet: function (d) {
+                            if (d.status === 1) {
+                                return '<a class="layui-btn layui-btn-xs layui-btn-normal">启用</a>';
+                            } else {
+                                return '<a class="layui-btn layui-btn-xs layui-btn-primary">禁用</a>';
+                            }
+                        }
+                    },
+                    {
+                        field: 'updateTime', width: 170, title: '更新时间', align: 'center', templet: function (d) {
+                            return layui.util.toDateString(d.updateTime, 'yyyy-MM-dd HH:mm:ss');
+                        }
+                    },
+                    {fixed: 'right', title: '操作', width: 150, minWidth: 125, align: 'center', toolbar: '#bar-mp-reply-keyword-table'}
+                ]
+            ]
+        })
+
+        // 监听工具条
+        table.on('toolbar(mp-reply-keyword-table)', function (obj) {
+            switch (obj.event) {
+                case 'add':
+                    layer.open({
+                        type: 2,
+                        title: '添加回复',
+                        shade: false,
+                        maxmin: false,
+                        area: ['700px', '500px'],
+                        content: '/ums/mp/reply/goAdd?type=1'
+                    });
+                    break;
+            }
+        });
+
+    });
+
+    /**
+     * 显示头像
+     * @param t
+     */
+    function show_img(t) {
+        layer.open({
+            type: 1,
+            title: false,
+            skin: 'layui-layer-nobg', //没有背景色
+            shadeClose: true,
+            content: '<img style="display: inline-block; width: 100%; height: 100%;max-height: 320px;max-width: 320px" src="' + t.src + '" alt="">'
+        });
+    }
+</script>
+</body>
+</html>

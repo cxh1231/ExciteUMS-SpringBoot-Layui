@@ -37,7 +37,7 @@ public class EventMenuHandler extends AbstractHandler {
         // 事件类型：CLICK（即点击菜单拉取消息时的事件推送，需要给用户返回消息）
         if (wxMessage.getEvent().equals(WxConsts.EventType.CLICK)) {
             // 根据菜单的KEY获取消息
-            mpReply = mpReplyService.getReplyByType(OffiaccountConsts.ReplyType.MENU_CLICK_REPLY, wxMessage.getEventKey());
+            mpReply = mpReplyService.getOneReplyByType(OffiaccountConsts.ReplyType.MENU_CLICK_REPLY, wxMessage.getEventKey());
         }
         // 唤起扫码
 //        else if (wxMessage.getEvent().equals(WxConsts.EventType.SCAN)) {

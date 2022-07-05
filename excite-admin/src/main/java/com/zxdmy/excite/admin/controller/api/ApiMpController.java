@@ -1,14 +1,15 @@
 package com.zxdmy.excite.admin.controller.api;
 
+import cn.hutool.crypto.digest.MD5;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.zxdmy.excite.common.base.BaseController;
 import com.zxdmy.excite.common.base.BaseResult;
+import com.zxdmy.excite.offiaccount.api.OffiaccountApiService;
+import com.zxdmy.excite.offiaccount.api.OffiaccountEventService;
+import com.zxdmy.excite.ums.entity.UmsApp;
+import com.zxdmy.excite.ums.service.IUmsAppService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.chanjar.weixin.common.error.WxErrorException;
-import me.chanjar.weixin.mp.api.WxMpMessageRouter;
-import me.chanjar.weixin.mp.api.WxMpService;
-import me.chanjar.weixin.mp.bean.message.WxMpXmlMessage;
-import me.chanjar.weixin.mp.bean.message.WxMpXmlOutMessage;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -27,11 +28,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/mp")
 public class ApiMpController extends BaseController {
 
-    // 微信服务
-    private final WxMpService wxService;
+    private OffiaccountApiService offiaccountApiService;
 
-    // 微信消息/事件消息路由
-    private final WxMpMessageRouter messageRouter;
+    private OffiaccountEventService eventService;
+
+    private IUmsAppService appService;
 
     /**
      * 首次进行【服务器配置】时，接入认证使用
@@ -57,7 +58,7 @@ public class ApiMpController extends BaseController {
             throw new IllegalArgumentException("请求参数非法，请核实!");
         }
         // 进行签名验证
-        else if (wxService.checkSignature(timestamp, nonce, signature)) {
+        else if (eventService.checkSignature(timestamp, nonce, signature)) {
             // 验证成功，返回随机字符串，接入成功
             return echostr;
         }
@@ -92,69 +93,49 @@ public class ApiMpController extends BaseController {
         // 打印日志
         // log.info("\n接收微信请求：\n[openid=[{}], [signature=[{}], encType=[{}], msgSignature=[{}],timestamp=[{}], nonce=[{}],\nrequestBody=[\n{}\n] ", openid, signature, encType, msgSignature, timestamp, nonce, requestBody);
         // 校验时间戳等签名信息
-        if (!wxService.checkSignature(timestamp, nonce, signature)) {
+        if (!eventService.checkSignature(timestamp, nonce, signature)) {
             throw new IllegalArgumentException("非法请求，可能属于伪造的请求！");
         }
-        // 输出内容
-        String out = null;
-        // 明文传输的消息
-        if (encType == null) {
-            // 获取接收到的数据
-            WxMpXmlMessage inMessage = WxMpXmlMessage.fromXml(requestBody);
-            // 交给route
-            WxMpXmlOutMessage outMessage = this.route(inMessage);
-            if (outMessage == null) {
-                return "";
-            }
-            out = outMessage.toXml();
-        }
-        // aes加密的消息
-        else if ("aes".equalsIgnoreCase(encType)) {
-            // 消息解密
-            try {
-                WxMpXmlMessage inMessage = WxMpXmlMessage.fromEncryptedXml(requestBody, wxService.getWxMpConfigStorage(), timestamp, nonce, msgSignature);
-                // 将消息交给route处理
-                WxMpXmlOutMessage outMessage = this.route(inMessage);
-                if (outMessage == null) {
-                    return "";
-                }
-                // 返回的消息，同样加墨
-                out = outMessage.toEncryptedXml(wxService.getWxMpConfigStorage());
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-                System.out.println("解密出错，可能来自非官方的请求！");
-            }
-        }
-        // 返回组装后的消息
-        return out;
-    }
-
-    @GetMapping(value = "access")
-    @ResponseBody
-    public BaseResult getAccessToken() throws WxErrorException {
-
-        return success(wxService.getAccessToken());
-    }
-
-    @GetMapping(value = "test")
-    @ResponseBody
-    public BaseResult test() throws WxErrorException {
-
-        return success(wxService.getQrcodeService().qrCodeCreateTmpTicket("fhsdakjfhskajdfhskjd", 300));
+        return eventService.eventMessageService(requestBody, timestamp, nonce, encType, msgSignature);
     }
 
     /**
-     * 进行路由操作
+     * 获取公众号的AccessToken
      *
-     * @param message 接收到微信推送的XML序列化消息
-     * @return 返回给微信服务器的XML消息
+     * @param appid   应用的appid
+     * @param refresh 是否强制刷新AccessToken：1-是，0-否
+     * @param nonce   随机字符串
+     * @param hash    签名
+     * @return 返回的json数据
      */
-    private WxMpXmlOutMessage route(WxMpXmlMessage message) {
-        try {
-            return this.messageRouter.route(message);
-        } catch (Exception e) {
-            log.error("路由消息时出现异常！", e);
+    @GetMapping(value = "get_access_token/{appid}")
+    @ResponseBody
+    public BaseResult getAccessToken(@PathVariable String appid, String refresh, String nonce, String hash) {
+        if (null == appid || null == nonce || null == hash) {
+            return error("必填参数不能为空");
         }
-        return null;
+        // 从数据库读取该 APPID 信息
+        UmsApp umsApp = appService.getOne(new QueryWrapper<UmsApp>().eq(UmsApp.APP_ID, appid));
+        if (null == umsApp) {
+            return error("应用不存在");
+        }
+        // 校验签名
+        String signStr = "nonce=" + nonce + "&refresh=" + refresh + "&" + umsApp.getAppSecret();
+        // 签名正确
+        if (hash.equalsIgnoreCase(MD5.create().digestHex(signStr))) {
+            String accessToken;
+            if (refresh.equals("1")) {
+                accessToken = offiaccountApiService.getAccessToken(true);
+            } else {
+                accessToken = offiaccountApiService.getAccessToken(false);
+            }
+            if (null == accessToken) {
+                return error("获取AccessToken失败");
+            }
+            return success("获取AccessToken成功！", accessToken);
+        } else {
+            return error("签名错误");
+        }
     }
+
 }

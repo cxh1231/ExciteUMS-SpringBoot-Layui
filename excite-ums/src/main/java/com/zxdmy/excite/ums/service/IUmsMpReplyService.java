@@ -22,6 +22,7 @@ public interface IUmsMpReplyService extends IService<UmsMpReply> {
      * @param key  关键词 | 菜单的KEY
      * @return 一条自动回复
      */
-    UmsMpReply getReplyByType(Integer type, String key);
+    UmsMpReply getOneReplyByType(Integer type, String key);
 
+    List<UmsMpReply> getReplyListByType(Integer type);
 }

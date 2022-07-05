@@ -35,7 +35,7 @@ public class UmsMpReplyServiceImpl extends ServiceImpl<UmsMpReplyMapper, UmsMpRe
      * @return 一条自动回复
      */
     @Override
-    public UmsMpReply getReplyByType(Integer type, String key) {
+    public UmsMpReply getOneReplyByType(Integer type, String key) {
         QueryWrapper<UmsMpReply> wrapper = new QueryWrapper<>();
         // 构造检索条件并检索：关键词回复
         if (Objects.equals(type, OffiaccountConsts.ReplyType.KEYWORD_REPLY)) {
@@ -68,5 +68,19 @@ public class UmsMpReplyServiceImpl extends ServiceImpl<UmsMpReplyMapper, UmsMpRe
         } else {
             return null;
         }
+    }
+
+    /**
+     * 根据消息类型获取自动回复消息列表
+     *
+     * @param type 枚举：消息类型
+     * @return 一条自动回复
+     */
+    @Override
+    public List<UmsMpReply> getReplyListByType(Integer type) {
+        QueryWrapper<UmsMpReply> wrapper = new QueryWrapper<>();
+        wrapper.eq(UmsMpReply.TYPE, type)
+                .orderByDesc(UmsMpReply.ID);
+        return mpReplyMapper.selectList(wrapper);
     }
 }

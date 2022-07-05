@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>公众号配置</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <link rel="stylesheet" href="/lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+</head>
+<body>
+<div class="layuimini-container">
+    <div class="layuimini-main">
+        <!-- 表单 -->
+        <form class="layui-form layui-form-pane" lay-filter="form-mp-reply-add">
+            <!-- 【邮箱账号】 -->
+            <div class="layui-form-item">
+                <label class="layui-form-label">关键词<span style="color:red"> *</span></label>
+                <div class="layui-input-block">
+                    <input type="text" name="keyword" lay-verify="keyword" placeholder="请输入关键词" autocomplete="off" class="layui-input">
+                    <input type="text" name="type" value="1" hidden>
+                </div>
+            </div>
+            <!-- 关键词与匹配模式 -->
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">消息类型<span style="color:red"> *</span></label>
+                    <div class="layui-input-inline">
+                        <select name="repType" lay-filter="reply_type" id="reply_type">
+                            <option value="text" selected="">文本消息</option>
+                            <option value="news">图文消息</option>
+                        </select>
+                    </div>
+                </div>
+                <!--【匹配模式】-->
+                <div class="layui-inline">
+                    <label class="layui-form-label">匹配模式<span style="color:red"> *</span></label>
+                    <div class="layui-input-inline">
+                        <select name="mate" lay-filter="mate">
+                            <option value="1" selected="">全匹配</option>
+                            <option value="2">半匹配</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <!-- 文本消息 -->
+            <div class="layui-form-item layui-form-text reply-text">
+                <label class="layui-form-label">文本消息</label>
+                <div class="layui-input-block">
+                    <textarea name="repContent" placeholder="请输入文本消息内容，回车键换行" class="layui-textarea" style="height: 180px"></textarea>
+                </div>
+            </div>
+            <!-- 图文消息：标题 -->
+            <div class="layui-form-item reply-news">
+                <label class="layui-form-label">图文标题</label>
+                <div class="layui-input-block">
+                    <input type="text" name="repTitle" lay-verify="repTitle" placeholder="请输入图文消息的封面" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item reply-news">
+                <label class="layui-form-label">图文描述</label>
+                <div class="layui-input-block">
+                    <input type="text" name="repDescription" lay-verify="repDescription" placeholder="请输入图文消息的描述" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item reply-news">
+                <label class="layui-form-label">图文封面</label>
+                <div class="layui-input-block">
+                    <input type="text" name="repPicUrl" lay-verify="repPicUrl" placeholder="请输入图文消息的封面URL，1:1的图最佳" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item reply-news">
+                <label class="layui-form-label">图文链接</label>
+                <div class="layui-input-block">
+                    <input type="text" name="repUrl" lay-verify="repUrl" placeholder="请输入点击图文消息后访问的链接" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <!-- 保存按钮 -->
+            <div class="layui-form-item">
+                <button class="layui-btn" lay-submit lay-filter="form-mp-reply-add">立即添加</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!--引入JS文件-->
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script src="/js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+
+<script>
+    layui.use(['table', 'upload'], function () {
+        let $ = layui.jquery,
+            form = layui.form,
+            upload = layui.upload,
+            laydate = layui.laydate,
+            table = layui.table;
+
+        //监听提交
+        form.on('submit(form-mp-reply-add)', function (data) {
+            // 加载层
+            let index_loading = layer.load(1, {
+                shade: [0.2, '#fff'] //0.1透明度的白色背景
+            });
+            // 发起 添加用户 请求
+            $.post("/ums/mp/reply/add", data.field, function (data) {
+                // 关闭加载层
+                layer.close(index_loading)
+                if (data.code === 200) {
+                    // 弹窗确认下一步操作
+                    layer.open({
+                        type: 0,
+                        title: data.msg,
+                        closeBtn: 0,        // 不显示右上角的关闭按钮
+                        btn: ["继续添加", "关闭"],
+                        content: '是否继续添加？',
+                        // 【继续添加】按钮响应事件
+                        btn1: function (index) {
+                            layer.close(index)
+                        },
+                        // 【关闭】按钮响应事件
+                        btn2: function (index) {
+                            // 先得到当前iframe层的索引
+                            let index2 = parent.layer.getFrameIndex(window.name);
+                            // 关闭当前弹窗
+                            parent.layer.close(index2);
+                        }
+                    });
+                } else {
+                    layer.alert(data.msg, {icon: 2});
+                }
+            });
+            return false;
+        });
+
+        /**
+         * 菜单类型切换
+         */
+        $('.reply-text').css('display', 'block');
+        $('.reply-news').css('display', 'none');
+        form.on('select(reply_type)', function (data) {
+            if (data.value === 'text') {
+                $('.reply-text').css('display', 'block');
+                $('.reply-news').css('display', 'none');
+            }
+            if (data.value === 'news') {
+                $('.reply-text').css('display', 'none');
+                $('.reply-news').css('display', 'block');
+            }
+        })
+    });
+</script>
+</body>
+</html>

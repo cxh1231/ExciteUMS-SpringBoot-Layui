@@ -30,6 +30,15 @@ public class OffiaccountConsts {
         public static final Integer SCAN_LOGIN_REPLY = 4;
     }
 
+    public static class ReplyStatus {
+
+        // 启用
+        public static final Integer ENABLE = 1;
+
+        // 禁用
+        public static final Integer DISABLE = 0;
+    }
+
     /**
      * 消息类型
      */

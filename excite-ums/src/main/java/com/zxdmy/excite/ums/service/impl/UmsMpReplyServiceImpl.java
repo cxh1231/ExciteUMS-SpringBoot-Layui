@@ -35,7 +35,7 @@ public class UmsMpReplyServiceImpl extends ServiceImpl<UmsMpReplyMapper, UmsMpRe
      * @return 一条自动回复
      */
     @Override
-    public UmsMpReply getOneReplyByType(Integer type, String key) {
+    public UmsMpReply getOneReplyByTypeOrKey(Integer type, String key) {
         QueryWrapper<UmsMpReply> wrapper = new QueryWrapper<>();
         // 构造检索条件并检索：关键词回复
         if (Objects.equals(type, OffiaccountConsts.ReplyType.KEYWORD_REPLY)) {
@@ -54,7 +54,7 @@ public class UmsMpReplyServiceImpl extends ServiceImpl<UmsMpReplyMapper, UmsMpRe
         }
         // 其他的回复，直接检索即可
         else {
-            wrapper.eq(UmsMpReply.TYPE, type)
+            wrapper.eq(null != type, UmsMpReply.TYPE, type)
                     .eq(UmsMpReply.STATUS, SystemCode.STATUS_Y.getCode())
                     // 当 KEY 非空，并且非关键词时，是菜单点击的回复
                     .eq(null != key, UmsMpReply.MENU_KEY, key)

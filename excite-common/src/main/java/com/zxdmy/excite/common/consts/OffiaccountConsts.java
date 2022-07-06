@@ -20,14 +20,11 @@ public class OffiaccountConsts {
         // 关键词回复
         public static final Integer KEYWORD_REPLY = 1;
 
-        // 点击菜单回复
-        public static final Integer MENU_CLICK_REPLY = 2;
-
         // 关注默认回复
-        public static final Integer SUBSCRIBE_REPLY = 3;
+        public static final Integer SUBSCRIBE_REPLY = 2;
 
         // 登录成功后回复
-        public static final Integer SCAN_LOGIN_REPLY = 4;
+        public static final Integer SCAN_LOGIN_REPLY = 3;
     }
 
     public static class ReplyStatus {

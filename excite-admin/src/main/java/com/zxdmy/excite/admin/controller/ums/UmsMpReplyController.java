@@ -1,6 +1,7 @@
 package com.zxdmy.excite.admin.controller.ums;
 
 import cn.hutool.core.util.RandomUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.zxdmy.excite.common.base.BaseResult;
 import com.zxdmy.excite.common.consts.OffiaccountConsts;
 import com.zxdmy.excite.ums.entity.UmsMpReply;
@@ -45,6 +46,14 @@ public class UmsMpReplyController extends BaseController {
         return "ums/mp/replyAdd";
     }
 
+    @RequestMapping("goEdit")
+    public String goEdit(Long id, String type, ModelMap map) {
+        UmsMpReply mpReply = replyService.getById(id);
+        map.put("reply", mpReply);
+        map.put("type", type);
+        return "ums/mp/replyEdit";
+    }
+
     @RequestMapping(value = "/add", method = {RequestMethod.POST})
     @ResponseBody
     public BaseResult add(UmsMpReply mpReply) {
@@ -60,6 +69,33 @@ public class UmsMpReplyController extends BaseController {
         }
     }
 
+    @RequestMapping(value = "/update", method = {RequestMethod.POST})
+    @ResponseBody
+    public BaseResult update(UmsMpReply mpReply) {
+        if (null == mpReply) {
+            return error("编辑失败");
+        }
+        System.out.println(mpReply);
+        if (replyService.updateById(mpReply)) {
+            return success("编辑成功");
+        } else {
+            return error("编辑失败");
+        }
+    }
+
+    @RequestMapping(value = "/delete", method = {RequestMethod.POST})
+    @ResponseBody
+    public BaseResult delete(Long id) {
+        if (null == id) {
+            return error("删除失败");
+        }
+        if (replyService.removeById(id)) {
+            return success("删除成功");
+        } else {
+            return error("删除失败");
+        }
+    }
+
     @RequestMapping(value = "/list", method = {RequestMethod.GET})
     @ResponseBody
     public BaseResult getReply(String type) {
@@ -67,8 +103,9 @@ public class UmsMpReplyController extends BaseController {
             return error("请求参数错误！");
         }
         try {
-            int replyType = Integer.parseInt(type);
-            return success("自动回复获取成功！", replyService.getReplyListByType(replyType));
+//            int replyType = Integer.parseInt(type);
+//            return success("自动回复获取成功！", replyService.getReplyListByType(replyType));
+            return success("自动列表获取成功！", replyService.list(new QueryWrapper<UmsMpReply>().orderByDesc(UmsMpReply.UPDATE_TIME)));
         } catch (Exception e) {
             return error("请求参数错误！");
         }

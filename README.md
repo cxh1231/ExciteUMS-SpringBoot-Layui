@@ -64,19 +64,31 @@
 </td>
 </tr>
 <tr>
+<tr>
 <td>
-<img src="https://img.zxdmy.com/2022/202206211003323.png" alt="文件管理">
-<center><b>文件管理</b></center>
+<img src="https://img.zxdmy.com/2022/202207061110282.png" alt="">
+<center><b>公众号配置</b></center>
 </td>
 <td>
-<center>敬请期待</center>
-<center><b>互联登录管理</b></center>
+<img src="https://img.zxdmy.com/2022/202207061110373.png" alt="">
+<center><b>公众号菜单管理</b></center>
+</td>
+</tr>
+<tr>
+<tr>
+<td>
+<img src="https://img.zxdmy.com/2022/202207061110797.png" alt="">
+<center><b>公众号用户管理</b></center>
+</td>
+<td>
+<img src="https://img.zxdmy.com/2022/202207061110930.png" alt="">
+<center><b>公众号自动回复管理</b></center>
 </td>
 </tr>
 <tr>
 <td>
-<center>敬请期待</center>
-<center><b>公众平台管理</b></center>
+<img src="https://img.zxdmy.com/2022/202206211003323.png" alt="文件管理">
+<center><b>文件管理</b></center>
 </td>
 <td>
 <center>敬请期待</center>

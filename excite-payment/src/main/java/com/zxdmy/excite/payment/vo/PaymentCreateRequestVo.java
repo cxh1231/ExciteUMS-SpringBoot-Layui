@@ -28,6 +28,11 @@ import java.util.TreeMap;
 public class PaymentCreateRequestVo extends BasePaymentVo implements Serializable {
 
     /**
+     * 公众号等微信平台的用户id，微信内支付时必传
+     */
+    private String openid;
+
+    /**
      * 订单标题
      */
     @NotBlank(message = "缺少订单标题参数")
@@ -92,6 +97,8 @@ public class PaymentCreateRequestVo extends BasePaymentVo implements Serializabl
     private String attach;
 
 
+    public static final String OPENID = "openid";
+
     public static final String TITLE = "title";
 
     public static final String AMOUNT = "amount";
@@ -116,7 +123,7 @@ public class PaymentCreateRequestVo extends BasePaymentVo implements Serializabl
      */
     public TreeMap<String, Object> getTreeMap() {
         TreeMap<String, Object> treeMap = new TreeMap<>();
-        treeMap.put(APPID, this.getAppid());
+        treeMap.put(OPENID, this.getOpenid());
         treeMap.put(TITLE, this.getTitle());
         treeMap.put(AMOUNT, this.getAmount());
         treeMap.put(NOTIFY_URL, this.getNotifyUrl());
@@ -125,6 +132,8 @@ public class PaymentCreateRequestVo extends BasePaymentVo implements Serializabl
         treeMap.put(PAY_CHANNEL, this.getPayChannel());
         treeMap.put(PAY_SCENE, this.getPayScene());
         treeMap.put(ATTACH, this.getAttach());
+
+        treeMap.put(APPID, this.getAppid());
         treeMap.put(TIME, this.getTime());
         treeMap.put(NONCE, this.getNonce());
         return treeMap;

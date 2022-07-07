@@ -3,6 +3,7 @@ package com.zxdmy.excite.ums.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zxdmy.excite.common.consts.PaymentConsts;
+import com.zxdmy.excite.ums.entity.UmsApp;
 import com.zxdmy.excite.ums.entity.UmsOrder;
 import com.zxdmy.excite.ums.mapper.UmsOrderMapper;
 import com.zxdmy.excite.ums.service.IUmsOrderService;
@@ -65,7 +66,7 @@ public class UmsOrderServiceImpl extends ServiceImpl<UmsOrderMapper, UmsOrder> i
                 // 检索终止时间
                 .le(endDate != null && !"".equals(endDate), UmsOrder.CREATE_TIME, endDate);
         // 时间排序，降序
-        queryWrapper.orderByDesc(UmsOrder.CREATE_TIME);
+        queryWrapper.orderByDesc(UmsApp.ID);
         // 分页查询并返回
         return orderMapper.selectPage(new Page<>(pageNum, pageSize), queryWrapper);
     }

@@ -2,6 +2,7 @@ package com.zxdmy.excite.ums.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.zxdmy.excite.ums.entity.UmsApp;
 import com.zxdmy.excite.ums.entity.UmsMpUser;
 import com.zxdmy.excite.ums.mapper.UmsMpUserMapper;
 import com.zxdmy.excite.ums.service.IUmsMpUserService;
@@ -56,7 +57,7 @@ public class UmsMpUserServiceImpl extends ServiceImpl<UmsMpUserMapper, UmsMpUser
         // 关注状态不为空，则检索关注状态
         queryWrapper.eq(subscribeStatus != null, UmsMpUser.SUBSCRIBE, subscribeStatus)
                 // 时间倒序排列
-                .orderByDesc(UmsMpUser.CREATE_TIME);
+                .orderByDesc(UmsApp.ID);
         // 分页查询并返回
         return mpUserMapper.selectPage(new Page<>(pageNum, pageSize), queryWrapper);
     }

@@ -142,6 +142,19 @@ public class BaseController {
     }
 
     /**
+     * 请求成功消息+数据+总数，用于分页显示（JSON code：200；浏览器Status Code：200）
+     *
+     * @param message 消息
+     * @param data    数据
+     * @param count   记录数
+     * @return 结果类
+     */
+    public BaseResult success(String message, Object data, long count) {
+        response.setStatus(HttpStatus.OK.value());
+        return new BaseResult(HttpStatus.OK.value(), message, data).put("count", count);
+    }
+
+    /**
      * 请求成功消息+数据+总数，用于分页显示（JSON code：自定义；浏览器Status Code：200）
      *
      * @param code    状态码
@@ -151,6 +164,20 @@ public class BaseController {
      * @return 结果类
      */
     public BaseResult success(int code, String message, Object data, int count) {
+        response.setStatus(HttpStatus.OK.value());
+        return new BaseResult(code, message, data).put("count", count);
+    }
+
+    /**
+     * 请求成功消息+数据+总数，用于分页显示（JSON code：自定义；浏览器Status Code：200）
+     *
+     * @param code    状态码
+     * @param message 消息
+     * @param data    数据
+     * @param count   记录数
+     * @return 结果类
+     */
+    public BaseResult success(int code, String message, Object data, long count) {
         response.setStatus(HttpStatus.OK.value());
         return new BaseResult(code, message, data).put("count", count);
     }
@@ -169,6 +196,19 @@ public class BaseController {
         return new BaseResult(httpStatus.value(), message, data).put("count", count);
     }
 
+    /**
+     * 请求成功消息+数据+总数，用于分页显示（JSON code：自定义；浏览器Status Code：同返回码）
+     *
+     * @param httpStatus 状态码
+     * @param message    消息
+     * @param data       数据
+     * @param count      记录数
+     * @return 结果类
+     */
+    public BaseResult success(HttpStatus httpStatus, String message, Object data, long count) {
+        response.setStatus(httpStatus.value());
+        return new BaseResult(httpStatus.value(), message, data).put("count", count);
+    }
 
     /**
      * 请求失败消息（JSON code：400；浏览器Status Code：200）

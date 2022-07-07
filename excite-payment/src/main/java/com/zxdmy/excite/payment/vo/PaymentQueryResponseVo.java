@@ -1,14 +1,13 @@
 package com.zxdmy.excite.payment.vo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.Accessors;
-import org.hibernate.validator.constraints.Length;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.util.TreeMap;
 
@@ -20,8 +19,22 @@ import java.util.TreeMap;
  */
 @Getter
 @Setter
+@ToString
 @Accessors(chain = true)
-public class PaymentQueryReturnVo extends BasePaymentVo implements Serializable {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class PaymentQueryResponseVo extends BasePaymentVo implements Serializable {
+
+    /**
+     * 查询结果代码
+     */
+    @JsonProperty(value = "sub_code")
+    private Integer subCode;
+
+    /**
+     * 查询结果描述
+     */
+    @JsonProperty(value = "sub_msg")
+    private String subMsg;
 
     /**
      * 订单标题
@@ -32,6 +45,7 @@ public class PaymentQueryReturnVo extends BasePaymentVo implements Serializable 
      * 订单金额
      */
     private String amount;
+
     /**
      * 交易单号（官方渠道的账号）
      */
@@ -81,6 +95,7 @@ public class PaymentQueryReturnVo extends BasePaymentVo implements Serializable 
      *
      * @return 字典序map
      */
+    @JsonIgnore
     public TreeMap<String, Object> getTreeMap() {
         TreeMap<String, Object> treeMap = new TreeMap<>();
         treeMap.put(APPID, this.getAppid());

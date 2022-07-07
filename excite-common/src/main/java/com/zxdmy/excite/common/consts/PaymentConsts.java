@@ -55,15 +55,38 @@ public class PaymentConsts {
     }
 
     /**
-     * 支付结果
+     * 订单状态
      */
     public static class Status {
+        /**
+         * 待支付
+         */
         public static final String WAIT = "WAIT";
 
+        /**
+         * 支付成功
+         */
         public static final String SUCCESS = "SUCCESS";
 
+        /**
+         * 交易有退款
+         */
+        public static final String REFUND = "REFUND";
+
+        /**
+         * 交易关闭（已全额退款或超时未支付）
+         */
         public static final String CLOSED = "CLOSED";
 
+        /**
+         * 支付完成（超过可退款时间）
+         */
         public static final String FINISHED = "FINISHED";
+
+        /**
+         * 订单错误
+         */
+        public static final String ERROR = "ERROR";
+
     }
 }

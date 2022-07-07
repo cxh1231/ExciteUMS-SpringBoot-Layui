@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zxdmy.excite.common.consts.OffiaccountConsts;
 import com.zxdmy.excite.common.enums.SystemCode;
+import com.zxdmy.excite.ums.entity.UmsApp;
 import com.zxdmy.excite.ums.entity.UmsMpReply;
 import com.zxdmy.excite.ums.mapper.UmsMpReplyMapper;
 import com.zxdmy.excite.ums.service.IUmsMpReplyService;
@@ -60,7 +61,7 @@ public class UmsMpReplyServiceImpl extends ServiceImpl<UmsMpReplyMapper, UmsMpRe
         // 类型
         queryWrapper.eq(null != search, UmsMpReply.TYPE, type)
                 // 最后修改时间倒序
-                .orderByDesc(UmsMpReply.UPDATE_TIME);
+                .orderByDesc(UmsApp.ID);
         // 分页查询并返回
         return mpReplyMapper.selectPage(new Page<>(pageNum, pageSize), queryWrapper);
     }

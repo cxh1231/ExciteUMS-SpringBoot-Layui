@@ -7,6 +7,8 @@ import com.zxdmy.excite.common.base.BaseController;
 import com.zxdmy.excite.common.base.BaseResult;
 import com.zxdmy.excite.payment.api.AlipayApiService;
 import com.zxdmy.excite.payment.api.WechatPayApiService;
+import com.zxdmy.excite.payment.vo.PaymentCreateResponseVo;
+import com.zxdmy.excite.payment.vo.PaymentQueryResponseVo;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,24 +34,17 @@ public class UmsConfigTestController extends BaseController {
     @ResponseBody
     public BaseResult alipayQrcode(String title, String price) {
         String outTradeNo = IdUtil.simpleUUID();
-        String qrcode = alipayApiService.pay("qrcode", title, outTradeNo, price, null, null);
+        PaymentCreateResponseVo responseVo = alipayApiService.pay("qrcode", title, outTradeNo, price, null, null);
         return success(200, "获取支付二维码成功！")
-                .put("qrcode", qrcode)
+                .put("qrcode", responseVo.getQrcode())
                 .put("outTradeNo", outTradeNo);
     }
 
     @PostMapping(value = "/alipay/query")
     @ResponseBody
     public BaseResult alipayQuery(String outTradeNo) {
-        String[] result = alipayApiService.queryPay(null, outTradeNo);
-        if ("Y".equals(result[0])) {
-            return success(200, "查询成功！" +
-                    " <br>支付宝交易号：" + result[1] +
-                    " <br>交易状态：" + result[3] +
-                    " <br>订单金额：" + result[4] +
-                    " <br>买家账号：" + result[6]);
-        }
-        return error("未支付：" + result[1] + result[2]);
+        PaymentQueryResponseVo result = alipayApiService.queryPay(null, outTradeNo);
+        return success("查询支付结果成功！", result);
     }
 
     @PostMapping(value = "/alipay/refund")
@@ -67,54 +62,40 @@ public class UmsConfigTestController extends BaseController {
 
     @PostMapping(value = "/wechatPay/qrcode")
     @ResponseBody
-    public BaseResult pay(String title, Float price) {
+    public BaseResult pay(String title, String price) {
         System.out.println(title);
         System.out.println(price);
-        int total = (int) (price * 100);
         String outTradeNo = IdUtil.simpleUUID();
-        String result = wechatPayApiService.pay("qrcode", title, outTradeNo, total, null);
+        PaymentCreateResponseVo result = wechatPayApiService.pay("qrcode", title, outTradeNo, price, null);
 
         return success(200, "获取支付二维码成功！")
-                .put("qrcode", result)
+                .put("qrcode", result.getQrcode())
                 .put("outTradeNo", outTradeNo);
     }
 
     @PostMapping(value = "/wechatPay/query")
     @ResponseBody
     public BaseResult query(String outTradeNo) {
-        WxPayOrderQueryV3Result wxPayOrderQueryV3Result = wechatPayApiService.query(null, outTradeNo);
-        if (wxPayOrderQueryV3Result.getTradeState().equals("SUCCESS")) {
-            return success(200, "支付成功！，交易成功时间：" + wxPayOrderQueryV3Result.getSuccessTime());
-        } else if (wxPayOrderQueryV3Result.getTradeState().equals("NOTPAY")) {
-            return error("未支付！");
-        } else if (wxPayOrderQueryV3Result.getTradeState().equals("CLOSED")) {
-            return error("订单已关闭！");
-        } else if (wxPayOrderQueryV3Result.getTradeState().equals("USERPAYING")) {
-            return success(200, "用户支付中（付款码支付）！");
-        } else if (wxPayOrderQueryV3Result.getTradeState().equals("PAYERROR")) {
-            return error("支付失败(其他原因，如银行返回失败)！");
-        } else if (wxPayOrderQueryV3Result.getTradeState().equals("REFUND")) {
-            return error("订单已退款！");
-        } else
-            return error(wxPayOrderQueryV3Result.getTradeState() + "：订单不存在");
+        PaymentQueryResponseVo responseVo = wechatPayApiService.query(null, outTradeNo);
+        return success(responseVo.toString());
     }
 
-    @PostMapping(value = "/wechatPay/refund")
-    @ResponseBody
-    public BaseResult refund(String outTradeNo, Float amount) {
-        int refund = (int) (amount * 100);
-        // 查询该订单的实际支付金额
-        int total = wechatPayApiService.query(null, outTradeNo).getAmount().getTotal();
-        if (refund > total) {
-            return error("退款金额大于支付金额！");
-        }
-        WxPayRefundV3Result wxPayRefundV3Result = wechatPayApiService.refund(outTradeNo, IdUtil.simpleUUID(), total, refund);
-        if ("SUCCESS".equals(wxPayRefundV3Result.getStatus())) {
-            return success(200, "退款成功！");
-        } else if ("PROCESSING".equals(wxPayRefundV3Result.getStatus())) {
-            return success(200, "退款处理中...稍后到账，请注意查收微信通知！");
-        }
-        return error("退款失败！");
-    }
+//    @PostMapping(value = "/wechatPay/refund")
+//    @ResponseBody
+//    public BaseResult refund(String outTradeNo, Float amount) {
+//        int refund = (int) (amount * 100);
+//        // 查询该订单的实际支付金额
+//        int total = wechatPayApiService.query(null, outTradeNo).getAmount().getTotal();
+//        if (refund > total) {
+//            return error("退款金额大于支付金额！");
+//        }
+//        WxPayRefundV3Result wxPayRefundV3Result = wechatPayApiService.refund(outTradeNo, IdUtil.simpleUUID(), total, refund);
+//        if ("SUCCESS".equals(wxPayRefundV3Result.getStatus())) {
+//            return success(200, "退款成功！");
+//        } else if ("PROCESSING".equals(wxPayRefundV3Result.getStatus())) {
+//            return success(200, "退款处理中...稍后到账，请注意查收微信通知！");
+//        }
+//        return error("退款失败！");
+//    }
 
 }

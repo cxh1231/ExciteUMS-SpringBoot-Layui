@@ -3,21 +3,18 @@ package com.zxdmy.excite.admin.controller.api;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.github.binarywang.wxpay.bean.notify.SignatureHeader;
 import com.github.binarywang.wxpay.bean.notify.WxPayNotifyResponse;
-import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyV3Result;
-import com.github.binarywang.wxpay.exception.WxPayException;
-import com.github.binarywang.wxpay.service.WxPayService;
 import com.zxdmy.excite.common.base.BaseController;
 import com.zxdmy.excite.common.base.BaseResult;
 import com.zxdmy.excite.common.consts.PaymentConsts;
+import com.zxdmy.excite.common.enums.PaymentEnums;
 import com.zxdmy.excite.common.enums.ReturnCode;
 import com.zxdmy.excite.common.utils.OrderUtils;
 import com.zxdmy.excite.common.utils.SignUtils;
 import com.zxdmy.excite.payment.api.AlipayApiService;
 import com.zxdmy.excite.payment.api.WechatPayApiService;
 import com.zxdmy.excite.payment.model.PaymentNotifyModel;
-import com.zxdmy.excite.payment.vo.PaymentCreateReturnVo;
+import com.zxdmy.excite.payment.vo.PaymentCreateResponseVo;
 import com.zxdmy.excite.payment.vo.PaymentCreateRequestVo;
 import com.zxdmy.excite.ums.entity.UmsApp;
 import com.zxdmy.excite.ums.entity.UmsOrder;
@@ -30,6 +27,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 /**
  * <p>
@@ -71,86 +69,68 @@ public class ApiPaymentController extends BaseController {
         if (SignUtils.checkSignMD5(paymentCreateVo.getTreeMap(), app.getAppSecret(), paymentCreateVo.getHash())) {
             // 生成订单号
             String outTradeNo = OrderUtils.createOrderCode();
-            // 三项返回参数
-            String qrcode = null;
-            String page = null;
-            String wechat = null;
+            // 返回的实体
+            PaymentCreateResponseVo responseVo = new PaymentCreateResponseVo();
             // 微信支付
-            if (PaymentCreateReturnVo.WECHAT.equalsIgnoreCase(paymentCreateVo.getPayChannel())) {
+            if (PaymentConsts.Channel.WECHAT.equalsIgnoreCase(paymentCreateVo.getPayChannel())) {
                 // 订单号加前缀
                 outTradeNo = PaymentConsts.Order.ORDER_CODE_WECHAT + outTradeNo;
-                // 修改金额格式（微信支付的单位是分）
-                BigDecimal decimal = new BigDecimal(paymentCreateVo.getAmount()).multiply(new BigDecimal("100"));
-                Integer amount = decimal.intValue();
-                // 电脑扫码支付、二维码支付
-                if (PaymentCreateReturnVo.QRCODE.equalsIgnoreCase(paymentCreateVo.getPayScene())) {
-                    qrcode = wechatPayApiService.pay(
-                            paymentCreateVo.getPayScene(),
-                            paymentCreateVo.getTitle(),
-                            outTradeNo, amount, ""
-                    );
-                }
-                // 微信内支付
-                else {
-                    wechat = "";
-                    // TODO 微信支付jsapi支付
-                }
+                // 发起支付并获取返回结果
+                responseVo = wechatPayApiService.pay(
+                        paymentCreateVo.getPayScene(),
+                        paymentCreateVo.getTitle(),
+                        outTradeNo,
+                        paymentCreateVo.getAmount(),
+                        paymentCreateVo.getOpenid()
+                );
             }
             // 支付宝支付（已经做了二选一校验，无需多次校验）
             else {
                 // 订单号加前缀
                 outTradeNo = PaymentConsts.Order.ORDER_CODE_ALIPAY + outTradeNo;
-                // 二维码支付
-                if (PaymentCreateReturnVo.QRCODE.equalsIgnoreCase(paymentCreateVo.getPayScene())) {
-                    qrcode = alipayApiService.pay(
-                            paymentCreateVo.getPayScene(),
-                            paymentCreateVo.getTitle(),
-                            outTradeNo,
-                            paymentCreateVo.getAmount(),
-                            paymentCreateVo.getReturnUrl(),
-                            paymentCreateVo.getCancelUrl()
-                    );
-                }
-                // 网址支付
-                else {
-                    page = "";
-                    // TODO 支付宝电脑支付
-                }
+                // 发起支付并获取返回结果
+                responseVo = alipayApiService.pay(
+                        paymentCreateVo.getPayScene(),
+                        paymentCreateVo.getTitle(),
+                        outTradeNo,
+                        paymentCreateVo.getAmount(),
+                        paymentCreateVo.getReturnUrl(),
+                        paymentCreateVo.getCancelUrl()
+                );
             }
-            // 如果所有的支付字段均为空，说明订单未生成
-            if (StringUtils.isAllEmpty(qrcode, page, wechat)) {
-                return error(9000, "发起支付请求错误，请重试！");
+            // 如果生成订单成功，则返回支付结果
+            if (Objects.equals(responseVo.getSubCode(), PaymentEnums.SUCCESS.getCode())) {
+
+                // 生成订单实体，并保存至数据库
+                UmsOrder order = new UmsOrder();
+                order.setAppId(app.getAppId())
+                        .setOutTradeNo(outTradeNo)
+                        .setTitle(paymentCreateVo.getTitle())
+                        .setAmount(paymentCreateVo.getAmount())
+                        .setStatus(PaymentConsts.Status.WAIT)
+                        .setPayChannel(paymentCreateVo.getPayChannel())
+                        .setPayScene(paymentCreateVo.getPayScene())
+                        .setNotifyUrl(paymentCreateVo.getNotifyUrl())
+                        .setReturnUrl(paymentCreateVo.getReturnUrl())
+                        .setCancelUrl(paymentCreateVo.getCancelUrl())
+                        .setAttach(paymentCreateVo.getAttach());
+                orderService.createOrder(order);
+
+                // 生成签名
+                String time = String.valueOf((int) (System.currentTimeMillis() / 1000));
+                // 随机值
+                String nonce = RandomUtil.randomString(16);
+                // 填充返回的参数
+                responseVo.setAppid(app.getAppId()).setTime(time).setNonce(nonce);
+                // 生成签名
+                responseVo.setHash(SignUtils.sign(responseVo.getTreeMap(), app.getAppSecret()));
+                // 返回结果
+                return success(responseVo);
             }
-
-            // 生成订单实体，并保存至数据库
-            UmsOrder order = new UmsOrder();
-            order.setAppId(app.getAppId())
-                    .setOutTradeNo(outTradeNo)
-                    .setTitle(paymentCreateVo.getTitle())
-                    .setAmount(paymentCreateVo.getAmount())
-                    .setStatus(PaymentConsts.Status.WAIT)
-                    .setPayChannel(paymentCreateVo.getPayChannel())
-                    .setPayScene(paymentCreateVo.getPayScene())
-                    .setNotifyUrl(paymentCreateVo.getNotifyUrl())
-                    .setReturnUrl(paymentCreateVo.getReturnUrl())
-                    .setCancelUrl(paymentCreateVo.getCancelUrl())
-                    .setAttach(paymentCreateVo.getAttach());
-            orderService.createOrder(order);
-
-            // 生成签名
-            String time = String.valueOf((int) (System.currentTimeMillis() / 1000));
-            // 随机值
-            String nonce = RandomUtil.randomString(16);
-            // 返回的实体
-            PaymentCreateReturnVo returnVo = new PaymentCreateReturnVo();
-            // 填充返回的参数
-            returnVo.setAppid(app.getAppId()).setTime(time).setNonce(nonce);
-            returnVo.setTitle(paymentCreateVo.getTitle()).setAmount(paymentCreateVo.getAmount()).setOutTradeNo(outTradeNo)
-                    .setQrcode(qrcode).setPage(page).setWechat(wechat);
-            // 生成签名
-            returnVo.setHash(SignUtils.sign(returnVo.getTreeMap(), app.getAppSecret()));
-            // 返回结果
-            return success(returnVo);
+            // 如果生成订单失败，则返回错误信息
+            else {
+                return error(responseVo.getSubCode(), responseVo.getSubMsg());
+            }
         } else {
             // 签名错误
             return error(SignUtils.sign(paymentCreateVo.getTreeMap(), app.getAppSecret()));

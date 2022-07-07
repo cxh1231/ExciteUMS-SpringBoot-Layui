@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
@@ -18,11 +19,24 @@ import java.util.TreeMap;
  */
 @Getter
 @Setter
+@ToString
 @Accessors(chain = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class PaymentCreateReturnVo extends BasePaymentVo implements Serializable {
+public class PaymentCreateResponseVo extends BasePaymentVo implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
+    /**
+     * 返回码
+     */
+    @JsonProperty(value = "sub_code")
+    private Integer subCode;
+
+    /**
+     * 返回信息
+     */
+    @JsonProperty(value = "sub_msg")
+    private String subMsg;
 
     /**
      * 商户单号（本平台）
@@ -41,20 +55,29 @@ public class PaymentCreateReturnVo extends BasePaymentVo implements Serializable
     private String amount;
 
     /**
-     * qrcode场景下，返回二维码
+     * 微信、支付宝的当面付、Navicat场景下，返回二维码
      */
     private String qrcode;
 
     /**
-     * page场景下，返回page字段
+     * 支付宝电脑网站、手机网站场景下，返回page字段
      */
     private String page;
 
     /**
-     * wechat场景下，返回微信支付链接
+     * 微信H5支付场景下，返回付款链接
      */
-    private String wechat;
+    private String url;
 
+    /**
+     * 微信预支付交易会话标识（APP支付、JSAPI支付 会返回）
+     */
+    @JsonProperty(value = "prepay_id")
+    private String prepayId;
+
+    public static final String SUB_CODE = "sub_code";
+
+    public static final String SUB_MSG = "sub_msg";
     public static final String OUT_TRADE_NO = "out_trade_no";
 
     public static final String TITLE = "title";
@@ -65,7 +88,9 @@ public class PaymentCreateReturnVo extends BasePaymentVo implements Serializable
 
     public static final String PAGE = "page";
 
-    public static final String WECHAT = "wechat";
+    public static final String URL = "url";
+
+    public static final String PREPAY_ID = "prepay_id";
 
     /**
      * 生成字典序Map
@@ -75,13 +100,17 @@ public class PaymentCreateReturnVo extends BasePaymentVo implements Serializable
     @JsonIgnore
     public TreeMap<String, Object> getTreeMap() {
         TreeMap<String, Object> treeMap = new TreeMap<>();
+        treeMap.put(SUB_CODE, this.getSubCode());
+        treeMap.put(SUB_MSG, this.getSubMsg());
+        treeMap.put(OUT_TRADE_NO, this.getOutTradeNo());
+        treeMap.put(TITLE, this.getTitle());
+        treeMap.put(AMOUNT, this.getAmount());
+        treeMap.put(QRCODE, this.getQrcode());
+        treeMap.put(PAGE, this.getPage());
+        treeMap.put(URL, this.getUrl());
+        treeMap.put(PREPAY_ID, this.getPrepayId());
+
         treeMap.put(APPID, this.getAppid());
-        treeMap.put(OUT_TRADE_NO, this.outTradeNo);
-        treeMap.put(TITLE, this.title);
-        treeMap.put(AMOUNT, this.amount);
-        treeMap.put(QRCODE, this.qrcode);
-        treeMap.put(PAGE, this.page);
-        treeMap.put(WECHAT, this.wechat);
         treeMap.put(TIME, this.getTime());
         treeMap.put(NONCE, this.getNonce());
         return treeMap;

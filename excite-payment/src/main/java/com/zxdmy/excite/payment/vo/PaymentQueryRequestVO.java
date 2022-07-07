@@ -48,9 +48,10 @@ public class PaymentQueryRequestVO extends BasePaymentVo implements Serializable
      */
     public TreeMap<String, Object> getTreeMap() {
         TreeMap<String, Object> treeMap = new TreeMap<>();
-        treeMap.put(APPID, this.getAppid());
         treeMap.put(TRADE_NO, this.tradeNo);
         treeMap.put(OUT_TRADE_NO, this.outTradeNo);
+
+        treeMap.put(APPID, this.getAppid());
         treeMap.put(TIME, this.getTime());
         treeMap.put(NONCE, this.getNonce());
         return treeMap;

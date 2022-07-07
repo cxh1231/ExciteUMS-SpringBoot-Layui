@@ -47,7 +47,7 @@ public class UmsAppServiceImpl extends ServiceImpl<UmsAppMapper, UmsApp> impleme
         wrapper.like(null != appName, UmsApp.APP_NAME, appName)
                 .or().like(null != appId, UmsApp.APP_ID, appId)
                 // 时间倒序排列
-                .orderByDesc(UmsApp.CREATE_TIME);
+                .orderByDesc(UmsApp.ID);
         // 分页查询并返回
         return appMapper.selectPage(new Page<>(pageNum, pageSize), wrapper);
     }

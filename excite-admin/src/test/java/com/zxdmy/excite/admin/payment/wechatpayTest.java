@@ -43,6 +43,6 @@ public class wechatpayTest {
 
     @Test
     void test() {
-        System.out.println(wechatPayApiService.pay("wechat", "title,", "324235ewgfdfterw", 10, "rrrr"));
+        System.out.println(wechatPayApiService.pay("wechat", "title,", "324235ewgfdfterw", "10", "rrrr"));
     }
 }

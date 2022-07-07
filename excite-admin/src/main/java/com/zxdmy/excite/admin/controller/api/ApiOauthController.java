@@ -117,6 +117,10 @@ public class ApiOauthController extends BaseController {
         else if (type.equalsIgnoreCase(OauthConsts.LoginType.MP2)) {
 
         }
+        // 公众号登录（微信内页登录，不关注公众号）
+        else if (type.equalsIgnoreCase(OauthConsts.LoginType.MPH5)) {
+
+        }
         // 处理信息
 
         // 保存信息至redis

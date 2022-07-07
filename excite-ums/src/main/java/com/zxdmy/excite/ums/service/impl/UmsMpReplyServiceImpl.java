@@ -1,6 +1,7 @@
 package com.zxdmy.excite.ums.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zxdmy.excite.common.consts.OffiaccountConsts;
 import com.zxdmy.excite.common.enums.SystemCode;
 import com.zxdmy.excite.ums.entity.UmsMpReply;
@@ -26,6 +27,43 @@ import java.util.Objects;
 public class UmsMpReplyServiceImpl extends ServiceImpl<UmsMpReplyMapper, UmsMpReply> implements IUmsMpReplyService {
 
     private UmsMpReplyMapper mpReplyMapper;
+
+    /**
+     * 分页查询
+     *
+     * @param search   检索关键词：关键词、文本消息、标题、描述、备注。
+     * @param type     类型
+     * @param pageNum  页码
+     * @param pageSize 每页数量
+     * @return 分页结果
+     */
+    @Override
+    public Page<UmsMpReply> getPage(String search, Integer type, Integer pageNum, Integer pageSize) {
+        // 页码为空，默认为1
+        if (pageNum == null) {
+            pageNum = 1;
+        }
+        // 每页数量为空，默认为10
+        if (pageSize == null) {
+            pageSize = 10;
+        }
+        // 构造查询条件
+        QueryWrapper<UmsMpReply> queryWrapper = new QueryWrapper<>();
+        // 检索关键词
+        if (null != search && !"".equals(search)) {
+            queryWrapper.like(UmsMpReply.KEYWORD, search)
+                    .or().like(UmsMpReply.REP_CONTENT, search)
+                    .or().like(UmsMpReply.REP_TITLE, search)
+                    .or().like(UmsMpReply.REP_DESCRIPTION, search)
+                    .or().like(UmsMpReply.REMARK, search);
+        }
+        // 类型
+        queryWrapper.eq(null != search, UmsMpReply.TYPE, type)
+                // 最后修改时间倒序
+                .orderByDesc(UmsMpReply.UPDATE_TIME);
+        // 分页查询并返回
+        return mpReplyMapper.selectPage(new Page<>(pageNum, pageSize), queryWrapper);
+    }
 
     /**
      * 根据消息类型获取一条最新的自动回复消息

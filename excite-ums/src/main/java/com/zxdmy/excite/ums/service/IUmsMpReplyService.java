@@ -1,5 +1,6 @@
 package com.zxdmy.excite.ums.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zxdmy.excite.ums.entity.UmsMpReply;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -14,6 +15,19 @@ import java.util.List;
  * @since 2022-06-29
  */
 public interface IUmsMpReplyService extends IService<UmsMpReply> {
+
+
+    /**
+     * 分页查询
+     *
+     * @param search   检索关键词：关键词、文本消息、标题、描述、备注。
+     * @param type     类型
+     * @param pageNum  页码
+     * @param pageSize 每页数量
+     * @return 分页结果
+     */
+    Page<UmsMpReply> getPage(String search, Integer type, Integer pageNum, Integer pageSize);
+
 
     /**
      * 根据消息类型获取一条最新的自动回复消息

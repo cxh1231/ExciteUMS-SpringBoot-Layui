@@ -29,6 +29,11 @@ public class OauthConsts {
         public static final String MP2 = "mp2";
 
         /**
+         * 公众号登录（微信内页登录，不关注公众号）
+         */
+        public static final String MPH5 = "mph5";
+
+        /**
          * 普通微信登录（直接登录的形式）
          */
         public static final String WECHAT = "wechat";

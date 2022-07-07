@@ -1,5 +1,6 @@
 package com.zxdmy.excite.ums.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zxdmy.excite.ums.entity.UmsOrder;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -13,6 +14,20 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IUmsOrderService extends IService<UmsOrder> {
 
+
+    /**
+     * 分页查询订单信息
+     *
+     * @param search     搜索关键字：应用信息，订单标题，商户号，交易号。
+     * @param payChannel 交易方式：支付宝，微信。
+     * @param status     交易状态
+     * @param startDate  开始时间
+     * @param endDate    结束时间
+     * @param pageNum    页码
+     * @param pageSize   每页数量
+     * @return 分页结果
+     */
+    Page<UmsOrder> getPage(String search, String payChannel, String status, String startDate, String endDate, Integer pageNum, Integer pageSize);
 
     /**
      * 创建订单

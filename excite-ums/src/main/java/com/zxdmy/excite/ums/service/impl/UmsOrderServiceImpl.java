@@ -1,6 +1,7 @@
 package com.zxdmy.excite.ums.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zxdmy.excite.common.consts.PaymentConsts;
 import com.zxdmy.excite.ums.entity.UmsOrder;
 import com.zxdmy.excite.ums.mapper.UmsOrderMapper;
@@ -23,6 +24,51 @@ import org.springframework.stereotype.Service;
 public class UmsOrderServiceImpl extends ServiceImpl<UmsOrderMapper, UmsOrder> implements IUmsOrderService {
 
     private UmsOrderMapper orderMapper;
+
+
+    /**
+     * 分页查询订单信息
+     *
+     * @param search     搜索关键字：应用信息，订单标题，商户号，交易号。
+     * @param payChannel 交易方式：支付宝，微信。
+     * @param status     交易状态
+     * @param pageNum    页码
+     * @param startDate  开始时间
+     * @param endDate    结束时间
+     * @param pageSize   每页数量
+     * @return 分页结果
+     */
+    @Override
+    public Page<UmsOrder> getPage(String search, String payChannel, String status, String startDate, String endDate, Integer pageNum, Integer pageSize) {
+        // 如果页码为空，默认为 1
+        if (pageNum == null) {
+            pageNum = 1;
+        }
+        // 如果每页数量为空，默认为 10
+        if (pageSize == null) {
+            pageSize = 10;
+        }
+        // 创建查询条件
+        QueryWrapper<UmsOrder> queryWrapper = new QueryWrapper<>();
+        // 搜索关键字不为空，则添加搜索条件
+        if (search != null && !"".equals(search)) {
+            queryWrapper.like(UmsOrder.APP_ID, search)
+                    .or().like(UmsOrder.TITLE, search)
+                    .or().like(UmsOrder.TRADE_NO, search)
+                    .or().like(UmsOrder.OUT_TRADE_NO, search);
+        }
+        // 交易方式不为空，则添加搜索条件
+        queryWrapper.eq(payChannel != null && !"".equals(payChannel), UmsOrder.PAY_CHANNEL, payChannel)
+                .eq(status != null && !"".equals(status), UmsOrder.STATUS, status)
+                // 检索起始时间
+                .ge(startDate != null && !"".equals(startDate), UmsOrder.CREATE_TIME, startDate)
+                // 检索终止时间
+                .le(endDate != null && !"".equals(endDate), UmsOrder.CREATE_TIME, endDate);
+        // 时间排序，降序
+        queryWrapper.orderByDesc(UmsOrder.CREATE_TIME);
+        // 分页查询并返回
+        return orderMapper.selectPage(new Page<>(pageNum, pageSize), queryWrapper);
+    }
 
     /**
      * 创建订单

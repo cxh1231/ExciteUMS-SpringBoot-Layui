@@ -22,21 +22,9 @@ import java.util.TreeMap;
 @ToString
 @Accessors(chain = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class PaymentCreateResponseVo extends BasePaymentVo implements Serializable {
+public class PaymentCreateResponseVo extends BaseResponseVo implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
-    /**
-     * 返回码
-     */
-    @JsonProperty(value = "sub_code")
-    private Integer subCode;
-
-    /**
-     * 返回信息
-     */
-    @JsonProperty(value = "sub_msg")
-    private String subMsg;
 
     /**
      * 商户单号（本平台）
@@ -75,9 +63,13 @@ public class PaymentCreateResponseVo extends BasePaymentVo implements Serializab
     @JsonProperty(value = "prepay_id")
     private String prepayId;
 
+    /**
+     * 发起支付请求时携带的参数，原样返回
+     */
+    private String attach;
+
     public static final String SUB_CODE = "sub_code";
 
-    public static final String SUB_MSG = "sub_msg";
     public static final String OUT_TRADE_NO = "out_trade_no";
 
     public static final String TITLE = "title";
@@ -92,6 +84,8 @@ public class PaymentCreateResponseVo extends BasePaymentVo implements Serializab
 
     public static final String PREPAY_ID = "prepay_id";
 
+    public static final String ATTACH = "attach";
+
     /**
      * 生成字典序Map
      *
@@ -100,8 +94,6 @@ public class PaymentCreateResponseVo extends BasePaymentVo implements Serializab
     @JsonIgnore
     public TreeMap<String, Object> getTreeMap() {
         TreeMap<String, Object> treeMap = new TreeMap<>();
-        treeMap.put(SUB_CODE, this.getSubCode());
-        treeMap.put(SUB_MSG, this.getSubMsg());
         treeMap.put(OUT_TRADE_NO, this.getOutTradeNo());
         treeMap.put(TITLE, this.getTitle());
         treeMap.put(AMOUNT, this.getAmount());
@@ -109,6 +101,10 @@ public class PaymentCreateResponseVo extends BasePaymentVo implements Serializab
         treeMap.put(PAGE, this.getPage());
         treeMap.put(URL, this.getUrl());
         treeMap.put(PREPAY_ID, this.getPrepayId());
+        treeMap.put(ATTACH, this.getAttach());
+
+        treeMap.put(CODE, this.getCode());
+        treeMap.put(MSG, this.getMsg());
 
         treeMap.put(APPID, this.getAppid());
         treeMap.put(TIME, this.getTime());

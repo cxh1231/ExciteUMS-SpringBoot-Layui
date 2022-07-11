@@ -62,8 +62,8 @@ public class WechatPayApiService {
         // 必填信息不能为空
         if (payScene == null || description == null || outTradeNo == null || total == null) {
             this.log.error("\n【参数错误】错误详情：{}", "必填参数不能为空");
-            responseVo.setSubCode(PaymentEnums.ERROR_PARAM.getCode())
-                    .setSubMsg(PaymentEnums.ERROR_PARAM.getMessage() + "必填参数不能为空");
+            responseVo.setCode(PaymentEnums.ERROR_PARAM.getCode())
+                    .setMsg(PaymentEnums.ERROR_PARAM.getMessage() + "必填参数不能为空");
             return responseVo;
         }
         // 修改金额格式（微信支付的单位是分）
@@ -97,8 +97,8 @@ public class WechatPayApiService {
                 // 微信内支付，含小程序，需要传入openId
                 if (null == openId) {
                     this.log.error("\n【参数错误】错误详情：{}", "微信内支付必须传入openId");
-                    responseVo.setSubCode(PaymentEnums.ERROR_PARAM.getCode())
-                            .setSubMsg(PaymentEnums.ERROR_PARAM.getMessage() + "微信内支付必须传入openId");
+                    responseVo.setCode(PaymentEnums.ERROR_PARAM.getCode())
+                            .setMsg(PaymentEnums.ERROR_PARAM.getMessage() + "微信内支付必须传入openId");
                     return responseVo;
                 }
                 // 用户在直连商户 appid下的唯一标识。下单前需获取到用户的 Openid
@@ -126,20 +126,20 @@ public class WechatPayApiService {
             // 其他：暂不支持
             else {
                 this.log.error("\n【参数错误】错误详情：{}", "支付场景[" + payScene + "]暂不支持，只支持qrcode、wechat、wap、app。");
-                responseVo.setSubCode(PaymentEnums.ERROR_PARAM.getCode())
-                        .setSubMsg(PaymentEnums.ERROR_PARAM.getMessage() + "支付场景[" + payScene + "]暂不支持，只支持qrcode、wechat、wap、app");
+                responseVo.setCode(PaymentEnums.ERROR_PARAM.getCode())
+                        .setMsg(PaymentEnums.ERROR_PARAM.getMessage() + "支付场景[" + payScene + "]暂不支持，只支持qrcode、wechat、wap、app");
                 return responseVo;
             }
         } catch (WxPayException e) {
             this.log.error("\n【系统错误】错误详情：{}", e.getMessage());
-            responseVo.setSubCode(PaymentEnums.ERROR_SYSTEM.getCode())
-                    .setSubMsg(PaymentEnums.ERROR_SYSTEM.getMessage() + "：" + e.getMessage());
+            responseVo.setCode(PaymentEnums.ERROR_SYSTEM.getCode())
+                    .setMsg(PaymentEnums.ERROR_SYSTEM.getMessage() + "：" + e.getMessage());
             return responseVo;
         }
         // 将下单结果写入返回实体
-        responseVo.setSubCode(PaymentEnums.SUCCESS.getCode())
-                .setSubMsg(PaymentEnums.SUCCESS.getMessage())
-                .setTitle(description)
+        responseVo.setCode(PaymentEnums.SUCCESS.getCode())
+                .setMsg(PaymentEnums.SUCCESS.getMessage());
+        responseVo.setTitle(description)
                 .setOutTradeNo(outTradeNo)
                 .setAmount(total)
                 .setQrcode(qrcode)
@@ -161,8 +161,8 @@ public class WechatPayApiService {
         // 必填信息不能为空
         if ((null == transactionId || transactionId.equals("")) && (null == outTradeNo || outTradeNo.equals(""))) {
             this.log.error("\n【参数错误】错误详情：{}", "微信订单号和商户系统内部的订单号不能同时为空");
-            responseVo.setSubCode(PaymentEnums.ERROR_PARAM.getCode())
-                    .setSubMsg(PaymentEnums.ERROR_PARAM.getMessage() + "微信订单号和商户系统内部的订单号不能同时为空");
+            responseVo.setCode(PaymentEnums.ERROR_PARAM.getCode())
+                    .setMsg(PaymentEnums.ERROR_PARAM.getMessage() + "微信订单号和商户系统内部的订单号不能同时为空");
             return responseVo;
         }
         // 尝试查询订单信息
@@ -171,10 +171,11 @@ public class WechatPayApiService {
 
             System.out.println(result);
             // 将结果写入返回实体
-            responseVo.setSubCode(PaymentEnums.SUCCESS.getCode())
-                    .setSubMsg(PaymentEnums.SUCCESS.getMessage())
+            responseVo.setCode(PaymentEnums.SUCCESS.getCode())
+                    .setMsg(PaymentEnums.SUCCESS.getMessage());
+
+            responseVo.setAmount(result.getAmount().getCurrency()) // TODO 这里是分，需要转换成元
                     // .setTitle("")
-                    .setAmount(result.getAmount().getCurrency()) // TODO 这里是分，需要转换成元
                     .setTradeNo(result.getTransactionId())
                     .setOutTradeNo(result.getOutTradeNo())
                     .setPaidTime(result.getSuccessTime());
@@ -189,8 +190,8 @@ public class WechatPayApiService {
         // 订单不存在等，则抛出异常
         catch (WxPayException e) {
             this.log.error("\n【查询错误】错误详情：{}", e.getMessage());
-            responseVo.setSubCode(PaymentEnums.ERROR.getCode())
-                    .setSubMsg(PaymentEnums.ERROR.getMessage() + "：" + e.getMessage());
+            responseVo.setCode(PaymentEnums.ERROR.getCode())
+                    .setMsg(PaymentEnums.ERROR.getMessage() + "：" + e.getMessage());
             return responseVo;
         }
     }

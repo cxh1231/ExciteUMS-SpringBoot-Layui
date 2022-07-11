@@ -30,7 +30,7 @@ public class PaymentCreateRequestVo extends BasePaymentVo implements Serializabl
     /**
      * 公众号等微信平台的用户id，微信内支付时必传
      */
-    private String openid;
+//    private String openid;
 
     /**
      * 订单标题
@@ -86,7 +86,7 @@ public class PaymentCreateRequestVo extends BasePaymentVo implements Serializabl
      */
     @SerializedName(value = "payScene", alternate = {"pay_scene"})
     @NotBlank(message = "缺少支付场景参数")
-    @ValidationEnum(strValues = {"qrcode", "page", "wechat"}, message = "支付场景参数错误")
+    @ValidationEnum(strValues = {"qrcode", "page", "wechat", "wap"}, message = "支付场景参数错误")
     @JsonProperty(value = "pay_scene")
     private String payScene;
 
@@ -123,7 +123,7 @@ public class PaymentCreateRequestVo extends BasePaymentVo implements Serializabl
      */
     public TreeMap<String, Object> getTreeMap() {
         TreeMap<String, Object> treeMap = new TreeMap<>();
-        treeMap.put(OPENID, this.getOpenid());
+//        treeMap.put(OPENID, this.getOpenid());
         treeMap.put(TITLE, this.getTitle());
         treeMap.put(AMOUNT, this.getAmount());
         treeMap.put(NOTIFY_URL, this.getNotifyUrl());

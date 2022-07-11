@@ -22,19 +22,7 @@ import java.util.TreeMap;
 @ToString
 @Accessors(chain = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class PaymentQueryResponseVo extends BasePaymentVo implements Serializable {
-
-    /**
-     * 查询结果代码
-     */
-    @JsonProperty(value = "sub_code")
-    private Integer subCode;
-
-    /**
-     * 查询结果描述
-     */
-    @JsonProperty(value = "sub_msg")
-    private String subMsg;
+public class PaymentQueryResponseVo extends BaseResponseVo implements Serializable {
 
     /**
      * 订单标题

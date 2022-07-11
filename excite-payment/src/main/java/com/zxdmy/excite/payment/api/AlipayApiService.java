@@ -56,8 +56,8 @@ public class AlipayApiService {
         // 必填信息不能为空
         if (null == subject || null == outTradeNo || null == totalAmount || null == payScene) {
             this.log.error("\n【参数错误】错误详情：{}", "必填参数不能为空");
-            responseVo.setSubCode(PaymentEnums.ERROR_PARAM.getCode())
-                    .setSubMsg(PaymentEnums.ERROR_PARAM.getMessage() + "：必填参数不能为空");
+            responseVo.setCode(PaymentEnums.ERROR_PARAM.getCode())
+                    .setMsg(PaymentEnums.ERROR_PARAM.getMessage() + "：必填参数不能为空");
             return responseVo;
         }
         // 尝试发起支付，并获取各个场景的支付代码
@@ -78,8 +78,8 @@ public class AlipayApiService {
                 // 参数错误直接返回
                 if (null == returnUrl) {
                     this.log.error("\n【参数错误】错误详情：{}", "电脑网站支付的跳转地址（returnUrl）不能为空");
-                    responseVo.setSubCode(PaymentEnums.ERROR_PARAM.getCode())
-                            .setSubMsg(PaymentEnums.ERROR_PARAM.getMessage() + "：电脑网站支付的跳转地址（returnUrl）不能为空");
+                    responseVo.setCode(PaymentEnums.ERROR_PARAM.getCode())
+                            .setMsg(PaymentEnums.ERROR_PARAM.getMessage() + "：电脑网站支付的跳转地址（returnUrl）不能为空");
                     return responseVo;
                 }
                 // 调用接口
@@ -93,8 +93,8 @@ public class AlipayApiService {
                 // 参数错误直接返回
                 if (null == returnUrl || null == quitUrl) {
                     this.log.error("\n【参数错误】错误详情：{}", "手机网站支付的取消跳转地址（quitUrl）、成功跳转地址（returnUrl）不能为空");
-                    responseVo.setSubCode(PaymentEnums.ERROR_PARAM.getCode())
-                            .setSubMsg(PaymentEnums.ERROR_PARAM.getMessage() + "：手机网站支付的取消跳转地址（quitUrl）、成功跳转地址（returnUrl）不能为空");
+                    responseVo.setCode(PaymentEnums.ERROR_PARAM.getCode())
+                            .setMsg(PaymentEnums.ERROR_PARAM.getMessage() + "：手机网站支付的取消跳转地址（quitUrl）、成功跳转地址（returnUrl）不能为空");
                     return responseVo;
                 }
                 AlipayTradeWapPayResponse response2 = Factory.Payment.Wap().pay(subject, outTradeNo, totalAmount, quitUrl, returnUrl);
@@ -112,20 +112,20 @@ public class AlipayApiService {
             // 其他情况：错误
             else {
                 this.log.error("\n【参数错误】错误详情：{}", "支付场景[" + payScene + "]不在许可支付类型范围内。许可类型：当面付（qrcode），电脑网站支付（page），手机网站支付（wap），APP支付（app）");
-                responseVo.setSubCode(PaymentEnums.ERROR_PARAM.getCode())
-                        .setSubMsg(PaymentEnums.ERROR_PARAM.getMessage() + "：支付场景[" + payScene + "]不在许可支付类型范围内。许可类型：当面付（qrcode），电脑网站支付（page），手机网站支付（wap），APP支付（app）");
+                responseVo.setCode(PaymentEnums.ERROR_PARAM.getCode())
+                        .setMsg(PaymentEnums.ERROR_PARAM.getMessage() + "：支付场景[" + payScene + "]不在许可支付类型范围内。许可类型：当面付（qrcode），电脑网站支付（page），手机网站支付（wap），APP支付（app）");
                 return responseVo;
             }
         } catch (Exception e) {
-            this.log.error("\n【系统错误】错误详情：{}", "手机网站支付的取消跳转地址（quitUrl）、成功跳转地址（returnUrl）不能为空");
-            responseVo.setSubCode(PaymentEnums.ERROR_SYSTEM.getCode())
-                    .setSubMsg(PaymentEnums.ERROR_SYSTEM.getMessage() + "：" + e.getMessage());
+            this.log.error("\n【系统错误】错误详情：{}", e.getMessage());
+            responseVo.setCode(PaymentEnums.ERROR_SYSTEM.getCode())
+                    .setMsg(PaymentEnums.ERROR_SYSTEM.getMessage() + "：" + e.getMessage());
             return responseVo;
         }
         // 将基本信息填入实体，并返回
-        responseVo.setSubCode(PaymentEnums.SUCCESS.getCode())
-                .setSubMsg(PaymentEnums.SUCCESS.getMessage())
-                .setTitle(subject)
+        responseVo.setCode(PaymentEnums.SUCCESS.getCode())
+                .setMsg(PaymentEnums.SUCCESS.getMessage());
+        responseVo.setTitle(subject)
                 .setOutTradeNo(outTradeNo)
                 .setAmount(totalAmount)
                 .setQrcode(qrCode)
@@ -149,8 +149,8 @@ public class AlipayApiService {
             this.log.error("\n【参数错误】错误详情：{}", "tradeNo 和 outTradeNo 不能同时为空！");
             // 设置返回结果
             returnVo.setStatus(PaymentConsts.Status.ERROR)
-                    .setSubCode(PaymentEnums.ERROR.getCode())
-                    .setSubMsg("tradeNo 和 outTradeNo 不能同时为空！");
+                    .setCode(PaymentEnums.ERROR.getCode())
+                    .setMsg("tradeNo 和 outTradeNo 不能同时为空！");
             return returnVo;
         }
         try {
@@ -158,9 +158,9 @@ public class AlipayApiService {
             AlipayTradeQueryResponse response = Factory.Payment.Common().optional("trade_no", tradeNo).query(outTradeNo);
             // 订单查询成功（即返回信息中没有 sub_code）
             if (ResponseChecker.success(response)) {
-                returnVo.setSubCode(PaymentEnums.SUCCESS.getCode())
-                        .setSubMsg(response.msg)
-                        .setTitle(response.subject)
+                returnVo.setCode(PaymentEnums.SUCCESS.getCode())
+                        .setMsg(response.msg);
+                returnVo.setTitle(response.subject)
                         .setAmount(response.totalAmount)
                         .setTradeNo(response.tradeNo)
                         .setOutTradeNo(response.outTradeNo)
@@ -182,9 +182,8 @@ public class AlipayApiService {
             else {
                 this.log.error("\n【订单查询错误】错误代码：{}\n错误描述：{}", response.subCode, response.subMsg);
                 // 写入错误信息
-                returnVo.setSubCode(PaymentEnums.ERROR.getCode())
-                        .setSubMsg(PaymentEnums.ERROR.getCode() + "：" + response.subMsg)
-                        .setStatus(PaymentConsts.Status.ERROR);
+                returnVo.setCode(PaymentEnums.ERROR.getCode())
+                        .setMsg(PaymentEnums.ERROR.getCode() + "：" + response.subMsg);
             }
             // 返回结果
             return returnVo;
@@ -192,8 +191,8 @@ public class AlipayApiService {
             this.log.error("\n【发生异常】异常原因：{}", e.getMessage());
             // 设置返回结果
             returnVo.setStatus(PaymentConsts.Status.ERROR)
-                    .setSubCode(PaymentEnums.ERROR.getCode())
-                    .setSubMsg(PaymentEnums.ERROR.getCode() + "：" + e.getMessage());
+                    .setCode(PaymentEnums.ERROR.getCode())
+                    .setMsg(PaymentEnums.ERROR.getCode() + "：" + e.getMessage());
             return returnVo;
         }
     }

@@ -44,7 +44,6 @@ public class OffiaccountApiService {
     final Logger log = LoggerFactory.getLogger(this.getClass());
 
 
-
     /**
      * 获取菜单
      *
@@ -188,8 +187,25 @@ public class OffiaccountApiService {
      * @param redirectUrl 用户登录成功后跳转的页面
      * @return 官方登录链接
      */
-    public String getAuthorizationUrl(String redirectUrl) {
+    public String getAuthorizationUrlUserinfo(String redirectUrl) {
         return wxService.getOAuth2Service().buildAuthorizationUrl(redirectUrl, WxConsts.OAuth2Scope.SNSAPI_USERINFO, null);
+    }
+
+    public String getAuthorizationUrlBase(String redirectUrl, String code) {
+        return wxService.getOAuth2Service().buildAuthorizationUrl(redirectUrl, WxConsts.OAuth2Scope.SNSAPI_BASE, code);
+    }
+
+    public OauthUserVo getUserBaseByAuthCode(String code) {
+        OauthUserVo userVo = new OauthUserVo();
+        try {
+            WxOAuth2AccessToken accessToken = wxService.getOAuth2Service().getAccessToken(code);
+            System.out.println(accessToken.toString());
+            userVo.setUserid(accessToken.getOpenId());
+            return userVo;
+        } catch (WxErrorException e) {
+            System.out.println(e.getError().getErrorMsg());
+        }
+        return userVo;
     }
 
     public OauthUserVo getUserInfoByAuthCode(String code) {

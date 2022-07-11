@@ -1,8 +1,10 @@
 package com.zxdmy.excite.payment.vo;
 
+import cn.hutool.core.util.RandomUtil;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 import org.hibernate.validator.constraints.Length;
 
@@ -19,6 +21,7 @@ import java.io.Serializable;
  */
 @Getter
 @Setter
+@ToString
 @Accessors(chain = true)
 public class BasePaymentVo implements Serializable {
 
@@ -36,14 +39,14 @@ public class BasePaymentVo implements Serializable {
      */
     @NotBlank(message = "缺少时间戳参数")
     @Length(min = 10, max = 14, message = "时间戳参数格式错误")
-    private String time;
+    private String time = String.valueOf((int) (System.currentTimeMillis() / 1000));
 
     /**
      * 随机值
      */
     @NotBlank(message = "缺少随机数参数")
     @Length(min = 8, max = 64, message = "随机数参数格式错误")
-    private String nonce;
+    private String nonce = RandomUtil.randomString(16);;
 
     /**
      * 签名

@@ -16,7 +16,9 @@ public enum PaymentEnums {
 
     ERROR_PARAM(4001, "参数错误"),
 
-    ERROR_SIGN(4002, "签名错误"),
+    ERROR_APP_ID(4002, "APPID无效，请检查APPID参数，或APPID已被禁用"),
+
+    ERROR_SIGN(4003, "签名错误，请检查签名参数和签名算法"),
 
     ERROR_SYSTEM(5000, "系统错误");
 

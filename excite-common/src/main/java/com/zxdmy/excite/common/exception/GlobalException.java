@@ -68,7 +68,7 @@ public class GlobalException extends BaseController {
         else if (e instanceof HttpMessageNotReadableException) {
             result = "请求参数错误：只支持接收Body类型参数";
         }
-        // 信息校验失败提示
+        // 信息校验失败提示【这里在controller里使用BindingResult参数处理】
         else if (e instanceof BindException) {
             BindingResult bindingResult = ((BindException) e).getBindingResult();
             StringBuilder errMsg = new StringBuilder();

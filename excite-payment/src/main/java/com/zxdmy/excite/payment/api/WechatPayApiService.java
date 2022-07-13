@@ -1,16 +1,22 @@
 package com.zxdmy.excite.payment.api;
 
+import cn.hutool.core.codec.Base64;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import com.github.binarywang.wxpay.bean.notify.SignatureHeader;
 import com.github.binarywang.wxpay.bean.notify.WxPayNotifyResponse;
 import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyV3Result;
+import com.github.binarywang.wxpay.bean.order.WxPayMpOrderResult;
 import com.github.binarywang.wxpay.bean.request.WxPayRefundV3Request;
 import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderV3Request;
 import com.github.binarywang.wxpay.bean.result.WxPayOrderQueryV3Result;
 import com.github.binarywang.wxpay.bean.result.WxPayRefundV3Result;
+import com.github.binarywang.wxpay.bean.result.WxPayUnifiedOrderV3Result;
 import com.github.binarywang.wxpay.bean.result.enums.TradeTypeEnum;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
+import com.github.binarywang.wxpay.v3.util.AesUtils;
+import com.github.binarywang.wxpay.v3.util.RsaCryptoUtil;
+import com.github.binarywang.wxpay.v3.util.SignUtils;
 import com.zxdmy.excite.common.consts.PaymentConsts;
 import com.zxdmy.excite.common.enums.PaymentEnums;
 import com.zxdmy.excite.common.exception.ServiceException;
@@ -28,7 +34,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
 import java.math.BigDecimal;
+import java.security.cert.X509Certificate;
 import java.text.DecimalFormat;
+import java.util.Arrays;
+import java.util.Map;
 
 /**
  * <p>
@@ -84,13 +93,11 @@ public class WechatPayApiService {
                 .setAmount(new WxPayUnifiedOrderV3Request.Amount().setTotal(amount));
 
         // 尝试根据请求类型，获取下单结果
-        String qrcode = null;
-        String prepayId = null;
-        String url = null;
         try {
             // 场景：qrcode支付（native支付）
             if (PaymentConsts.Scene.QRCODE.equalsIgnoreCase(payScene)) {
-                qrcode = this.wxPayService.unifiedOrderV3(TradeTypeEnum.NATIVE, wxPayUnifiedOrderV3Request).getCodeUrl();
+                String qrcode = this.wxPayService.unifiedOrderV3(TradeTypeEnum.NATIVE, wxPayUnifiedOrderV3Request).getCodeUrl();
+                responseVo.setQrcode(qrcode);
             }
             // 场景：wechat（微信内支付，含小程序）
             else if (PaymentConsts.Scene.WECHAT.equalsIgnoreCase(payScene)) {
@@ -103,7 +110,14 @@ public class WechatPayApiService {
                 }
                 // 用户在直连商户 appid下的唯一标识。下单前需获取到用户的 Openid
                 wxPayUnifiedOrderV3Request.setPayer(new WxPayUnifiedOrderV3Request.Payer().setOpenid(openId));
-                prepayId = this.wxPayService.unifiedOrderV3(TradeTypeEnum.JSAPI, wxPayUnifiedOrderV3Request).getPrepayId();
+                // 发起支付，并组装生成支付所需参数对象.
+                WxPayUnifiedOrderV3Result.JsapiResult result = wxPayService.createOrderV3(TradeTypeEnum.JSAPI, wxPayUnifiedOrderV3Request);
+                // 将JSAPI支付的5项关键信息保存至返回实体中
+                responseVo.setTime(result.getTimeStamp())
+                        .setAppid(result.getAppId())
+                        .setNonce(result.getNonceStr())
+                        .setHash(result.getPaySign());
+                responseVo.setPrepayId(result.getPackageValue());
             }
             // 场景：手机网站支付
             else if (PaymentConsts.Scene.WAP.equalsIgnoreCase(payScene)) {
@@ -117,11 +131,23 @@ public class WechatPayApiService {
                                                 .setType("wechat")
                                 )
                 );
-                url = this.wxPayService.unifiedOrderV3(TradeTypeEnum.H5, wxPayUnifiedOrderV3Request).getH5Url();
+                String url = this.wxPayService.unifiedOrderV3(TradeTypeEnum.H5, wxPayUnifiedOrderV3Request).getH5Url();
+                responseVo.setUrl(url);
             }
             // 场景：app支付
             else if (PaymentConsts.Scene.APP.equalsIgnoreCase(payScene)) {
-                prepayId = this.wxPayService.unifiedOrderV3(TradeTypeEnum.APP, wxPayUnifiedOrderV3Request).getPrepayId();
+                // 发起支付，并组装生成支付所需参数对象.
+                WxPayUnifiedOrderV3Result.AppResult result = wxPayService.createOrderV3(TradeTypeEnum.APP, wxPayUnifiedOrderV3Request);
+                // 将APP支付的 7 项关键信息保存至返回实体中
+                // 详见：https://pay.weixin.qq.com/wiki/doc/apiv3/apis/chapter3_2_4.shtml
+                responseVo.setAppid(result.getAppid())
+//                        .setPartnerId(result.getPartnerId())
+//                        .setPrepayId(result.getPrepayId())
+//                        .setPackageValue(result.getPackageValue())
+                        .setNonce(result.getNoncestr())
+                        .setTime(result.getTimestamp())
+                        .setHash(result.getSign());
+                responseVo.setPrepayId(result.getPrepayId());
             }
             // 其他：暂不支持
             else {
@@ -141,10 +167,7 @@ public class WechatPayApiService {
                 .setMsg(PaymentEnums.SUCCESS.getMessage());
         responseVo.setTitle(description)
                 .setOutTradeNo(outTradeNo)
-                .setAmount(total)
-                .setQrcode(qrcode)
-                .setPrepayId(prepayId)
-                .setUrl(url);
+                .setAmount(total);
         return responseVo;
     }
 

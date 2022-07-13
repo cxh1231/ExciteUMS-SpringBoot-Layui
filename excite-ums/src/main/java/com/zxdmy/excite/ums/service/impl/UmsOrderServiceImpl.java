@@ -9,6 +9,8 @@ import com.zxdmy.excite.ums.mapper.UmsOrderMapper;
 import com.zxdmy.excite.ums.service.IUmsOrderService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -73,23 +75,43 @@ public class UmsOrderServiceImpl extends ServiceImpl<UmsOrderMapper, UmsOrder> i
 
     /**
      * 创建订单
+     * 同时将订单信息放入缓存中
      *
      * @param order 订单信息
      */
     @Async
     @Override
-    public void createOrder(UmsOrder order) {
+    @CachePut(value = "umsOrder", key = "#order.outTradeNo")
+    public UmsOrder createOrder(UmsOrder order) {
         orderMapper.insert(order);
+        return order;
     }
 
     /**
-     * 根据异步通知更新系统订单信息，正常情况下是支付成功后的回调通知
+     * 根据 商户单号 查询订单信息
+     * 如果命中缓存，则直接返回缓存中的数据
+     *
+     * @param outTradeNo 商户单号
+     * @return 订单信息
+     */
+    @Override
+    @Cacheable(value = "umsOrder", key = "#outTradeNo")
+    public UmsOrder getOrderByOutTradeNo(String outTradeNo) {
+        QueryWrapper<UmsOrder> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(UmsOrder.OUT_TRADE_NO, outTradeNo);
+        return orderMapper.selectOne(queryWrapper);
+    }
+
+    /**
+     * 根据【官方的异步通知】更新系统订单信息，正常情况下是支付成功后的回调通知
+     * 同时将最新的订单信息放入缓存中
      *
      * @param order 订单信息
      */
     @Async
     @Override
-    public void updateOrderByNotifyReceive(UmsOrder order) {
+    @CachePut(value = "umsOrder", key = "#order.outTradeNo")
+    public UmsOrder updateOrderByNotifyReceive(UmsOrder order) {
         // 如果该订单已经根据异步通知更新了，则无需操作。
         // 判断是否已更新，采用 status 字段判断：已经成功了，则无需操作；否则更新订单信息
         QueryWrapper<UmsOrder> wrapper = new QueryWrapper<>();
@@ -100,6 +122,8 @@ public class UmsOrderServiceImpl extends ServiceImpl<UmsOrderMapper, UmsOrder> i
         order.setOutTradeNo(null);
         // 执行更新
         orderMapper.update(order, wrapper);
+        // @CachePut 注解，对于更新来说，用到的是返回值，所以这里返回的是最新的订单信息，即再查询一次数据库
+        return orderMapper.selectOne(new QueryWrapper<UmsOrder>().eq(UmsOrder.OUT_TRADE_NO, order.getOutTradeNo()));
     }
 
     /**

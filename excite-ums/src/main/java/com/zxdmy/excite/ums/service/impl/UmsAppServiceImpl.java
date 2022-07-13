@@ -7,6 +7,9 @@ import com.zxdmy.excite.ums.mapper.UmsAppMapper;
 import com.zxdmy.excite.ums.service.IUmsAppService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.AllArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -50,5 +53,55 @@ public class UmsAppServiceImpl extends ServiceImpl<UmsAppMapper, UmsApp> impleme
                 .orderByDesc(UmsApp.ID);
         // 分页查询并返回
         return appMapper.selectPage(new Page<>(pageNum, pageSize), wrapper);
+    }
+
+    /**
+     * 新增或修改应用信息
+     *
+     * @param app 应用信息
+     * @return 保存 | 修改结果
+     */
+    @Override
+    @CachePut(key = "#app.appId", value = "umsApp")
+    public UmsApp saveOrUpdateApp(UmsApp app) {
+        // 构造查询条件
+        QueryWrapper<UmsApp> wrapper = new QueryWrapper<>();
+        wrapper.eq(UmsApp.APP_ID, app.getAppId());
+        // 更新失败：应用ID不存在，则新增应用
+        if (appMapper.update(app, wrapper) == 0) {
+            // 返回新增结果：大于0表示新增成功
+            appMapper.insert(app);
+        }
+        // 更新时，缓存注解用的是返回值，所以查询刚修改的应用信息，并返回
+        return appMapper.selectOne(wrapper);
+    }
+
+    /**
+     * 根据应用ID查询应用信息
+     *
+     * @param appId 应用ID
+     * @return 应用信息
+     */
+    @Override
+    @Cacheable(key = "#appId", value = "umsApp")
+    public UmsApp getByAppId(String appId) {
+        System.out.println("通过数据库查询应用信息");
+        QueryWrapper<UmsApp> wrapper = new QueryWrapper<>();
+        wrapper.eq(UmsApp.APP_ID, appId);
+        return appMapper.selectOne(wrapper);
+    }
+
+    /**
+     * 根据应用ID删除应用信息
+     *
+     * @param appId 应用ID
+     * @return 删除结果
+     */
+    @Override
+    @CacheEvict(value = "umsApp", key = "#appId")
+    public boolean deleteByAppId(String appId) {
+        QueryWrapper<UmsApp> wrapper = new QueryWrapper<>();
+        wrapper.eq(UmsApp.APP_ID, appId);
+        return appMapper.delete(wrapper) > 0;
     }
 }

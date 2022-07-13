@@ -1,7 +1,8 @@
 package com.zxdmy.excite.admin.controller.api;
 
 import cn.hutool.core.date.LocalDateTimeUtil;
-import cn.hutool.crypto.digest.MD5;
+import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.binarywang.wxpay.bean.notify.WxPayNotifyResponse;
 import com.zxdmy.excite.common.base.BaseController;
@@ -16,6 +17,7 @@ import com.zxdmy.excite.payment.api.WechatPayApiService;
 import com.zxdmy.excite.payment.model.PaymentNotifyModel;
 import com.zxdmy.excite.payment.vo.PaymentCreateRequestVo;
 import com.zxdmy.excite.payment.vo.PaymentCreateResponseVo;
+import com.zxdmy.excite.payment.vo.PaymentQueryResponseVo;
 import com.zxdmy.excite.ums.entity.UmsApp;
 import com.zxdmy.excite.ums.entity.UmsOrder;
 import com.zxdmy.excite.ums.service.IUmsAppService;
@@ -28,6 +30,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Objects;
+import java.util.TreeMap;
 
 /**
  * <p>
@@ -71,12 +74,18 @@ public class ApiPaymentController extends BaseController {
             return responseVo;
         }
         // 应用信息获取失败：直接返回错误信息
-        UmsApp app = appService.getOne(new QueryWrapper<UmsApp>().eq(UmsApp.APP_ID, paymentCreateVo.getAppid()));
+        UmsApp app = appService.getByAppId(paymentCreateVo.getAppid());
         if (null == app) {
             responseVo.setCode(PaymentEnums.ERROR_APP_ID.getCode())
                     .setMsg(PaymentEnums.ERROR_APP_ID.getMessage());
             return responseVo;
         }
+        // 如果该应用已被禁用，则直接返回错误信息
+//        if (app.getStatus() == 0) {
+//            responseVo.setCode(PaymentEnums.ERROR_APP_STATUS.getCode())
+//                    .setMsg(PaymentEnums.ERROR_APP_STATUS.getMessage());
+//            return responseVo;
+//        }
         // 签名验证失败：直接返回错误信息
         if (!SignUtils.checkSignMD5(paymentCreateVo.getTreeMap(), app.getAppSecret(), paymentCreateVo.getHash())) {
             responseVo.setCode(PaymentEnums.ERROR_SIGN.getCode())
@@ -90,11 +99,11 @@ public class ApiPaymentController extends BaseController {
         // 微信支付
         if (PaymentConsts.Channel.WECHAT.equalsIgnoreCase(paymentCreateVo.getPayChannel())) {
             // 订单号加前缀
-            outTradeNo = PaymentConsts.Order.ORDER_CODE_WECHAT + outTradeNo;
+            outTradeNo = PaymentConsts.Order.OUT_TRADE_NO_PREFIX_WECHAT + outTradeNo;
             // 支付场景：wechat，需要先登录才能发起支付，统一使用支付页面
             if (PaymentConsts.Scene.WECHAT.equalsIgnoreCase(paymentCreateVo.getPayScene())) {
                 // 生成支付页面地址
-                String payUrl = offiaccountApiService.getAuthorizationUrlBase("http://dev.open.zxdmy.com/api/payment/wechat", outTradeNo);
+                String payUrl = offiaccountApiService.getAuthorizationUrlBase("http://dev.open.zxdmy.com/api/payment/wechat/jsapi", outTradeNo);
                 // 设置返回实体
                 responseVo.setTitle(paymentCreateVo.getTitle())
                         .setOutTradeNo(outTradeNo)
@@ -103,7 +112,6 @@ public class ApiPaymentController extends BaseController {
             }
             // 其他场景：直接发起支付
             else {
-                // 微信支付公众号支付
                 responseVo = wechatPayApiService.pay(
                         paymentCreateVo.getPayScene(),
                         paymentCreateVo.getTitle(),
@@ -116,7 +124,7 @@ public class ApiPaymentController extends BaseController {
         // 支付宝支付（已经做了二选一校验，无需多次校验）
         else {
             // 订单号加前缀
-            outTradeNo = PaymentConsts.Order.ORDER_CODE_ALIPAY + outTradeNo;
+            outTradeNo = PaymentConsts.Order.OUT_TRADE_NO_PREFIX_ALIPAY + outTradeNo;
             // 发起支付并获取返回结果
             responseVo = alipayApiService.pay(
                     paymentCreateVo.getPayScene(),
@@ -127,7 +135,6 @@ public class ApiPaymentController extends BaseController {
                     paymentCreateVo.getCancelUrl()
             );
         }
-
         // 如果生成订单成功，则将订单信息保存至数据库
         if (Objects.equals(responseVo.getCode(), PaymentEnums.SUCCESS.getCode())) {
             // 生成订单实体，并保存至数据库
@@ -155,56 +162,157 @@ public class ApiPaymentController extends BaseController {
         return responseVo;
     }
 
-
-    // 微信内支付
-    @RequestMapping(value = "/wechat", method = {RequestMethod.GET})
-    public String wechatPay(String code, String state, ModelMap map) {
-        String openId = offiaccountApiService.getUserBaseByAuthCode(code).getUserid();
-        if (openId == null) {
-            return "授权失败";
+    /**
+     * JSAPI支付页面
+     *
+     * @param code  微信授权码
+     * @param state 商户单号
+     * @param map   参数集合
+     * @return 返回支付页面或错误页面
+     */
+    @RequestMapping(value = "/wechat/jsapi", method = {RequestMethod.GET})
+    public String wechatPayPage(String code, String state, ModelMap map) {
+        // 根据微信授权码获取用户OpenID
+        String openId;
+        try {
+            openId = offiaccountApiService.getUserBaseByAuthCode(code).getUserid();
         }
-        UmsOrder order = orderService.getOne(new QueryWrapper<UmsOrder>().eq(UmsOrder.OUT_TRADE_NO, state));
+        // 如果获取不到用户OpenID，捕获错误信息并显示
+        catch (Exception e) {
+            map.put("error", "授权失败：" + e.getMessage());
+            return "/api/pay/error";
+        }
+        System.out.println(openId);
 
-        // 下单
+        // 根据商户单号获取订单信息
+        UmsOrder order = orderService.getOrderByOutTradeNo(state);
+        // 如果获取不到订单信息，则跳转到错误页面
+        if (null == order) {
+            map.put("error", "获取订单失败：订单不存在");
+            return "/api/pay/error";
+        }
+        // 当前订单已支付
+        if (Objects.equals(order.getStatus(), PaymentConsts.Status.SUCCESS)) {
+            map.put("error", "当前订单已支付，请勿重复支付");
+            return "/api/pay/error";
+        }
+        // 如果订单状态不是待支付，则跳转到错误页面
+        if (!order.getStatus().equals(PaymentConsts.Status.WAIT)) {
+            map.put("error", "订单状态错误，当前订单状态：" + order.getStatus());
+            return "/api/pay/error";
+        }
+        // 生成订单
         PaymentCreateResponseVo responseVo = wechatPayApiService.pay(
                 PaymentConsts.Scene.WECHAT,
                 order.getTitle(),
                 order.getOutTradeNo(),
                 order.getAmount(),
+                // TODO 这里替换为用户的OpenID
                 "oEOXk5h4BEbm63QeK4m01aBOigXk"
         );
-        String appId = "wx7cd3849a05d3db6e";
-        String nonceStr = "1234567890";
-        String timeStamp = String.valueOf((int) (System.currentTimeMillis() / 1000));
-        String packageStr = "prepay_id=" + responseVo.getPrepayId();
+        // 如果生成订单失败，则跳转到错误页面
+        if (!responseVo.getCode().equals(PaymentEnums.SUCCESS.getCode())) {
+            map.put("error", "创建订单失败：" + responseVo.getMsg());
+            return "/api/pay/error";
+        }
+        // 订单信息参数
+        map.put("amount", responseVo.getAmount());
+        map.put("title", responseVo.getTitle());
+        map.put("outTradeNo", responseVo.getOutTradeNo());
+        // 生成加密签名
+        String appid = order.getAppId();
+        String nonce = RandomUtil.randomString(16);
+        String time = String.valueOf((int) (System.currentTimeMillis() / 1000));
+        String appSecret = appService.getByAppId(order.getAppId()).getAppSecret();
+        TreeMap<String, Object> treeMap = new TreeMap<>();
+        treeMap.put("appid", appid);
+        treeMap.put("nonce", nonce);
+        treeMap.put("time", time);
+        treeMap.put("out_trade_no", responseVo.getOutTradeNo());
+        String hash = SignUtils.sign(treeMap, appSecret);
+        // 构建回调链接参数
+        String params = "?appid=" + appid + "&nonce=" + nonce + "&out_trade_no=" + responseVo.getOutTradeNo() + "&time=" + time + "&hash=" + hash;
+        // 支付成败跳转的页面，这里需要给回调地址加上商户单号，以便后续查询订单状态
+        // /callback_url?appid=202207284800&nonce=5456127336&out_trade_no=WX1234556&time=1657542633&hash=3bc7e059cdd4047fe00219b198d15127
+        map.put("returnUrl", order.getReturnUrl() + params);
+        map.put("cancelUrl", order.getCancelUrl() + params);
 
-        String signStr = appId + "\n" + timeStamp + "\n" + nonceStr + "\n" + packageStr;
-
-        map.put("appId", appId);
-        map.put("timeStamp", timeStamp);
-        map.put("nonceStr", nonceStr);
-        map.put("package", packageStr);
+        // JSAPI唤起支付页面的参数
+        map.put("appId", responseVo.getAppid());
+        map.put("timeStamp", responseVo.getTime());
+        map.put("nonceStr", responseVo.getNonce());
+        map.put("package", responseVo.getPrepayId());
         map.put("signType", "RSA");
-
-        map.put("paySign", MD5.create().digestHex(signStr));
+        map.put("paySign", responseVo.getHash());
 
         // 返回结果
-        return "/api/pay/pay";
+        return "/api/pay/jsapi";
     }
 
     /**
      * 对外：查询订单接口
      *
+     * @param appId      应用ID
+     * @param tradeNo    交易单号
+     * @param outTradeNo 商户单号
+     * @param time       时间戳
+     * @param nonce      随机值
+     * @param hash       签名
      * @return 支付结果
      */
-    @RequestMapping(value = "/query", method = {RequestMethod.POST})
+    @RequestMapping(value = "/query", method = {RequestMethod.GET, RequestMethod.POST})
     @ResponseBody
-    public BaseResult query() {
-        // TODO 查询微信 → 查询支付宝 → 返回查询结果
+    public BaseResult query(
+            @RequestParam(name = "appid", required = false) String appId,
+            @RequestParam(name = "trade_no", required = false) String tradeNo,
+            @RequestParam(name = "out_trade_no", required = false) String outTradeNo,
+            @RequestParam(name = "time", required = false) String time,
+            @RequestParam(name = "nonce", required = false) String nonce,
+            @RequestParam(name = "hash", required = false) String hash
+    ) {
+        PaymentQueryResponseVo responseVo = new PaymentQueryResponseVo();
+        // 必填参数不能为空
+        if (StrUtil.hasBlank(appId, time, nonce, hash)) {
+            return error("必填参数不能为空");
+        }
+        // 商户单号和交易单号不能同时为空
+        if (StrUtil.isAllBlank(outTradeNo, tradeNo)) {
+            return error("商户单号和交易单号不能同时为空");
+        }
+        // 校验签名
+        TreeMap<String, Object> treeMap = new TreeMap<>();
+        treeMap.put("appid", appId);
+        treeMap.put("nonce", nonce);
+        treeMap.put("time", time);
+        treeMap.put("out_trade_no", outTradeNo);
+        treeMap.put("trade_no", tradeNo);
+        String appSecret = appService.getByAppId(appId).getAppSecret();
+        String sign = SignUtils.sign(treeMap, appSecret);
+        if (!sign.equals(hash)) {
+            return error("签名错误");
+        }
 
-        // TODO 异步：根据查询结果，更新数据库里的信息
+        // 微信支付渠道：商户单号不为空并且以WX开头，或交易单号不为空并且以42开头
+        if (StrUtil.isNotBlank(outTradeNo) && (outTradeNo.startsWith(PaymentConsts.Order.OUT_TRADE_NO_PREFIX_WECHAT)
+                || (StrUtil.isNotBlank(tradeNo) && tradeNo.startsWith(PaymentConsts.Order.TRADE_NO_PREFIX_WECHAT)))) {
+            responseVo = wechatPayApiService.query(outTradeNo, tradeNo);
+        }
+        // 支付宝支付渠道：商户单号不为空并且以AL开头，或交易单号不为空并且以20开头
+        else if (StrUtil.isNotBlank(outTradeNo) && (outTradeNo.startsWith(PaymentConsts.Order.OUT_TRADE_NO_PREFIX_ALIPAY)
+                || (StrUtil.isNotBlank(tradeNo) && tradeNo.startsWith(PaymentConsts.Order.TRADE_NO_PREFIX_ALIPAY)))) {
+            responseVo = alipayApiService.query(outTradeNo, tradeNo);
+        }
+        // 其他情况：错误
+        else {
+            return error("商户单号或交易单号错误");
+        }
 
-        return error("666");
+
+        // 异步请求，更新本系统订单状态
+
+        // 构建返回结果
+
+        return success("查询成功");
     }
 
     /**

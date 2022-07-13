@@ -204,8 +204,8 @@ public class OffiaccountApiService {
             return userVo;
         } catch (WxErrorException e) {
             System.out.println(e.getError().getErrorMsg());
+            throw new ServiceException(e.getError().getErrorMsg());
         }
-        return userVo;
     }
 
     public OauthUserVo getUserInfoByAuthCode(String code) {

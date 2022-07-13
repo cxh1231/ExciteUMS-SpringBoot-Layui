@@ -34,14 +34,17 @@ public interface IUmsOrderService extends IService<UmsOrder> {
      *
      * @param order 订单信息
      */
-    void createOrder(UmsOrder order);
+    UmsOrder createOrder(UmsOrder order);
+
+
+    UmsOrder getOrderByOutTradeNo(String outTradeNo);
 
     /**
      * 根据异步通知更新系统订单信息，正常情况下是支付成功后的回调通知
      *
      * @param order 订单信息
      */
-    void updateOrderByNotifyReceive(UmsOrder order);
+    UmsOrder updateOrderByNotifyReceive(UmsOrder order);
 
     /**
      * 根据订单通知的推送结果，更新订单信息

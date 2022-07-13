@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>订单支付</title>
+    <link rel="icon" href="/images/favicon.ico">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta http-equiv="Access-Control-Allow-Origin" content="*">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+    <link rel="stylesheet" href="/css/weui/weui.css"/>
+    <link rel="stylesheet" href="/css/weui/weuix.css"/>
+</head>
+
+<body ontouchstart class="page-bg">
+
+<div class="page-hd" style="background: #ffff">
+    <h2 style="text-align: center">
+        <img src="https://api.xunhupay.com/content/images/wechat-s.png" alt="" style="vertical-align: middle">
+        微信支付收银台
+    </h2>
+</div>
+
+<div class="weui-pay">
+    <div style="text-align: -webkit-center;">
+        <div class="weui-avatar-circle" style="width: 80px;height: 80px">
+            <img src="https://www.chenxiuhao.cn/public/images/avatar.jpg" style="width: 80px;height: 80px">
+            <span class="weui-icon-success weui-icon-safe-success"></span>
+        </div>
+    </div>
+
+</div>
+<div class="weui-pay">
+    <p class="weui-pay-num">￥<span th:text="${amount}">15.00</span></p>
+</div>
+<div class="weui-pay">
+    <ul class="weui-pay-u">
+        <li class="">
+            <span class="title">订单标题</span>
+            <span class="content" th:text="${title}">这里是订单的标题</span>
+        </li>
+        <li>
+            <span class="title">商户单号</span>
+            <span class="content" th:text="${outTradeNo}">AL2022071115461180372942587630</span>
+        </li>
+    </ul>
+</div>
+
+<div class="weui-pay">
+    <div class="pay-div">
+        <a href="javascript:void(0);" onclick="wechat_jsapi_pay();" class="weui-btn weui-btn_primary">立即支付</a></div>
+    <div class="pay-div">
+        <a href="javascript:void(0);" onclick="confirm_msg();" class="weui-btn weui-btn_plain-primary">取消支付</a>
+    </div>
+</div>
+<script src="/js/weui/zepto.min.js"></script>
+<script src="/js/weui/zepto.weui.js"></script>
+<script type="text/javascript">
+    // 判断浏览器UA
+    let ua = navigator.userAgent.toLowerCase();
+    let isWeixin = ua.indexOf('micromessenger') !== -1;
+    let isAndroid = ua.indexOf('android') !== -1;
+    let isIos = (ua.indexOf('iphone') !== -1) || (ua.indexOf('ipad') !== -1);
+    // 如果不是在微信中打开，则加载错误页面
+    if (!isWeixin) {
+        document.head.innerHTML = '<title>抱歉，出错了</title><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0"><link rel="stylesheet" type="text/css" href="https://res.wx.qq.com/open/libs/weui/0.4.1/weui.css">';
+        document.body.innerHTML = '<div class="weui_msg"><div class="weui_icon_area"><i class="weui_icon_info weui_icon_msg"></i></div><div class="weui_text_area"><h4 class="weui_msg_title">请在微信客户端打开链接</h4></div></div>';
+    }
+    // 如果是在微信中打开，则加载微信支付js文件
+    else {
+        if (typeof WeixinJSBridge == "undefined") {
+            if (document.addEventListener) {
+                document.addEventListener('WeixinJSBridgeReady', wechat_jsapi_pay, false);
+            } else if (document.attachEvent) {
+                document.attachEvent('WeixinJSBridgeReady', wechat_jsapi_pay);
+                document.attachEvent('onWeixinJSBridgeReady', wechat_jsapi_pay);
+            }
+        } else {
+            wechat_jsapi_pay();
+        }
+    }
+
+    /**
+     * 唤起支付层
+     */
+    function wechat_jsapi_pay() {
+        WeixinJSBridge.invoke('getBrandWCPayRequest', {
+            "appId": "[[${appId}]]",
+            "timeStamp": "[[${timeStamp}]]",
+            "nonceStr": "[[${nonceStr}]]",
+            "package": "[[${package}]]",
+            "signType": "[[${signType}]]",
+            "paySign": "[[${paySign}]]"
+        }, function (res) {
+            // 支付成功
+            if (res.err_msg === "get_brand_wcpay_request:ok") {
+                $.toast("支付成功，页面跳转中...", 2000, function () {
+                    location.replace("[(${returnUrl})]");
+                });
+            }
+            // 已经唤起支付层，但用户点击[x]按钮取消支付
+            else if (res.err_msg === "get_brand_wcpay_request:cancel") {
+                // alert('点击[立即支付]按钮可继续支付');
+            }
+            // 其他错误
+            else {
+                alert('发生错误，请重试或联系系统管理器');
+            }
+        });
+    }
+
+    /**
+     * 取消支付确认框
+     */
+    function confirm_msg() {
+        $.modal({
+            title: "取消支付？",
+            text: "点击[继续支付]按钮可继续支付<br>点击[取消支付]按钮放弃支付",
+            buttons: [
+                {
+                    text: "继续支付", onClick: function () {
+                        $.closeModal();
+                        wechat_jsapi_pay();
+                    }
+                },
+                {
+                    text: "取消支付", className: "default", onClick: function () {
+                        $.closeModal();
+                        location.replace("[(${cancelUrl})]");
+                    }
+                },
+            ]
+        });
+    }
+
+
+</script>
+
+</body>
+</html>

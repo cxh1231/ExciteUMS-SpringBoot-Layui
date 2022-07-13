@@ -46,7 +46,7 @@ public class BasePaymentVo implements Serializable {
      */
     @NotBlank(message = "缺少随机数参数")
     @Length(min = 8, max = 64, message = "随机数参数格式错误")
-    private String nonce = RandomUtil.randomString(16);;
+    private String nonce = RandomUtil.randomString(16);
 
     /**
      * 签名

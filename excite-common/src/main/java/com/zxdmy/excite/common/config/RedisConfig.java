@@ -18,6 +18,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
+import java.time.Duration;
 
 /**
  * <p>
@@ -72,13 +73,19 @@ public class RedisConfig {
         RedisCacheConfiguration redisCacheConfiguration = config
                 // 覆盖默认的构造key，否则会多出一个冒号
                 .computePrefixWith(cacheName -> this.allowPrefix ? this.prefix + cacheName + ":" : cacheName)
+                // 设置KEY值的序列化方式
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+                // 设置VALUE值的序列化方式
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()))
+                // 设置缓存的过期时间：30分钟
+                .entryTtl(Duration.ofSeconds(60 * 30))
                 // 不缓存空值
                 // .disableCachingNullValues()
                 ;
 
-        return RedisCacheManager.builder(factory).cacheDefaults(redisCacheConfiguration).build();
+        return RedisCacheManager.builder(factory)
+                // 设置缓存的默认配置
+                .cacheDefaults(redisCacheConfiguration).build();
     }
 
 

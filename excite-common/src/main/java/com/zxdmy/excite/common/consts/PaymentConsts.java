@@ -49,9 +49,13 @@ public class PaymentConsts {
      * 订单前缀类别头
      */
     public static class Order {
-        public static final String ORDER_CODE_WECHAT = "WX";
+        public static final String OUT_TRADE_NO_PREFIX_WECHAT = "WX";
 
-        public static final String ORDER_CODE_ALIPAY = "AL";
+        public static final String OUT_TRADE_NO_PREFIX_ALIPAY = "AL";
+
+        public static final String TRADE_NO_PREFIX_WECHAT = "42";
+
+        public static final String TRADE_NO_PREFIX_ALIPAY = "20";
     }
 
     /**

@@ -43,7 +43,7 @@ public class UmsConfigTestController extends BaseController {
     @PostMapping(value = "/alipay/query")
     @ResponseBody
     public BaseResult alipayQuery(String outTradeNo) {
-        PaymentQueryResponseVo result = alipayApiService.queryPay(null, outTradeNo);
+        PaymentQueryResponseVo result = alipayApiService.query(null, outTradeNo);
         return success("查询支付结果成功！", result);
     }
 

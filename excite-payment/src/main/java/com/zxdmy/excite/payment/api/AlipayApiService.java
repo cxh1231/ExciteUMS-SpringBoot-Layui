@@ -141,7 +141,7 @@ public class AlipayApiService {
      * @return 返回查询结果：status ERROR为查询失败，其他为查询成功
      * @apiNote tradeNo 和 outTradeNo 不能同时为空。同时存在优先取 tradeNo。
      */
-    public PaymentQueryResponseVo queryPay(String tradeNo, String outTradeNo) {
+    public PaymentQueryResponseVo query(String tradeNo, String outTradeNo) {
         // 构造返回对象
         PaymentQueryResponseVo returnVo = new PaymentQueryResponseVo();
         // 判断

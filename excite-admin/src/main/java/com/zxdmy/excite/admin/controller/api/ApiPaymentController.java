@@ -303,19 +303,19 @@ public class ApiPaymentController extends BaseController {
         String sign = SignUtils.sign(treeMap, app.getAppSecret());
         if (!sign.equals(hash)) {
             responseVo.setCode(PaymentEnums.ERROR_SIGN.getCode())
-                    .setMsg(PaymentEnums.ERROR_SIGN.getMessage());
+                    .setMsg(PaymentEnums.ERROR_SIGN.getMessage() + "：" + sign);
             return responseVo;
         }
 
         // 微信支付渠道：商户单号不为空并且以WX开头，或交易单号不为空并且以42开头
         if (StrUtil.isNotBlank(outTradeNo) && (outTradeNo.startsWith(PaymentConsts.Order.OUT_TRADE_NO_PREFIX_WECHAT)
                 || (StrUtil.isNotBlank(tradeNo) && tradeNo.startsWith(PaymentConsts.Order.TRADE_NO_PREFIX_WECHAT)))) {
-            responseVo = wechatPayApiService.query(outTradeNo, tradeNo);
+            responseVo = wechatPayApiService.query(tradeNo, outTradeNo);
         }
         // 支付宝支付渠道：商户单号不为空并且以AL开头，或交易单号不为空并且以20开头
         else if (StrUtil.isNotBlank(outTradeNo) && (outTradeNo.startsWith(PaymentConsts.Order.OUT_TRADE_NO_PREFIX_ALIPAY)
                 || (StrUtil.isNotBlank(tradeNo) && tradeNo.startsWith(PaymentConsts.Order.TRADE_NO_PREFIX_ALIPAY)))) {
-            responseVo = alipayApiService.query(outTradeNo, tradeNo);
+            responseVo = alipayApiService.query(tradeNo, outTradeNo);
         }
         // 其他情况：错误
         else {
@@ -328,12 +328,14 @@ public class ApiPaymentController extends BaseController {
         // 构建返回结果
         hash = SignUtils.sign(responseVo.getTreeMap(), app.getAppSecret());
 
-        responseVo.setHash(hash);
+        responseVo.setAppid(appId)
+                .setHash(hash);
         return responseVo;
     }
 
     /**
      * 退款接口
+     * TODO 退款接口，只能发起申请，实际退款需要等后台确认
      *
      * @return 支付结果
      */

@@ -40,6 +40,14 @@ public interface IUmsOrderService extends IService<UmsOrder> {
     UmsOrder getOrderByOutTradeNo(String outTradeNo);
 
     /**
+     * 异步执行：根据回调信息更新订单信息（包含官方的回调，以及下游的回调信息）
+     *
+     * @param order 官方回调信息
+     * @return 更新后的订单信息
+     */
+    UmsOrder updateOrderByNotify(UmsOrder order);
+
+    /**
      * 根据异步通知更新系统订单信息，正常情况下是支付成功后的回调通知
      *
      * @param order 订单信息

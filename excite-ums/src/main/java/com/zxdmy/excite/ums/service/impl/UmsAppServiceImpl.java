@@ -85,7 +85,6 @@ public class UmsAppServiceImpl extends ServiceImpl<UmsAppMapper, UmsApp> impleme
     @Override
     @Cacheable(key = "#appId", value = "umsApp")
     public UmsApp getByAppId(String appId) {
-        System.out.println("通过数据库查询应用信息");
         QueryWrapper<UmsApp> wrapper = new QueryWrapper<>();
         wrapper.eq(UmsApp.APP_ID, appId);
         return appMapper.selectOne(wrapper);

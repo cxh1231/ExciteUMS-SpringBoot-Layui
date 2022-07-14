@@ -86,7 +86,6 @@ public class PaymentQueryResponseVo extends BaseResponseVo implements Serializab
     @JsonIgnore
     public TreeMap<String, Object> getTreeMap() {
         TreeMap<String, Object> treeMap = new TreeMap<>();
-        treeMap.put(APPID, this.getAppid());
         treeMap.put(TITLE, this.title);
         treeMap.put(AMOUNT, this.amount);
         treeMap.put(TRADE_NO, this.tradeNo);
@@ -94,6 +93,11 @@ public class PaymentQueryResponseVo extends BaseResponseVo implements Serializab
         treeMap.put(STATUS, this.status);
         treeMap.put(CREATE_TIME, this.createTime);
         treeMap.put(PAID_TIME, this.paidTime);
+
+        treeMap.put(CODE, this.getCode());
+        treeMap.put(MSG, this.getMsg());
+
+        treeMap.put(APPID, this.getAppid());
         treeMap.put(TIME, this.getTime());
         treeMap.put(NONCE, this.getNonce());
         return treeMap;

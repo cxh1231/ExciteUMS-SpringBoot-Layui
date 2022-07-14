@@ -1,8 +1,12 @@
 package com.zxdmy.excite.ums.service.impl;
 
+import cn.hutool.core.util.RandomUtil;
+import cn.hutool.crypto.SignUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zxdmy.excite.common.consts.PaymentConsts;
+import com.zxdmy.excite.common.utils.HttpRequestUtils;
+import com.zxdmy.excite.common.utils.SignUtils;
 import com.zxdmy.excite.ums.entity.UmsApp;
 import com.zxdmy.excite.ums.entity.UmsOrder;
 import com.zxdmy.excite.ums.mapper.UmsOrderMapper;
@@ -13,6 +17,14 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * <p>
@@ -28,6 +40,7 @@ public class UmsOrderServiceImpl extends ServiceImpl<UmsOrderMapper, UmsOrder> i
 
     private UmsOrderMapper orderMapper;
 
+    private UmsAppServiceImpl appService;
 
     /**
      * 分页查询订单信息
@@ -100,6 +113,68 @@ public class UmsOrderServiceImpl extends ServiceImpl<UmsOrderMapper, UmsOrder> i
         QueryWrapper<UmsOrder> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq(UmsOrder.OUT_TRADE_NO, outTradeNo);
         return orderMapper.selectOne(queryWrapper);
+    }
+
+    /**
+     * 异步执行：根据回调信息更新订单信息（包含官方的回调，以及下游的回调信息）
+     *
+     * @param order 官方回调信息
+     * @return 更新后的订单信息
+     */
+    @Async
+    @Override
+    @CachePut(value = "umsOrder", key = "#order.outTradeNo")
+    public UmsOrder updateOrderByNotify(UmsOrder order) {
+        // 先更新官方回调信息
+        QueryWrapper<UmsOrder> wrapper = new QueryWrapper<>();
+        wrapper.eq(UmsOrder.OUT_TRADE_NO, order.getOutTradeNo())
+                // 订单状态为 WAIT 的才需要更新
+                .eq(UmsOrder.STATUS, PaymentConsts.Status.WAIT);
+        // 商户单号 字段无需更新
+//        order.setOutTradeNo(null);
+        // 更新订单信息
+        int result = orderMapper.update(order, wrapper);
+        // 获取更新后的订单信息
+        order = orderMapper.selectOne(new QueryWrapper<UmsOrder>().eq(UmsOrder.OUT_TRADE_NO, order.getOutTradeNo()));
+        // 订单更新成功
+        if (result > 0) {
+            // 获取该应用的秘钥
+            String secret = appService.getByAppId(order.getAppId()).getAppSecret();
+            // 组装回调参数列表
+            Map<String, String> params = new HashMap<>();
+            params.put("appid", order.getAppId());
+            params.put("trade_no", order.getTradeNo());
+            params.put("out_trade_no", order.getOutTradeNo());
+            params.put("title", order.getTitle());
+            params.put("amount", order.getAmount());
+            params.put("status", order.getStatus());
+            params.put("attach", order.getAttach());
+            params.put("time", String.valueOf((int) (System.currentTimeMillis() / 1000)));
+            params.put("nonce", RandomUtil.randomString(16));
+            // 生成签名
+            String hash = SignUtils.sign(new TreeMap<>(params), secret);
+            params.put("hash", hash);
+
+            // 发送回调请求
+            String notifyResult = HttpRequestUtils.PostForm(order.getNotifyUrl(), params);
+            // 回调信息为success
+            if (notifyResult != null && notifyResult.equalsIgnoreCase(PaymentConsts.Status.SUCCESS)) {
+                // 构造更新条件
+                QueryWrapper<UmsOrder> queryWrapper = new QueryWrapper<>();
+                queryWrapper.eq(UmsOrder.OUT_TRADE_NO, order.getOutTradeNo());
+                // 定义更新内容
+                UmsOrder umsOrder = new UmsOrder();
+                umsOrder.setNotifyResult(PaymentConsts.Status.SUCCESS)
+                        .setNotifyTime(LocalDateTime.now());
+                // 更新订单信息
+                if (orderMapper.update(umsOrder, queryWrapper) > 0) {
+                    order.setNotifyResult(PaymentConsts.Status.SUCCESS)
+                            .setNotifyTime(umsOrder.getNotifyTime());
+                }
+            }
+        }
+        // @CachePut 注解，对于更新来说，用到的是返回值，所以这里返回的是最新的订单信息，即再查询一次数据库
+        return order;
     }
 
     /**

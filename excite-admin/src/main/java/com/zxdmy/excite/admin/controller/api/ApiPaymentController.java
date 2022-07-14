@@ -9,6 +9,7 @@ import com.zxdmy.excite.common.base.BaseController;
 import com.zxdmy.excite.common.base.BaseResult;
 import com.zxdmy.excite.common.consts.PaymentConsts;
 import com.zxdmy.excite.common.enums.PaymentEnums;
+import com.zxdmy.excite.common.enums.SystemCode;
 import com.zxdmy.excite.common.utils.OrderUtils;
 import com.zxdmy.excite.common.utils.SignUtils;
 import com.zxdmy.excite.offiaccount.api.OffiaccountApiService;
@@ -23,6 +24,7 @@ import com.zxdmy.excite.ums.entity.UmsOrder;
 import com.zxdmy.excite.ums.service.IUmsAppService;
 import com.zxdmy.excite.ums.service.IUmsOrderService;
 import lombok.AllArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.BindingResult;
@@ -262,7 +264,7 @@ public class ApiPaymentController extends BaseController {
      */
     @RequestMapping(value = "/query", method = {RequestMethod.GET, RequestMethod.POST})
     @ResponseBody
-    public BaseResult query(
+    public Object query(
             @RequestParam(name = "appid", required = false) String appId,
             @RequestParam(name = "trade_no", required = false) String tradeNo,
             @RequestParam(name = "out_trade_no", required = false) String outTradeNo,
@@ -273,11 +275,22 @@ public class ApiPaymentController extends BaseController {
         PaymentQueryResponseVo responseVo = new PaymentQueryResponseVo();
         // 必填参数不能为空
         if (StrUtil.hasBlank(appId, time, nonce, hash)) {
-            return error("必填参数不能为空");
+            responseVo.setCode(PaymentEnums.ERROR_PARAM.getCode())
+                    .setMsg(PaymentEnums.ERROR_PARAM.getMessage() + "：必填参数不能为空");
+            return responseVo;
         }
         // 商户单号和交易单号不能同时为空
         if (StrUtil.isAllBlank(outTradeNo, tradeNo)) {
-            return error("商户单号和交易单号不能同时为空");
+            responseVo.setCode(PaymentEnums.ERROR_PARAM.getCode())
+                    .setMsg(PaymentEnums.ERROR_PARAM.getMessage() + "：商户单号和交易单号不能同时为空");
+            return responseVo;
+        }
+        // 获取该应用的秘钥
+        UmsApp app = appService.getByAppId(appId);
+        if (null == app || app.getStatus() == null || app.getStatus() == SystemCode.STATUS_N.getCode()) {
+            responseVo.setCode(PaymentEnums.ERROR_APP_ID.getCode())
+                    .setMsg(PaymentEnums.ERROR_APP_ID.getMessage());
+            return responseVo;
         }
         // 校验签名
         TreeMap<String, Object> treeMap = new TreeMap<>();
@@ -286,10 +299,12 @@ public class ApiPaymentController extends BaseController {
         treeMap.put("time", time);
         treeMap.put("out_trade_no", outTradeNo);
         treeMap.put("trade_no", tradeNo);
-        String appSecret = appService.getByAppId(appId).getAppSecret();
-        String sign = SignUtils.sign(treeMap, appSecret);
+        // 验证签名是否正确
+        String sign = SignUtils.sign(treeMap, app.getAppSecret());
         if (!sign.equals(hash)) {
-            return error("签名错误");
+            responseVo.setCode(PaymentEnums.ERROR_SIGN.getCode())
+                    .setMsg(PaymentEnums.ERROR_SIGN.getMessage());
+            return responseVo;
         }
 
         // 微信支付渠道：商户单号不为空并且以WX开头，或交易单号不为空并且以42开头
@@ -304,15 +319,17 @@ public class ApiPaymentController extends BaseController {
         }
         // 其他情况：错误
         else {
-            return error("商户单号或交易单号错误");
+            responseVo.setCode(PaymentEnums.ERROR_PARAM.getCode())
+                    .setMsg(PaymentEnums.ERROR_PARAM.getMessage() + "：商户单号或交易单号格式要求");
+            return responseVo;
         }
-
-
         // 异步请求，更新本系统订单状态
 
         // 构建返回结果
+        hash = SignUtils.sign(responseVo.getTreeMap(), app.getAppSecret());
 
-        return success("查询成功");
+        responseVo.setHash(hash);
+        return responseVo;
     }
 
     /**
@@ -349,15 +366,18 @@ public class ApiPaymentController extends BaseController {
         if (null != notifyModel) {
             // 更新系统订单
             this.saveNotify2Order(notifyModel);
-            // TODO 向下游发送POST推送
-
-
+            // 返回给微信支付的结果
             return WxPayNotifyResponse.success("成功");
         }
         // 验签失败
         return WxPayNotifyResponse.fail("签名验证失败，请查询系统日志！");
     }
 
+    /**
+     * 支付宝支付的官方回调地址
+     *
+     * @return 验签成功为success，验签失败为 error
+     */
     @PostMapping("/notify/alipay")
     @ResponseBody
     public String alipayNotify() {
@@ -365,28 +385,47 @@ public class ApiPaymentController extends BaseController {
         PaymentNotifyModel notifyModel = alipayApiService.verifyNotify(request.getParameterMap());
         // 验签成功
         if (null != notifyModel) {
-            // 更新系统订单
+            // 更新系统订单并向下游发送POST推送
             this.saveNotify2Order(notifyModel);
-            // TODO 向下游发送POST推送
-
-
             return "success";
         }
         return "error";
     }
 
+    @GetMapping("/test")
+    @ResponseBody
+    public String test() {
+        this.notifyTest();
+        return "success";
+    }
+
+
+    @Async
+    public void notifyTest() {
+        // 延时3秒
+        try {
+            System.out.println("延时3秒开始");
+            Thread.sleep(10000);
+            System.out.println("延时3秒结束");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
-     * 根据回调信息更新系统的订单数据
+     * 异步请求：根据回调信息更新系统的订单数据
      *
      * @param notifyModel 回调信息
      */
     private void saveNotify2Order(PaymentNotifyModel notifyModel) {
+        // 构造订单信息
         UmsOrder order = new UmsOrder();
         order.setOutTradeNo(notifyModel.getOutTradeNo())
                 .setTradeNo(notifyModel.getTradeNo())
                 .setPaidTime(LocalDateTimeUtil.parse(notifyModel.getPaidTime()))
                 .setUserId(notifyModel.getUserId())
                 .setStatus(notifyModel.getStatus());
-        orderService.updateOrderByNotifyReceive(order);
+        // 异步：更新订单信息
+        orderService.updateOrderByNotify(order);
     }
 }

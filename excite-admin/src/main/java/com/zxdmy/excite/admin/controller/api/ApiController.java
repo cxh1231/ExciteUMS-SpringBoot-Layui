@@ -40,7 +40,7 @@ public class ApiController {
     private IUmsMpReplyService replyService;
 
     @ResponseBody
-    @RequestMapping(value = "/test1", method = RequestMethod.GET)
+    @RequestMapping(value = "/test", method = RequestMethod.GET)
     public String test1() {
 
 //        long startTime = System.currentTimeMillis();
@@ -59,7 +59,7 @@ public class ApiController {
 //            replyService.save(mpReply);
 //        }
 //        System.out.println("耗时：" + (System.currentTimeMillis() - startTime));
-        return "success";
+        return "success的点点滴滴";
     }
 
     @ResponseBody

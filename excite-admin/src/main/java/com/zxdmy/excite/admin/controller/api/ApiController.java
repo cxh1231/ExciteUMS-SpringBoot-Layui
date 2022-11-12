@@ -59,7 +59,7 @@ public class ApiController {
 //            replyService.save(mpReply);
 //        }
 //        System.out.println("耗时：" + (System.currentTimeMillis() - startTime));
-        return "success的点点滴滴";
+        return "SUCCESS";
     }
 
     @ResponseBody

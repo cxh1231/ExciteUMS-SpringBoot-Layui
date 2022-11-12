@@ -165,11 +165,11 @@ public class UmsPaymentOrderController extends BaseController {
 //        String json = HttpUtils.post("http://ip.tool.zxdmy.com/", null);
 //        System.out.println(json);
 
-        HttpResponse response = HttpRequest.get("http://ip.tool.zxdmy.com/")
-                .timeout(10000)
-                .execute();
-        System.out.println(response.getStatus());
-        System.out.println(response.body());
+//        HttpResponse response = HttpRequest.get("http://ip.tool.zxdmy.com/")
+//                .timeout(10000)
+//                .execute();
+//        System.out.println(response.getStatus());
+//        System.out.println(response.body());
 
         QueryWrapper<UmsOrder> wrapper = new QueryWrapper<>();
         wrapper.orderByDesc(UmsOrder.ID);

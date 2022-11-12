@@ -4,6 +4,8 @@ import com.zxdmy.excite.ums.entity.UmsMpReply;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 /**
  * <p>
  * 微信自动回复表 Mapper 接口
@@ -14,5 +16,7 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface UmsMpReplyMapper extends BaseMapper<UmsMpReply> {
+
+    List<UmsMpReply> getReplyListByKeywordHalfMate(String content);
 
 }

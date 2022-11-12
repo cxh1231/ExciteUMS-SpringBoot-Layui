@@ -4,31 +4,39 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.zxdmy.excite.ums.entity.UmsMpReply">
-        <id column="id" property="id" />
-        <result column="menu_key" property="menuKey" />
-        <result column="type" property="type" />
-        <result column="keyword" property="keyword" />
-        <result column="mate" property="mate" />
-        <result column="rep_type" property="repType" />
-        <result column="rep_content" property="repContent" />
-        <result column="rep_title" property="repTitle" />
-        <result column="rep_description" property="repDescription" />
-        <result column="rep_url" property="repUrl" />
-        <result column="rep_pic_url" property="repPicUrl" />
-        <result column="rep_media_id" property="repMediaId" />
-        <result column="rep_music_url" property="repMusicUrl" />
-        <result column="rep_hq_music_url" property="repHqMusicUrl" />
-        <result column="rep_thumb_media_id" property="repThumbMediaId" />
-        <result column="remark" property="remark" />
-        <result column="status" property="status" />
-        <result column="create_time" property="createTime" />
-        <result column="update_time" property="updateTime" />
-        <result column="delete_time" property="deleteTime" />
+        <id column="id" property="id"/>
+        <result column="menu_key" property="menuKey"/>
+        <result column="type" property="type"/>
+        <result column="keyword" property="keyword"/>
+        <result column="mate" property="mate"/>
+        <result column="rep_type" property="repType"/>
+        <result column="rep_content" property="repContent"/>
+        <result column="rep_title" property="repTitle"/>
+        <result column="rep_description" property="repDescription"/>
+        <result column="rep_url" property="repUrl"/>
+        <result column="rep_pic_url" property="repPicUrl"/>
+        <result column="rep_media_id" property="repMediaId"/>
+        <result column="rep_music_url" property="repMusicUrl"/>
+        <result column="rep_hq_music_url" property="repHqMusicUrl"/>
+        <result column="rep_thumb_media_id" property="repThumbMediaId"/>
+        <result column="remark" property="remark"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="delete_time" property="deleteTime"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, menu_key, type, keyword, mate, rep_type, rep_content, rep_title, rep_description, rep_url, rep_pic_url, rep_media_id, rep_music_url, rep_hq_music_url, rep_thumb_media_id, remark, status, create_time, update_time, delete_time
+        id
+        , menu_key, type, keyword, mate, rep_type, rep_content, rep_title, rep_description, rep_url, rep_pic_url, rep_media_id, rep_music_url, rep_hq_music_url, rep_thumb_media_id, remark, status, create_time, update_time, delete_time
     </sql>
 
+    <!-- 通过 文本内容 查询回复列表（半匹配模型） -->
+    <select id="getReplyListByKeywordHalfMate" parameterType="String" resultType="com.zxdmy.excite.ums.entity.UmsMpReply">
+        SELECT *
+        FROM ums_mp_reply
+        WHERE #{content} LIKE CONCAT('%', keyword, '%')
+        ORDER BY create_time DESC
+    </select>
 </mapper>

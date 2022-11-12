@@ -1,51 +1,45 @@
-package com.zxdmy.excite.admin.controller.api;
+package com.zxdmy.excite.admin.ums;
 
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.dfa.WordTree;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.zxdmy.excite.common.consts.OffiaccountConsts;
+import com.zxdmy.excite.common.utils.HttpRequestUtils;
+import com.zxdmy.excite.system.service.ISysMenuService;
 import com.zxdmy.excite.ums.entity.UmsMpReply;
 import com.zxdmy.excite.ums.mapper.UmsMpReplyMapper;
 import com.zxdmy.excite.ums.service.IUmsMpReplyService;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
  * <p>
- * 开放接口API控制器
+ * 描述
  * </p>
  *
  * @author 拾年之璐
- * @since 2022/3/30 11:27
+ * @since 2022/7/22 9:47
  */
-@Slf4j
-@Controller
-@AllArgsConstructor
-@RequestMapping("/api")
-public class ApiController {
+@SpringBootTest
+public class MpTest {
 
+    @Autowired
     private UmsMpReplyMapper replyMapper;
 
-    public static WordTree wordTree;
-
+    @Autowired
     private IUmsMpReplyService replyService;
 
-    @ResponseBody
-    @RequestMapping(value = "/test1", method = RequestMethod.GET)
-    public String test1() {
-
+    @Test
+    void test() {
         long startTime = System.currentTimeMillis();
         // 插入1万条数据
-        for (int i = 1192790; i < 100000000; i++) {
+        for (int i = 1132190; i < 100000000; i++) {
             System.out.println("第" + i + "条数据");
             UmsMpReply mpReply = new UmsMpReply();
             // 添加必须信息
@@ -59,27 +53,21 @@ public class ApiController {
             replyService.save(mpReply);
         }
         System.out.println("耗时：" + (System.currentTimeMillis() - startTime));
-        return "success";
     }
 
-    @ResponseBody
-    @RequestMapping(value = "/test3", method = RequestMethod.GET)
-    public String test3() {
-        Map<Integer, String> map = new LinkedHashMap<Integer, String>();
-        map.put(1, "1");
-        map.put(2, "2");
-        map.put(3, "3");
-        map.put(4, "4");
-        map.put(5, "5");
-        System.out.println(map.get(3));
-        // 遍历map
-        for (Map.Entry<Integer, String> entry : map.entrySet()) {
-            System.out.println(entry.getValue());
-        }
+    @Test
+    void test2() {
+        long startTime = System.currentTimeMillis();
+        List<UmsMpReply> replies = replyMapper.getReplyListByKeywordHalfMate("hello,我叫陈煜恒,我要查询关键词;;TM5M关键词45003;;");
+        System.out.println(replies);
+        System.out.println("耗时：" + (System.currentTimeMillis() - startTime));
+    }
 
+    @Test
+    void test3() {
         long startTime1 = System.currentTimeMillis();
-        List<UmsMpReply> replyList = replyService.list();
-        wordTree = new WordTree();
+        List<UmsMpReply> replyList = replyService.list(new QueryWrapper<UmsMpReply>().select(UmsMpReply.ID, UmsMpReply.KEYWORD));
+        WordTree wordTree = new WordTree();
         for (UmsMpReply reply : replyList) {
             wordTree.addWord(reply.getKeyword());
         }
@@ -98,6 +86,5 @@ public class ApiController {
         }
         System.out.println(replies.size());
         System.out.println("耗时：" + (System.currentTimeMillis() - startTime));
-        return matchAll + "\n" + replies.size() + "\n耗时：" + (System.currentTimeMillis() - startTime);
     }
 }

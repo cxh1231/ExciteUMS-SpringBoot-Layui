@@ -43,22 +43,22 @@ public class ApiController {
     @RequestMapping(value = "/test1", method = RequestMethod.GET)
     public String test1() {
 
-        long startTime = System.currentTimeMillis();
-        // 插入1万条数据
-        for (int i = 1192790; i < 100000000; i++) {
-            System.out.println("第" + i + "条数据");
-            UmsMpReply mpReply = new UmsMpReply();
-            // 添加必须信息
-            mpReply.setType(1)
-                    .setMenuKey(RandomUtil.randomStringUpper(8))
-                    .setMate("2")
-                    .setRepType("text")
-                    .setStatus(OffiaccountConsts.ReplyStatus.ENABLE)
-                    .setKeyword(RandomUtil.randomStringUpper(4) + "关键词" + i)
-                    .setRepContent("回复内容" + i);
-            replyService.save(mpReply);
-        }
-        System.out.println("耗时：" + (System.currentTimeMillis() - startTime));
+//        long startTime = System.currentTimeMillis();
+//        // 插入1万条数据
+//        for (int i = 1192790; i < 100000000; i++) {
+//            System.out.println("第" + i + "条数据");
+//            UmsMpReply mpReply = new UmsMpReply();
+//            // 添加必须信息
+//            mpReply.setType(1)
+//                    .setMenuKey(RandomUtil.randomStringUpper(8))
+//                    .setMate("2")
+//                    .setRepType("text")
+//                    .setStatus(OffiaccountConsts.ReplyStatus.ENABLE)
+//                    .setKeyword(RandomUtil.randomStringUpper(4) + "关键词" + i)
+//                    .setRepContent("回复内容" + i);
+//            replyService.save(mpReply);
+//        }
+//        System.out.println("耗时：" + (System.currentTimeMillis() - startTime));
         return "success";
     }
 

@@ -41,6 +41,13 @@ public class ApiOauthController extends BaseController {
 
     private RedisService redisService;
 
+    @RequestMapping(value = "/qqlogin", method = RequestMethod.GET)
+    @ResponseBody
+    public String qqlogin() {
+        // 处理完信息，然后跳转至请求的页面，并带上参数token
+        return "QQ授权登录配置信息错误";
+    }
+
     /**
      * 访问的登录页面
      *
